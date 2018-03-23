@@ -1,4 +1,5 @@
 export Junction
+export PressureZone
 
 struct Junction
     number::Int

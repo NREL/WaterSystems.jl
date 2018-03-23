@@ -13,4 +13,7 @@ include("Models/storage.jl")
 include("Models/transport_elements.jl")
 include("Models/pumps.jl")
 
+#Parser 
+include("Parsers/epa_net_parser.jl")
+
 end 
