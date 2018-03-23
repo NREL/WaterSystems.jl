@@ -8,6 +8,7 @@ using Compat
 using NamedTuples
 using PyCall
 
+include("WaterModels/src/WaterModels.jl")
 include("Models/topological_elements.jl")
 include("Models/storage.jl")
 include("Models/transport_elements.jl")
