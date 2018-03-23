@@ -1,0 +1,3 @@
+[submodule "src/WaterModels"]
+	path = src/WaterModels
+	url = https://github.com/lanl-ansi/WaterModels.jl
