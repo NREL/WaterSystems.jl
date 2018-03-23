@@ -4,7 +4,7 @@ export PressureZone
 struct Junction
     number::Int
     name::String
-    elevation::Real # Same as head? 
+    elevation::Real
     head::Real 
     pressurelims::Union{Nothing, NamedTuple}    
 end
