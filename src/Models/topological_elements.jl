@@ -5,7 +5,7 @@ struct Junction
     name::String
     elevation::Real # Same as head? 
     pressure::Real 
-    pressurelims::Union{Nothing, NamedTuples}    
+    pressurelims::Union{Nothing, NamedTuple}    
 end
 
 struct PressureZone
