@@ -4,6 +4,6 @@ struct WaterDemand
     name::String
     status::Bool
     node::Junction
-    MaxDemand::Real
-    ScalingFactor::TimeSeries.TimeArray
+    maxsemand::Real
+    scalingfactor::TimeSeries.TimeArray
 end 

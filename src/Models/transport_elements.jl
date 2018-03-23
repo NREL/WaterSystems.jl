@@ -6,8 +6,9 @@ struct Pipeline
     status::Bool
     connectionpoints::Tuple{Junction,Junction}
     length::Real
-    friction::Real
     diameter::Real
+    roughness::Real
+    minorloss::Real
     pressurelimits::Union{Nothing,Real}
 end
 
@@ -15,5 +16,6 @@ struct Valve
     name::String
     statis::Bool
     connectionpoints::Tuple{Junction,Junction}
-    friction::Real
+    diameter::Real
+    minorloss::Real
 end
