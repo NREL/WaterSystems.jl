@@ -3,7 +3,7 @@ export Tank
 export Reservoir
 
 abstract type 
-    Storage
+    Storage <: node
 end
 
 struct Tank <: Storage

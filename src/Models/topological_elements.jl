@@ -1,15 +1,19 @@
 export Junction
 export PressureZone
 
-struct Junction
+abstract type 
+    node
+end
+
+struct Junction <: node
     number::Int
     name::String
     elevation::Real
-    head::Real 
-    pressurelims::Union{Nothing, NamedTuple}    
 end
 
 struct PressureZone
     name::String
     junctions::Array{Junction}
 end
+
+include("storage.jl")
