@@ -2,13 +2,24 @@ export Junction
 export PressureZone
 
 abstract type 
-    node
+    Node
 end
 
-struct Junction <: node
-    number::Int
+struct Junction <: Node
     name::String
     elevation::Real
+    head::Any
+    minimum_pressure::Real
+    nominal_pressure::Real
+    initial_quality::Real
+    leak_status::Bool
+    leak_demand::Any
+    leak_area::Real
+    leak_discharge_coeff::Real
+    tag::String
+    demand::Any 
+    demand_timeseries_list::TimeSeries.TimeArray
+    coordinates::Tuple{Real,Real}
 end
 
 struct PressureZone

@@ -1,7 +1,28 @@
 export dict_to_struct
 
+
+# Parameters:
+#     Ct : Electricity cost in time period t
+#     γ : Specific weight of water
+#     ηij : Efficiency of pump installed on pipe (i, j)
+#     Q U : Maximum rate of flow through ijpipe (i, j)
+#     Dj,t : Demand at junction j in period t
+#     Ei : Elevation of node i
+#     PjL: Minimum water level in tank j 
+#     PjU : Maximum water level in tank j 
+#     Aj: Surface area of tank j
+#     delta_T : Length of each time period
+# Sets:
+#     N: The set of pipes
+#     P: The set of pipes thatcontain pumps
+#     R: The set of reservoirs
+#     K : The set of tanks
+#     J: The set of junctions
+#     T : The set of time periods
+
 function dict_to_struct(data::Dict)
     junctions = Array{Junction}(0)
+    tanks = Array{Tank}(0)
     #loads = Array{WaterDemand}(0) 
 
     for i in 1:length(data["nodes"])
@@ -11,8 +32,16 @@ function dict_to_struct(data::Dict)
             push!(junctions,Junction(i,
                     node["name"],
                     node["elevation"]))
-        #elseif node["node_type"] == "Reservoir"
-            #push!(reservoirs)
+        elseif node["node_type"] == "Tank"
+            push!(tanks,Tank(i,
+                node["name"],
+                node["elevation"], 
+                node["init_level"],
+                (node["min_level"], node["max_level"]),
+                node["diameter"],
+                node["min_vol"],
+                node["vol_curve"]
+               ))
         end
             #pressurelims = [node["minimum_pressure"],
             #node["leak_area"],
@@ -56,4 +85,6 @@ function dict_to_struct(data::Dict)
     #             )
     #     end
     # end
+
+    return junctions
 end

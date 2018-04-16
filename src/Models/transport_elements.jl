@@ -1,21 +1,43 @@
-export Pipeline
+export Link
+export Pipe
 export Valve
 
-struct Pipeline
-    name::String
-    status::Bool
-    connectionpoints::Tuple{Junction,Junction}
-    length::Real
-    diameter::Real
-    roughness::Real
-    minorloss::Real
-    pressurelimits::Union{Nothing,Real}
+abstract type
+    Link 
 end
 
-struct Valve 
+struct Pipe <: Link
     name::String
-    statis::Bool
-    connectionpoints::Tuple{Junction,Junction}
+    nodes::Tuple{Junction,Junction}
+    status::Bool
+    initial_status::Bool
     diameter::Real
-    minorloss::Real
+    tag::Any
+    flow::Any
+    minor_loss::Any
+    setting::Any
+    initial_setting::Real
+    vertices::Any
+    length::Real    
+    roughness::Real
+    bulk_rxn_coeff::Real
+    wall_rxn_coeff::Real
+    cv::Real
 end
+
+struct Valve <: Link
+    name::String
+    nodes::Tuple{Junction,Junction}
+    status::Bool
+    initial_status::Bool
+    diameter::Real
+    tag::String
+    flow::Real
+    vertices::Array
+    minor_loss::Real
+    setting::Any
+    initial_setting::Real
+    valve_type::String
+end
+
+include("pumps.jl")

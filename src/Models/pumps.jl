@@ -1,25 +1,20 @@
 export Pump
-export FixPump
-export VariablePump 
 
-abstract type 
-    Pump
-end
-
-struct FixPump <: Pump 
+struct Pump <: Link 
     name::String
+    nodes::Tuple{Junction,Junction}
     status::Bool
-    connectionpoints::Tuple{Junction,Junction}
-    flowlimits::Union{Nothing,NamedTuple}
-    curve::Any 
-    energy::Any
-end
-
-struct VariablePump <: Pump 
-    name::String
-    status::Bool
-    connectionpoints::Tuple{Junction,Junction}
-    flowlimits::Union{Nothing,NamedTuple}
-    curve::Any 
-    energy::Any
+    initial_status::Bool
+    tag::Any
+    flow::Any
+    setting::Any
+    initial_setting::Real
+    pump_type::String
+    pump_curve_name::String
+    efficiency::Real
+    energy_price::Real
+    energy_pattern::Any
+    base_speed::Real
+    speed_pattern_name::String
+    speed_timeseries::TimeSeries.TimeArray
 end
