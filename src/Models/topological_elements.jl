@@ -8,17 +8,9 @@ end
 struct Junction <: Node
     name::String
     elevation::Real
-    head::Any
-    minimum_pressure::Real
-    nominal_pressure::Real
-    initial_quality::Real
-    leak_status::Bool
-    leak_demand::Any
-    leak_area::Real
-    leak_discharge_coeff::Real
-    tag::String
+    head::Real
     demand::Any 
-    demand_timeseries_list::TimeSeries.TimeArray
+    minimum_pressure::Real
     coordinates::Tuple{Real,Real}
 end
 

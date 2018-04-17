@@ -10,19 +10,11 @@ struct Pipe <: Link
     name::String
     nodes::Tuple{Junction,Junction}
     status::Bool
-    initial_status::Bool
     diameter::Real
-    tag::Any
-    flow::Any
-    minor_loss::Any
-    setting::Any
-    initial_setting::Real
-    vertices::Any
-    length::Real    
+    length::Real
     roughness::Real
-    bulk_rxn_coeff::Real
-    wall_rxn_coeff::Real
-    cv::Real
+    headloss::Real
+    flow::Real
 end
 
 struct Valve <: Link
@@ -31,10 +23,7 @@ struct Valve <: Link
     status::Bool
     initial_status::Bool
     diameter::Real
-    tag::String
     flow::Real
-    vertices::Array
-    minor_loss::Real
     setting::Any
     initial_setting::Real
     valve_type::String

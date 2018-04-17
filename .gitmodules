@@ -1,3 +1,0 @@
-[submodule "src/WaterModels"]
-	path = src/WaterModels
-	url = https://github.com/claytonpbarrows/WaterModels.jl.git
