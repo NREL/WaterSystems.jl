@@ -1,27 +1,37 @@
 export Storage
 export Tank 
+export Roundtank
 export Reservoir
 
 abstract type 
-    Storage <: Node
+    Storage 
 end
 
-struct Tank <: Storage
+abstract type 
+    Tank <: Storage
+end
+
+struct Roundtank <: Tank
     name::String
-    elevation::Real
-    head::Any
-    level::Real
-    min_level::Real
-    max_level::Real
-    min_vol::Real
-    vol_curve::Union{Nothing,NamedTuple}
-    diameter::Real
-    coordinates::Tuple{Real,Real}
+    node::Junction
+    volumelimits::Union{NamedTuple{(:min, :max),Tuple{Float64,Float64}},Nothing}
+    volume::Union{Nothing,Float64}
+    area::Union{Nothing,Float64}
+    level::Union{Nothing,Float64}
+    levellimits::Union{NamedTuple{(:min, :max),Tuple{Float64,Float64}},Nothing}
+    #vol_curve::Union{Nothing,NamedTuple}
+end
+
+# Roundtank with diameter and levels
+function Roundtank(; name::String, node::Junction, diameter::Float64, levellimits::Union{NamedTuple{(:min, :max),Tuple{Float64,Float64}},Nothing}, level::Float64)
+    area = π * diameter ;
+    volume = area * level;
+    volumelimits = [x * area for x in levellimits];
+    return Roundtank(name, node, volumelimits, volume, area, level, levellimits)
 end
 
 struct Reservoir <: Storage
     name::String
     elevation::Real
-    head_timeseries::TimeSeries.TimeArray
-    coordinates::Tuple{Real,Real}
+    #head_timeseries::TimeSeries.TimeArray
 end

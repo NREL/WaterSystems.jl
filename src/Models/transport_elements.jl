@@ -6,16 +6,30 @@ abstract type
     Link 
 end
 
-struct Pipe <: Link
-    name::String
-    nodes::Tuple{Junction,Junction}
-    status::Bool
-    diameter::Real
-    length::Real
-    roughness::Real
-    headloss::Real
-    flow::Real
+abstract type 
+    Pipe <: Link
 end
+
+struct RegularPipe <: Link
+    name::String
+    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
+    diameter::Float64
+    length::Float64
+    roughness::Float64
+    headloss::Array{Tuple{Float64,Float64}}
+    flow::Union{Nothing,Float64}
+end
+
+RegularPipe(;
+            name,
+            connectionpoints=(from::Junction(), to::Junction()),
+            diameter = 0,
+            length = 0,
+            roughness = 0,
+            headloss = nothing,
+            flow = nothing
+            ) = RegularPipe(name, connectionpoints, diameter, length, roughness, headloss, flow)
+
 
 struct Valve <: Link
     name::String
