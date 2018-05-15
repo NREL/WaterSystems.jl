@@ -14,7 +14,7 @@ struct Junction <: Node
     coordinates::Union{NamedTuple{(:lat,:lon), Tuple{Float64,Float64}},Nothing}
 end
 
-Junction(;  name,
+Junction(;  name="init",
             elevation=0,
             head = nothing,
             demand = nothing,
