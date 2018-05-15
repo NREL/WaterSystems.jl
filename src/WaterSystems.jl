@@ -4,7 +4,6 @@ module WaterSystems
     using DataFrames
     # This packages will be removed with Julia v0.7
     using Compat
-    using NamedTuples
     using PyCall
 
     include("Models/topological_elements.jl")
