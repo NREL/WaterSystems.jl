@@ -14,7 +14,7 @@ module WaterSystems
     #Parser 
     include("Parsers/epa_net_parser.jl")
 
-    __precompile__() # this module is safe to precompile
+    #__precompile__() # this module is safe to precompile
 
     try
         @pyimport wntr
