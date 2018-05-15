@@ -23,7 +23,8 @@ struct Roundtank <: Tank
 end
 
 # Roundtank with diameter and levels
-function Roundtank(; name::String, node::Junction, diameter::Float64, levellimits::Union{NamedTuple{(:min, :max),Tuple{Float64,Float64}},Nothing}, level::Float64)
+# Roundtank with diameter and levels 
+function Roundtank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
     area = π * diameter ;
     volume = area * level;
     volumelimits = [x * area for x in levellimits];
