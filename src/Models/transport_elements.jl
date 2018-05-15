@@ -21,7 +21,7 @@ struct Regularpipe <: Link
 end
 
 Regularpipe(;
-            name,
+            name="init",
             connectionpoints=(from::Junction(), to::Junction()),
             diameter = 0,
             length = 0,
@@ -42,5 +42,3 @@ struct Valve <: Link
     initial_setting::Real
     valve_type::String
 end
-
-include("pumps.jl")
