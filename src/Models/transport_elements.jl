@@ -10,7 +10,7 @@ abstract type
     Pipe <: Link
 end
 
-struct RegularPipe <: Link
+struct Regularpipe <: Link
     name::String
     connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
     diameter::Float64
@@ -20,7 +20,7 @@ struct RegularPipe <: Link
     flow::Union{Nothing,Float64}
 end
 
-RegularPipe(;
+Regularpipe(;
             name,
             connectionpoints=(from::Junction(), to::Junction()),
             diameter = 0,
