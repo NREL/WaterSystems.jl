@@ -1,5 +1,6 @@
 export Link
 export Pipe
+export Regularpipe
 export Valve
 
 abstract type
@@ -16,7 +17,7 @@ struct Regularpipe <: Link
     diameter::Float64
     length::Float64
     roughness::Float64
-    headloss::Array{Tuple{Float64,Float64}}
+    headloss::Array{Tuple{Float64,Float64},1}
     flow::Union{Nothing,Float64}
 end
 
@@ -28,7 +29,7 @@ Regularpipe(;
             roughness = 0,
             headloss = nothing,
             flow = nothing
-            ) = RegularPipe(name, connectionpoints, diameter, length, roughness, headloss, flow)
+            ) = Regularpipe(name, connectionpoints, diameter, length, roughness, headloss, flow)
 
 
 struct Valve <: Link

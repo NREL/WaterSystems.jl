@@ -27,7 +27,7 @@ end
 function Roundtank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
     area = π * diameter ;
     volume = area * level;
-    volumelimits = [x * area for x in levellimits];
+    volumelimits = map(x->area*x,levellimits)
     return Roundtank(name, node, volumelimits, volume, area, level, levellimits)
 end
 

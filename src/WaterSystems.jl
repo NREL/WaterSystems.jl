@@ -34,7 +34,7 @@ module WaterSystems
 
         @pyimport pip
 
-        args = UTF8String[]
+        args = []
         if haskey(ENV, "http_proxy")
             push!(args, "--proxy")
             push!(args, ENV["http_proxy"])
