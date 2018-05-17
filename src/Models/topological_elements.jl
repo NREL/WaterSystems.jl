@@ -3,6 +3,7 @@ export PressureZone
 
 
 struct Junction
+    number::Int
     name::String
     elevation::Real
     head::Union{Nothing,Float64}
@@ -11,13 +12,14 @@ struct Junction
     coordinates::Union{NamedTuple{(:lat,:lon), Tuple{Float64,Float64}},Nothing}
 end
 
-Junction(;  name="init",
+Junction(;  number = 0,
+            name="init",
             elevation=0,
             head = nothing,
             demand = nothing,
             minimum_pressure = 0,
             coordinates = nothing
-            ) = Junction(name,elevation,head,demand,minimum_pressure,coordinates)
+            ) = Junction(number,name,elevation,head,demand,minimum_pressure,coordinates)
 
 struct PressureZone
     name::String

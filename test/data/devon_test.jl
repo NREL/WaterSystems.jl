@@ -5,11 +5,11 @@ using Dates
 DayAhead  = collect(DateTime("1/1/2024  0:00:00", "d/m/y  H:M:S"):Hour(1):DateTime("1/1/2024  23:00:00", "d/m/y  H:M:S"))
 
 
-junctions = [   Junction(name="J2",elevation=20,minimum_pressure=1),
-                Junction(name="J3",elevation=18,minimum_pressure=1),
-                Junction(name="J4",elevation=10,minimum_pressure=1),
-                Junction(name="T1",elevation=320),
-                Junction(name="R1",elevation=0)
+junctions = [   Junction(number=2,name="J2",elevation=20,minimum_pressure=1),
+                Junction(number=3,name="J3",elevation=18,minimum_pressure=1),
+                Junction(number=4,name="J4",elevation=10,minimum_pressure=1),
+                Junction(number=1,name="T1",elevation=320),
+                Junction(number=5,name="R1",elevation=0)
             ];
 
 tanks = [RoundTank(name="T1",node=junctions[4],diameter=10,levellimits=(min=0,max=1000/(10*pi)),level=200/(10*pi))];
@@ -34,4 +34,4 @@ pumps = [   ConstSpeedPump("PMP1",(from=junctions[5],to=junctions[4]),true,
 
 demands = [     WaterDemand("D1",junctions[3],true,10,TimeSeries.TimeArray(DayAhead, rand(24)))];
 
-#devon_sys = WaterSystem()  
+devon_sys = WaterSystem(junctions,vcat(pipes,valves,pumps),vcat(tanks,reservoirs),demands)  

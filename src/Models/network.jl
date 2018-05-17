@@ -18,15 +18,9 @@ function Network(links::Array{B}, nodes::Array{Junction}) where {B<:Link}
     
 end
 
-function build_incidence(nodecount, links::Array{B}, nodes::Array{Node}) where {B<:Link}
+function build_incidence(nodecount, links::Array{B}, nodes::Array{Junction}) where {B<:Link}
 
     linkcount = length(links)
-
-    for n in nodes
-        if n.number < -1
-            error("nodes must be numbered consecutively in the bus/node matrix")
-        end
-    end
 
     A = spzeros(Float64,nodecount,linkcount);
 

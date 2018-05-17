@@ -8,9 +8,11 @@ module WaterSystems
 
     include("Models/topological_elements.jl")
     include("Models/storage.jl")
-    include("Models/transport_elements.jl")
+    include("Models/network.jl")
     include("Models/pumps.jl")
     include("Models/water_demand.jl")
+
+    include("base.jl")
 
     #Parser 
     include("Parsers/epa_net_parser.jl")
