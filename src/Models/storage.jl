@@ -1,17 +1,12 @@
 export Storage
-export Tank 
-export Roundtank
+export RoundTank
 export Reservoir
 
 abstract type 
     Storage 
 end
 
-abstract type 
-    Tank <: Storage
-end
-
-struct Roundtank <: Tank
+struct RoundTank <: Storage
     name::String
     node::Junction
     volumelimits::Union{NamedTuple{(:min, :max),Tuple{Float64,Float64}},Nothing}
@@ -22,13 +17,12 @@ struct Roundtank <: Tank
     #vol_curve::Union{Nothing,NamedTuple}
 end
 
-# Roundtank with diameter and levels
-# Roundtank with diameter and levels 
-function Roundtank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
+# RoundTank with diameter and levels 
+function RoundTank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
     area = π * diameter ;
     volume = area * level;
     volumelimits = map(x->area*x,levellimits)
-    return Roundtank(name, node, volumelimits, volume, area, level, levellimits)
+    return RoundTank(name, node, volumelimits, volume, area, level, levellimits)
 end
 
 struct Reservoir <: Storage

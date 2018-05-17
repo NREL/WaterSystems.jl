@@ -1,11 +1,8 @@
 export Junction
 export PressureZone
 
-abstract type 
-    Node
-end
 
-struct Junction <: Node
+struct Junction
     name::String
     elevation::Real
     head::Union{Nothing,Float64}

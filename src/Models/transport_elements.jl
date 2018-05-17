@@ -1,17 +1,12 @@
 export Link
-export Pipe
-export Regularpipe
-export Valve
+export RegularPipe
+export PressureReducingValve
 
 abstract type
     Link 
 end
 
-abstract type 
-    Pipe <: Link
-end
-
-struct Regularpipe <: Link
+struct RegularPipe <: Link
     name::String
     connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
     diameter::Float64
@@ -21,7 +16,7 @@ struct Regularpipe <: Link
     flow::Union{Nothing,Float64}
 end
 
-Regularpipe(;
+RegularPipe(;
             name="init",
             connectionpoints=(from::Junction(), to::Junction()),
             diameter = 0,
@@ -29,17 +24,21 @@ Regularpipe(;
             roughness = 0,
             headloss = nothing,
             flow = nothing
-            ) = Regularpipe(name, connectionpoints, diameter, length, roughness, headloss, flow)
+            ) = RegularPipe(name, connectionpoints, diameter, length, roughness, headloss, flow)
 
 
-struct Valve <: Link
+struct PressureReducingValve <: Link
     name::String
-    nodes::Tuple{Junction,Junction}
+    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
     status::Bool
-    initial_status::Bool
-    diameter::Real
-    flow::Real
-    setting::Any
-    initial_setting::Real
-    valve_type::String
+    diameter::Union{Nothing,Float64}
+    setting::Union{Nothing,Float64}
 end
+
+PressureReducingValve(;
+                    name="init",
+                    connectionpoints=(from::Junction(), to::Junction()),
+                    status=false,
+                    diameter=1,
+                    setting=nothing
+                    ) = PressureReducingValve(name,connectionpoints,status,diameter,setting)

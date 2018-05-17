@@ -1,15 +1,17 @@
 module WaterSystems
 
-    using TimeSeries 
+    using TimeSeries
     using DataFrames
     # This packages will be removed with Julia v0.7
     using Compat
     using PyCall
+    using NamedTuples
 
     include("Models/topological_elements.jl")
     include("Models/storage.jl")
     include("Models/transport_elements.jl")
     include("Models/pumps.jl")
+    include("Models/water_demand.jl")
 
     #Parser 
     include("Parsers/epa_net_parser.jl")
