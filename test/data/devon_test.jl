@@ -34,4 +34,4 @@ pumps = [   ConstSpeedPump("PMP1",(from=junctions[5],to=junctions[4]),true,
 
 demands = [     WaterDemand("D1",junctions[3],true,10,TimeSeries.TimeArray(DayAhead, rand(24)))];
 
-devon_sys = WaterSystem(junctions,vcat(pipes,valves,pumps),vcat(tanks,reservoirs),demands)  
+devon_sys = WaterSystem(junctions,vcat(pipes,valves,pumps),vcat(tanks,reservoirs),demands);

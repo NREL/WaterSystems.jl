@@ -1,17 +1,30 @@
 export WaterSystem
 
+## Time Series Length ##
+
+function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}
+    t = length(loads[1].scalingfactor)
+    for l in loads
+        if t == length(l.scalingfactor)
+            continue
+        else
+            error("Inconsistent load scaling factor time series length")
+        end
+    end
+    return t
+end
+
 struct WaterSystem
     junctions::Array{Junction}
     links::Array{T} where {T<:Link}
     storages::Array{T} where {T<:Storage}
-    demands::WaterDemand
+    demands::Array{WaterDemand}
     network::Union{Nothing,Network}
     timesteps::Int
     
-    function WaterSystem(junctions, links, storages, demands, network, timesteps)
+    function WaterSystem(junctions, links, storages, demands, network)
 
-        #time_length = TimeSeriesCheckLoad(loads)
-        #TimeSeriesCheckRE(generators, time_length)
+        time_length = TimeSeriesCheckDemand(demands)
 
         new(junctions,
             links,
@@ -28,5 +41,5 @@ function WaterSystem(junctions::Array{Junction},
                     storages::Array{T} where {T<:Storage},
                     demands::Array{WaterDemand})
 
-    WaterSystem(junctions, links, storages, demands, Network(links, junctions), timesteps)
+    WaterSystem(junctions, links, storages, demands, Network(links, junctions))
 end
