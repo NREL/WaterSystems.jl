@@ -1,23 +1,23 @@
 module WaterSystems
 
-    using TimeSeries 
-    using PowerModels
+    using TimeSeries
     using DataFrames
     # This packages will be removed with Julia v0.7
     using Compat
-    using NamedTuples
     using PyCall
 
-    include("WaterModels/src/WaterModels.jl")
     include("Models/topological_elements.jl")
     include("Models/storage.jl")
-    include("Models/transport_elements.jl")
+    include("Models/network.jl")
     include("Models/pumps.jl")
+    include("Models/water_demand.jl")
+
+    include("base.jl")
 
     #Parser 
     include("Parsers/epa_net_parser.jl")
 
-    __precompile__() # this module is safe to precompile
+    #__precompile__() # this module is NOT safe to precompile
 
     try
         @pyimport wntr
@@ -37,7 +37,7 @@ module WaterSystems
 
         @pyimport pip
 
-        args = UTF8String[]
+        args = []
         if haskey(ENV, "http_proxy")
             push!(args, "--proxy")
             push!(args, ENV["http_proxy"])

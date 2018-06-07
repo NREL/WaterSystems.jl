@@ -27,7 +27,7 @@ function wn_to_struct(inp_file::String)
         #tanks
         t = wn[:get_node](tank)
         push!(tanks,Tank(t.name,
-                t.elevation
+                t.elevation,
                 t.head,
                 t.level,
                 t.min_level,
