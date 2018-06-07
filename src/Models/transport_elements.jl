@@ -1,6 +1,3 @@
-export Link
-export RegularPipe
-export PressureReducingValve
 
 abstract type
     Link 

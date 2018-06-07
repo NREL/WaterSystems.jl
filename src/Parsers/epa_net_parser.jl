@@ -1,5 +1,3 @@
-export wn_to_struct
-
 
 function wn_to_struct(inp_file::String)
     junctions = Array{Junction}(0)

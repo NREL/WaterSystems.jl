@@ -1,5 +1,3 @@
-export WaterSystem
-
 ## Time Series Length ##
 
 function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}

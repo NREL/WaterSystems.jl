@@ -1,6 +1,3 @@
-export Storage
-export RoundTank
-export Reservoir
 
 abstract type 
     Storage 

@@ -1,4 +1,3 @@
-export ConstSpeedPump
 
 struct ConstSpeedPump <: Link 
     name::String
