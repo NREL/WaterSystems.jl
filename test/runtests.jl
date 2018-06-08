@@ -1,7 +1,8 @@
 using WaterSystems
-using Test
+using Base.Test
 
 # write your own tests here
+
 @test true
 
 println("Read Data in *.jl files")
