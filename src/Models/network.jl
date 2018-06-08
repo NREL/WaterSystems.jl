@@ -1,7 +1,5 @@
 include("transport_elements.jl")
 
-export Network
-
 # To Do
 # 1. Consider a dynamic rate problem, add time series in the rate calculations.
 

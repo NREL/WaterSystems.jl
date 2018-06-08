@@ -1,4 +1,3 @@
-export WaterDemand 
 
 struct WaterDemand 
     name::String

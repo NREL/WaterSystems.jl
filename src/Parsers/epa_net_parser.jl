@@ -1,21 +1,3 @@
-export wn_to_struct
-
-##this section includes code that will most likely be called in the module or provided when calling the function
-#I include it here to test this piece of code indivually
-using TimeSeries
-using PowerModels
-using DataFrames
-# This packages will be removed with Julia v0.7
-using Compat
-using NamedTuples
-using PyCall
-
-include("WaterSystems.jl/src/Models/topological_elements.jl")
-include("WaterSystems.jl/src/Models/storage.jl")
-include("WaterSystems.jl/src/Models/transport_elements.jl")
-include("WaterSystems.jl/src/Models/pumps.jl")
-include("WaterSystems.jl/src/Models/water_demand.jl")
-
 
 ###############################################################################
 # function definition
