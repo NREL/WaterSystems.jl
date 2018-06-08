@@ -6,11 +6,11 @@ end
 struct RoundTank <: Storage
     name::String
     node::Junction
-    volumelimits::Union{NamedTuple{(:min, :max),Tuple{Float64,Float64}},Nothing}
+    volumelimits::Union{@NT(min::Float64, max::Float64),Nothing}
     volume::Union{Nothing,Float64}
     area::Union{Nothing,Float64}
     level::Union{Nothing,Float64}
-    levellimits::Union{NamedTuple{(:min, :max),Tuple{Float64,Float64}},Nothing}
+    levellimits::Union{@NT(min::Float64, max::Float64),Nothing}
     #vol_curve::Union{Nothing,NamedTuple}
 end
 

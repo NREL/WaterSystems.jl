@@ -5,7 +5,7 @@ end
 
 struct RegularPipe <: Link
     name::String
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
+    connectionpoints::@NT(from::Junction, to::Junction)
     diameter::Float64
     length::Float64
     roughness::Float64
@@ -26,7 +26,7 @@ RegularPipe(;
 
 struct PressureReducingValve <: Link
     name::String
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
+    connectionpoints::@NT(from::Junction, to::Junction)
     status::Bool
     diameter::Union{Nothing,Float64}
     setting::Union{Nothing,Float64}

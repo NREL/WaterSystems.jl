@@ -6,7 +6,7 @@ struct Junction
     head::Union{Nothing,Float64}
     demand::Any 
     minimum_pressure::Float64
-    coordinates::Union{NamedTuple{(:lat,:lon), Tuple{Float64,Float64}},Nothing}
+    coordinates::Union{@NT(lat::Float64, lon::Float64),Nothing}
 end
 
 Junction(;  number = 0,

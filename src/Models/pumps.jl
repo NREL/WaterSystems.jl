@@ -1,7 +1,7 @@
 
 struct ConstSpeedPump <: Link 
     name::String
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
+    connectionpoints::@NT(from::Junction, to::Junction)
     status::Bool
     flowcurve::Union{Function,Array{Tuple{Float64,Float64}}}
     energycurve::Union{Function,Array{Tuple{Float64,Float64}}}
@@ -12,7 +12,7 @@ end
 # function pump curves
 ConstSpeedPump(
     name::String,
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}},
+    connectionpoints::@NT(from::Junction, to::Junction),
     status::Bool,
     flowcurve::Function,
     energycurve::Function,
@@ -23,7 +23,7 @@ ConstSpeedPump(
 # PWL pump curves
 ConstSpeedPump(
     name::String,
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}},
+    connectionpoints::@NT(from::Junction, to::Junction),
     status::Bool,
     flowcurve::Tuple{Float64,Float64},
     energycurve::Tuple{Float64,Float64},
