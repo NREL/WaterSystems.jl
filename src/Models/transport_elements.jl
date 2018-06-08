@@ -3,12 +3,12 @@ export RegularPipe
 export PressureReducingValve
 
 abstract type
-    Link 
+    Link
 end
 
 struct RegularPipe <: Link
     name::String
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
+    connectionpoints:: @NT(from::Junction, to::Junction)
     diameter::Float64
     length::Float64
     roughness::Float64
@@ -28,8 +28,8 @@ RegularPipe(;
 
 
 struct PressureReducingValve <: Link
-    name::String
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
+    name:: String
+    connectionpoints:: @NT(from::Junction, to::Junction)
     status::Bool
     diameter::Union{Nothing,Float64}
     setting::Union{Nothing,Float64}
@@ -37,8 +37,8 @@ end
 
 PressureReducingValve(;
                     name="init",
-                    connectionpoints=(from::Junction(), to::Junction()),
+                    connectionpoints= @NT(from::Junction(), to::Junction()),
                     status=false,
-                    diameter=1,
+                    diameter=1.0,
                     setting=nothing
                     ) = PressureReducingValve(name,connectionpoints,status,diameter,setting)

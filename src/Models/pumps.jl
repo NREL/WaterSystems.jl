@@ -1,8 +1,8 @@
 export ConstSpeedPump
 
-struct ConstSpeedPump <: Link 
+struct ConstSpeedPump <: Link
     name::String
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}}
+    connectionpoints::@NT(from::Junction, to::Junction)
     status::Bool
     flowcurve::Union{Function,Array{Tuple{Float64,Float64}}}
     energycurve::Union{Function,Array{Tuple{Float64,Float64}}}
@@ -13,26 +13,26 @@ end
 # function pump curves
 ConstSpeedPump(
     name::String,
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}},
+    connectionpoints::@NT(from::Junction, to::Junction),
     status::Bool,
     flowcurve::Function,
     energycurve::Function,
     driveefficiency::Union{Nothing,Float64},
     energyprice::TimeSeries.TimeArray
-) = ConstSpeedPump(name, connectionpoints, status, flowcurve, energycurve, driveefficiency, energyprice)
+    ) = ConstSpeedPump(name, connectionpoints, status, flowcurve, energycurve, driveefficiency, energyprice)
 
 # PWL pump curves
 ConstSpeedPump(
     name::String,
-    connectionpoints::NamedTuple{(:from, :to),Tuple{Junction,Junction}},
+    connectionpoints::@NT(from::Junction, to::Junction),
     status::Bool,
     flowcurve::Tuple{Float64,Float64},
     energycurve::Tuple{Float64,Float64},
     driveefficiency::Union{Nothing,Float64},
     energyprice::TimeSeries.TimeArray
-) = ConstSpeedPump(name, connectionpoints, status, flowcurve, energycurve, driveefficiency, energyprice)
+    )= ConstSpeedPump(name, connectionpoints, status, flowcurve, energycurve, driveefficiency, energyprice)
 
-ConstSpeedPump(; 
+ConstSpeedPump(;
                 name="init",
                 connectionpoints=(from::Junction(), to::Junction()),
                 status=false,
@@ -41,4 +41,3 @@ ConstSpeedPump(;
                 driveefficiency=1.0,
                 energyprice=TimeSeries.TimeArray(today(), [0.0])
                 ) = ConstSpeedPump(name, connectionpoints, status, flowcurve, energycurve, driveefficiency, energyprice)
-
