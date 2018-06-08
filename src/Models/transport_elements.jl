@@ -5,11 +5,7 @@ end
 
 struct RegularPipe <: Link
     name::String
-<<<<<<< HEAD
     connectionpoints:: @NT(from::Junction, to::Junction)
-=======
-    connectionpoints::@NT(from::Junction, to::Junction)
->>>>>>> 6dedee1b3493113caa0760cbde6fc8556f826131
     diameter::Float64
     length::Float64
     roughness::Float64
@@ -29,13 +25,8 @@ RegularPipe(;
 
 
 struct PressureReducingValve <: Link
-<<<<<<< HEAD
-    name:: String
-    connectionpoints:: @NT(from::Junction, to::Junction)
-=======
     name::String
     connectionpoints::@NT(from::Junction, to::Junction)
->>>>>>> 6dedee1b3493113caa0760cbde6fc8556f826131
     status::Bool
     diameter::Union{Nothing,Float64}
     setting::Union{Nothing,Float64}
