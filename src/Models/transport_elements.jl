@@ -1,4 +1,3 @@
-
 abstract type
     Link
 end
@@ -9,7 +8,7 @@ struct RegularPipe <: Link
     diameter::Float64
     length::Float64
     roughness::Float64
-    headloss::Array{Tuple{Float64,Float64},1}
+    headloss::Float64
     flow::Union{Nothing,Float64}
 end
 
@@ -27,7 +26,7 @@ RegularPipe(;
 struct PressureReducingValve <: Link
     name::String
     connectionpoints::@NT(from::Junction, to::Junction)
-    status::Bool
+    status::String
     diameter::Union{Nothing,Float64}
     setting::Union{Nothing,Float64}
 end
@@ -35,7 +34,7 @@ end
 PressureReducingValve(;
                     name="init",
                     connectionpoints= @NT(from::Junction(), to::Junction()),
-                    status=false,
+                    status="Closed",
                     diameter=1.0,
                     setting=nothing
-                    ) = PressureReducingValve(name,connectionpoints,status,diameter,setting)
+                    ) = PressureReducingValve(name, connectionpoints, status, diameter, setting)

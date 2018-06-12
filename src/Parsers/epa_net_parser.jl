@@ -1,104 +1,238 @@
-
-###############################################################################
-# function definition
-
-@pyimport wntr.network.model as model #import wntr network mod
+@pyimport wntr.sim as sim #import wntr simulation
+@pyimport wntr.network.model as model #import wntr network model
 function wn_to_struct(inp_file)
     #initialize arrays for input into package
     junctions = Array{Junction}(0)
     tanks = Array{RoundTank}(0)
     reservoirs = Array{Reservoir}(0)
+    reservoir_junctions = Array{Junction}(0)
     pipes = Array{RegularPipe}(0)
     valves = Array{PressureReducingValve}(0)
     pumps = Array{ConstSpeedPump}(0)
 
-    #set up WaterNetwork using winter
-    wn = model.WaterNetworkModel(inp_file)
+    #set up WaterNetwork using WNTR
+    wn = model.WaterNetworkModel(inp_file) #Water Network
+    wns = sim.EpanetSimulator(wn) #Simulation either Demand Driven(DD) or Presure Dependent Demand(PDD), default DD
+    results =wns[:run_sim]()
+    node_results = results[:node] #dictionary of head, pressure, demand, quality
+    link_results = results[:link] #dictionary of status, flowrate, velocity, {headloss, setting, friciton factor, reaction rate, link quality} = epanet simulator only
 
-    #junctions
+    #Junctions
     for junc in wn[:junction_name_list]
-        #question1 is the timeseries in a usable format...output looks like '<Demands: [<TimeSeries: base=0.0, pattern='1', category='EN2 base'>]>
+        #head and demand are current at each node
         j = wn[:get_node](junc)
-        push!(junctions,Junction(wn[:num_junctions],j[:name],j[:elevation],j[:head],j[:demand_timeseries_list],j[:minimum_pressure],@NT(lat = j[:coordinates][2], lon = j[:coordinates][1])))
+        head = node_results["head"][junc][:values][1] #head at first timestep (initial_head)
+        demand = node_results["demand"][junc][:values][1] #demand at first timestep (initial_demand)
+        push!(junctions,Junction(wn[:num_junctions], junc, j[:elevation], convert(Float64,head), convert(Float64,demand), j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1])))
     end
 
-    #tanks
+    #Tanks
+    #currently for roundtank only
     for tank in wn[:tank_name_list]
+        #head  and demand are initial values
         t = wn[:get_node](tank)
-        #for roundtank only
-        #to get junction structure of nodes connected to tank
-        pipe = wn[:get_links_for_node](tank)
-        #initialize array in case of multiple pipes connected to tank
-        #Shouldn't need this once we figure out the node/junction nonesense
-        node = nothing
-        for i = length(pipe)
-            end_junction = wn[:get_link](pipe[i])[:end_node_name]
-            start_junction = wn[:get_link](pipe[i])[:start_node_name]
-            if  end_junction != tank
-                #there should be a more efficient way to do this but couldn't figure out how to get the index of the Junction
-                #in junctions containing the appropriate name
-                j = wn[:get_node](end_junction)
-                node = Junction(wn[:num_junctions],j[:name],j[:elevation],j[:head],j[:demand_timeseries_list],j[:minimum_pressure],@NT(lat = j[:coordinates][2], lon = j[:coordinates][1]))
-            else
-                j = wn[:get_node](start_junction)
-                node = Junction(wn[:num_junctions],j[:name],j[:elevation],j[:head],j[:demand_timeseries_list],j[:minimum_pressure],@NT(lat = j[:coordinates][2], lon = j[:coordinates][1]))
-        end
-        end
+        #assign minimum pressure to the stardard for junctions
+        junc = wn[:junction_name_list]
+        j = wn[:get_node](junc[1])
+        min_pressure = j[:minimum_pressure]
+
+        head = node_results["head"][tank][:values][1] #head at first timestep (initial_head)
+        demand = node_results["demand"][tank][:values][1] #demand at first timestep (initial_demand)
         area = π * t[:diameter] ;
         volume = area * t[:init_level];
         volumelimits = [x * area for x in [t[:min_level],t[:max_level]]];
-        push!(tanks,RoundTank(t[:name],node,@NT(min = volumelimits[1],max = volumelimits[2]),volume,area,t[:init_level],@NT(min = t[:min_level], max = t[:max_level])))
+
+        node = Junction(wn[:num_junctions], t[:name], t[:elevation], convert(Float64,head), convert(Float64,demand), min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
+        push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
     end
 
-    #reservoirs
-    #later include r[:head_timeseries]
+    #Reservoirs
     for res in wn[:reservoir_name_list]
         r = wn[:get_node](res)
-        push!(reservoirs,Reservoir(r[:name],r[:base_head])) #base_head = elevation
-        #Reservoir()
+        head = node_results["head"][res][:values][1] #head at first timestep (initial_head)
+        demand = node_results["demand"][res][:values][1] #demand at first timestep (initial_demand)
+        push!(reservoirs,Reservoir(res,r[:base_head])) #base_head = elevation
+        push!(reservoir_junctions, Junction(wn[:num_reservoirs], res, r[:base_head], convert(Float64,head), convert(Float64,demand), 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1]))) #array of pseudo junctions @ res
     end
 
-    #pipes
+
+    #Pipes
     for pipe in wn[:pipe_name_list]
-        p = wn[:get_link](pipe)
-        #test is node is type junction, if not it does not include the pipe in the output
-        s= wn[:get_node](p[:start_node_name])
-        e = wn[:get_node](p[:end_node_name])
-        if s[:node_type]  == "Junction" &&  e[:node_type] == "Junction"
-            junction_start = Junction(wn[:num_junctions], s[:name],s[:elevation],s[:head],s[:demand_timeseries_list],s[:minimum_pressure],@NT(lat = s[:coordinates][2], lon = s[:coordinates][1]))
-            junction_end = Junction(wn[:num_junctions], e[:name],e[:elevation],e[:head],e[:demand_timeseries_list],e[:minimum_pressure],@NT(lat = e[:coordinates][2], lon = e[:coordinates][1]))
-            push!(pipes,RegularPipe(p[:name], @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], [(0.0,0.0)],p[:flow]))
-        end
-    end
 
-    #valves does not work yet
+        p = wn[:get_link](pipe)
+        headloss = link_results["headloss"][pipe][:values][1] #headloss at first time step
+        flowrate = link_results["flowrate"][pipe][:values][1] #flowrate at first time step
+        junction_start = Junction()
+        junction_end = Junction()
+        s = wn[:get_node](p[:start_node_name])
+        e = wn[:get_node](p[:end_node_name])
+        #from node
+        if s[:node_type]  == "Junction"
+            for junc = 1:length(junctions)
+                if junctions[junc].name == s[:name]
+                    junction_start = junctions[junc]
+                    break
+                end
+            end
+        elseif s[:node_type]  == "Tank"
+            for tank = 1:length(tanks)
+                if tanks[tank].node.name == s[:name]
+                    junction_start = tanks[tank].node
+                    break
+                end
+            end
+        else
+            for res = 1:length(reservoirs)
+                if reservoir_junctions[res] == s[:name]
+                    junction_start = reservoir_junctions[res]
+                end
+            end
+        end
+        #to node
+        if e[:node_type] == "Junction"
+            for junc =1:length(junctions)
+                if junctions[junc].name == e[:name]
+                    junction_end = junctions[junc]
+                    break
+                end
+            end
+        elseif e[:node_type]  == "Tank"
+                for tank =1:length(tanks)
+                    if tanks[tank].node.name == e[:name]
+                        junction_end = tanks[tank].node
+                        break
+                    end
+                end
+            else
+                for res = 1:length(reservoirs)
+                    if reservoir_junctions[res] == s[:name]
+                        junction_end = reservoir_junctions[res]
+                    end
+                end
+            end
+            push!(pipes,RegularPipe(pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate)))
+        end
+    #Valves
+    #currently for Pressure Reducing Valve Only
     for valve in wn[:valve_name_list]
+
         v = wn[:get_link](valve)
+        junction_start = Junction()
+        junction_end = Junction()
         s = wn[:get_node](v[:start_node_name])
         e = wn[:get_node](v[:end_node_name])
-        if s[:node_type]  == "Junction" &&  e[:node_type] == "Junction"
-            junction_start = Junction(wn[:num_junctions], s[:name],s[:elevation],s[:head],s[:demand_timeseries_list],s[:minimum_pressure],@NT(lat = s[:coordinates][2], lon = s[:coordinates][1]))
-            junction_end = Junction(wn[:num_junctions], e[:name],e[:elevation],e[:head],e[:demand_timeseries_list],e[:minimum_pressure],@NT(lat = e[:coordinates][2], lon = e[:coordinates][1]))
-            push!(valves, PressureReducingValve(v[:name], @NT(from = junction_start, to = junction_end), v[:status], v[:diameter], v[:setting]))
+
+        #from node
+        if s[:node_type]  == "Junction"
+            for junc = 1:length(junctions)
+                if junctions[junc].name == s[:name]
+                    junction_start = junctions[junc]
+                    break
+                end
+            end
+        elseif s[:node_type]  == "Tank"
+            for tank = 1:length(tanks)
+                if tanks[tank].node.name == s[:name]
+                    junction_start = tanks[tank].node
+                    break
+                end
+            end
+        else
+            for res = 1:length(reservoirs)
+                if reservoir_junctions[res] == s[:name]
+                    junction_start = reservoir_junctions[res]
+                end
+            end
         end
+        #to node
+        if e[:node_type] == "Junction"
+            for junc = 1:length(junctions)
+                if junctions[junc].name == e[:name]
+                    junction_end = junctions[junc]
+                    break
+                end
+            end
+        elseif e[:node_type]  == "Tank"
+                for tank =1:length(tanks)
+                    if tanks[tank].node.name == e[:name]
+                        junction_end = tanks[tank].node
+                        break
+                    end
+                end
+        else
+            for res = 1:length(reservoirs)
+                if reservoir_junctions[res] == s[:name]
+                    junction_end = reservoir_junctions[res]
+                end
+            end
+        end
+        status_index = v[:initial_status] + 1  # 1=Closed, 2=Open, 3 = Active, 4 = CheckValve
+        status_string = ["Closed", "Open", "Active","Check Valve"][status_index]
+        push!(valves, PressureReducingValve(valve, @NT(from = junction_start, to = junction_end), status_string , v[:diameter], v[:setting]))
     end
 
-    #pumps does not work yet
-    # for pump in wn[:pump_name_list]
-    #     p = wn[:get_link](pump)
-    #     #test is node is type junction, if not it does not include the pump in the output
-    #     s= wn[:get_node](p[:start_node_name])
-    #     e = wn[:get_node](p[:end_node_name])
-    #     #wn[:get_curve](wn[:curve_name_list][1]) curves??
-    #     #p[:energy_price]
-    #     if s[:node_type]  == "Junction" &&  e[:node_type] == "Junction"
-    #         junction_start = Junction(wn[:num_junctions], s[:name],s[:elevation],s[:head],s[:demand_timeseries_list],s[:minimum_pressure],@NT(lat = s[:coordinates][2], lon = s[:coordinates][1]))
-    #         junction_end = Junction(wn[:num_junctions], e[:name],e[:elevation],e[:head],e[:demand_timeseries_list],e[:minimum_pressure],@NT(lat = e[:coordinates][2], lon = e[:coordinates][1]))
-    #         push!(pumps,ConstSpeedPump(p[:name],@NT(from = junction_start, to = junction_end),p[:status], [(0.0,0.0)] , [(0.0,0.0)], p[:efficiency], nothing))
-    #     end
-    #
-    # end
+    #Pumps
+    for pump in wn[:pump_name_list]
+        p = wn[:get_link](pump)
+        junction_start = Junction()
+        junction_end = Junction()
+        s= wn[:get_node](p[:start_node_name])
+        e = wn[:get_node](p[:end_node_name])
+        #from node
+        if s[:node_type]  == "Junction"
+            for junc = 1:length(junctions)
+                if junctions[junc].name == s[:name]
+                    junction_start = junctions[junc]
+                    break
+                end
+            end
+        elseif s[:node_type]  == "Tank"
+            for tank = 1:length(tanks)
+                if tanks[tank].node.name == s[:name]
+                    junction_start = tanks[tank].node
+                    break
+                end
+            end
+        else
+            for res = 1:length(reservoirs)
+                if reservoir_junctions[res] == s[:name]
+                    junction_start = reservoir_junctions[res]
+                end
+            end
+        end
+        #to node
+        if e[:node_type] == "Junction"
+            for junc =1:length(junctions)
+                if junctions[junc].name == e[:name]
+                    junction_end = junctions[junc]
+                    break
+                end
+            end
+        elseif e[:node_type]  == "Tank"
+                for tank =1:length(tanks)
+                    if tanks[tank].node.name == e[:name]
+                        junction_end = tanks[tank].node
+                        break
+                    end
+                end
+        else
+            for res = 1:length(reservoirs)
+                if reservoir_junctions[res] == s[:name]
+                    junction_end = reservoir_junctions[res]
+                end
+            end
+        end
+        if p[:pump_type] == "HEAD"
+            pump_curve_name = p[:pump_curve_name]
+            pump_curve = wn[:get_curve](pump_curve_name)[:points]
+        else
+            pump_curve = [(p[:power],0.0)] #power pump types gives fixed power value,
+            #0 is dummy variable to fit tuple type until we decide what we want to do
+        end
+            energyprice = TimeSeries.TimeArray(today(), [0.0])
+        push!(pumps,ConstSpeedPump(pump,@NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice))
+    end
 
-    return junctions, tanks, reservoirs, pipes, valves #, pumps
+    return junctions, tanks, reservoirs, pipes, valves, pumps
 end

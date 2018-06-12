@@ -3,9 +3,9 @@ struct Junction
     number::Int
     name::String
     elevation::Real
-    head::Union{Nothing,Float64}
+    head::Union{Nothing,Float32}
     demand::Any
-    minimum_pressure::Float64
+    minimum_pressure::Float32
     coordinates::Union{@NT(lat::Float64, lon::Float64),Nothing}
 end
 
