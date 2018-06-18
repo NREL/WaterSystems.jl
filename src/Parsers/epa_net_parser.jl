@@ -1,5 +1,5 @@
-@pyimport wntr.sim as sim #import wntr simulation
 @pyimport wntr.network.model as model #import wntr network model
+@pyimport wntr.sim.epanet as sim
 function wn_to_struct(inp_file)
     #initialize arrays for input into package
     junctions = Array{Junction}(0)
@@ -13,23 +13,27 @@ function wn_to_struct(inp_file)
     #set up WaterNetwork using WNTR
     wn = model.WaterNetworkModel(inp_file) #Water Network
     wns = sim.EpanetSimulator(wn) #Simulation either Demand Driven(DD) or Presure Dependent Demand(PDD), default DD
-    results =wns[:run_sim]()
+    results = wns[:run_sim]()
     node_results = results[:node] #dictionary of head, pressure, demand, quality
     link_results = results[:link] #dictionary of status, flowrate, velocity, {headloss, setting, friciton factor, reaction rate, link quality} = epanet simulator only
 
     #Junctions
+    index_junc = 0
     for junc in wn[:junction_name_list]
+        index_junc = index_junc + 1
         #head and demand are current at each node
         j = wn[:get_node](junc)
         head = node_results["head"][junc][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][junc][:values][1] #demand at first timestep (initial_demand)
-        push!(junctions,Junction(wn[:num_junctions], junc, j[:elevation], convert(Float64,head), convert(Float64,demand), j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1])))
+        push!(junctions,Junction(index_junc, junc, j[:elevation], convert(Float64,head), convert(Float64,demand), j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1])))
     end
 
     #Tanks
     #currently for roundtank only
+    index_tank = wn[:num_junctions]
     for tank in wn[:tank_name_list]
         #head  and demand are initial values
+        index_tank = index_tank + 1
         t = wn[:get_node](tank)
         #assign minimum pressure to the stardard for junctions
         junc = wn[:junction_name_list]
@@ -42,18 +46,21 @@ function wn_to_struct(inp_file)
         volume = area * t[:init_level];
         volumelimits = [x * area for x in [t[:min_level],t[:max_level]]];
 
-        node = Junction(wn[:num_junctions], t[:name], t[:elevation], convert(Float64,head), convert(Float64,demand), min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
-        push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
+        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), convert(Float64,demand), min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
+        push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
     end
 
     #Reservoirs
+    index_res = wn[:num_junctions] + wn[:num_tanks]
     for res in wn[:reservoir_name_list]
+        index_res = index_res +1
         r = wn[:get_node](res)
         head = node_results["head"][res][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][res][:values][1] #demand at first timestep (initial_demand)
-        push!(reservoirs,Reservoir(res,r[:base_head])) #base_head = elevation
-        push!(reservoir_junctions, Junction(wn[:num_reservoirs], res, r[:base_head], convert(Float64,head), convert(Float64,demand), 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1]))) #array of pseudo junctions @ res
+        node = Junction(index_res, res, r[:base_head], convert(Float64,head), convert(Float64,demand), 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1])) #array of pseudo junctions @ res
+        push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
+
     end
 
 
@@ -84,8 +91,8 @@ function wn_to_struct(inp_file)
             end
         else
             for res = 1:length(reservoirs)
-                if reservoir_junctions[res] == s[:name]
-                    junction_start = reservoir_junctions[res]
+                if reservoirs[res].node.name == s[:name]
+                    junction_start = reservoirs[res].node
                 end
             end
         end
@@ -106,12 +113,12 @@ function wn_to_struct(inp_file)
                 end
             else
                 for res = 1:length(reservoirs)
-                    if reservoir_junctions[res] == s[:name]
-                        junction_end = reservoir_junctions[res]
+                    if reservoirs[res].node.name == e[:name]
+                        junction_end = reservoirs[res].node
                     end
                 end
             end
-            push!(pipes,RegularPipe(pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate)))
+            push!(pipes,RegularPipe(pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate), p[:initial_status]))
         end
     #Valves
     #currently for Pressure Reducing Valve Only
@@ -140,8 +147,8 @@ function wn_to_struct(inp_file)
             end
         else
             for res = 1:length(reservoirs)
-                if reservoir_junctions[res] == s[:name]
-                    junction_start = reservoir_junctions[res]
+                if reservoirs[res].node.name == s[:name]
+                    junction_start = reservoirs[res].node
                 end
             end
         end
@@ -162,8 +169,8 @@ function wn_to_struct(inp_file)
                 end
         else
             for res = 1:length(reservoirs)
-                if reservoir_junctions[res] == s[:name]
-                    junction_end = reservoir_junctions[res]
+                if reservoirs[res].node.name == e[:name]
+                    junction_end = reservoirs[res].node
                 end
             end
         end
@@ -196,8 +203,8 @@ function wn_to_struct(inp_file)
             end
         else
             for res = 1:length(reservoirs)
-                if reservoir_junctions[res] == s[:name]
-                    junction_start = reservoir_junctions[res]
+                if reservoirs[res].node.name == s[:name]
+                    junction_start = reservoirs[res].node
                 end
             end
         end
@@ -218,8 +225,8 @@ function wn_to_struct(inp_file)
                 end
         else
             for res = 1:length(reservoirs)
-                if reservoir_junctions[res] == s[:name]
-                    junction_end = reservoir_junctions[res]
+                if reservoirs[res].node.name == e[:name]
+                    junction_end = reservoirs[res].node
                 end
             end
         end
@@ -233,6 +240,7 @@ function wn_to_struct(inp_file)
             energyprice = TimeSeries.TimeArray(today(), [0.0])
         push!(pumps,ConstSpeedPump(pump,@NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice))
     end
-
-    return junctions, tanks, reservoirs, pipes, valves, pumps
+    num_nodes = wn[:num_nodes]
+    num_links = wn[:num_links]
+    return junctions, tanks, reservoirs, pipes, valves, pumps, num_nodes, num_links
 end
