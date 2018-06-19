@@ -1,9 +1,9 @@
 ## Time Series Length ##
-
+include("Parsers/epa_net_parser.jl")
 function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}
-    t = length(loads[1].scalingfactor)
+    t = length(loads[1].demand)
     for l in loads
-        if t == length(l.scalingfactor)
+        if t == length(l.demand)
             continue
         else
             error("Inconsistent load scaling factor time series length")
@@ -19,7 +19,7 @@ struct WaterSystem
     demands::Array{WaterDemand}
     network::Union{Nothing,Network}
     timesteps::Int
-    
+
     function WaterSystem(junctions, links, storages, demands, network)
 
         time_length = TimeSeriesCheckDemand(demands)
@@ -40,4 +40,8 @@ function WaterSystem(junctions::Array{Junction},
                     demands::Array{WaterDemand})
 
     WaterSystem(junctions, links, storages, demands, Network(links, junctions))
+end
+function MakeWaterSystem(inp_file)
+    junctions, links, storages, demands, networks = wn_to_struct(inp_file)
+    return WaterSystem(junctions, links, storages, demands, networks)
 end

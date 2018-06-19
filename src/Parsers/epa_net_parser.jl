@@ -1,5 +1,19 @@
 @pyimport wntr.network.model as model #import wntr network model
 @pyimport wntr.sim.epanet as sim
+
+function seconds_to_clock(time_value)
+    if time_value <= 60
+        time = "0:00:$time_value"
+    elseif time_value <= 3600
+        minutes, seconds = fldmod(time_value, 60)
+        time = "0:$minutes:$seconds"
+    else
+        minutes, seconds = fldmod(time_value,60)
+        hours, minutes = fldmod(minutes, 60)
+        time = "$hours:$minutes:$seconds"
+    end
+end
+
 function wn_to_struct(inp_file)
     #initialize arrays for input into package
     junctions = Array{Junction}(0)
@@ -16,6 +30,15 @@ function wn_to_struct(inp_file)
     results = wns[:run_sim]()
     node_results = results[:node] #dictionary of head, pressure, demand, quality
     link_results = results[:link] #dictionary of status, flowrate, velocity, {headloss, setting, friciton factor, reaction rate, link quality} = epanet simulator only
+    #timeseries information
+    duration = wn[:options][:time][:duration]
+    time_step = wn[:options][:time][:report_timestep]
+    start_time = wn[:options][:time][:report_start]
+
+    start = seconds_to_clock(start_time)
+    start_day =  DateTime(start, "H:M:S")
+    demand = node_results["demand"]["11"][:values]
+    time_ahead = collect(start_day:Second(time_step):start_day+Second(duration))
 
     #Junctions
     index_junc = 0
@@ -47,6 +70,7 @@ function wn_to_struct(inp_file)
         volumelimits = [x * area for x in [t[:min_level],t[:max_level]]];
 
         node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), convert(Float64,demand), min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
+        push!(junctions, node)
         push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
     end
@@ -59,6 +83,7 @@ function wn_to_struct(inp_file)
         head = node_results["head"][res][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][res][:values][1] #demand at first timestep (initial_demand)
         node = Junction(index_res, res, r[:base_head], convert(Float64,head), convert(Float64,demand), 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1])) #array of pseudo junctions @ res
+        push!(junctions, node)
         push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
 
     end
@@ -237,10 +262,21 @@ function wn_to_struct(inp_file)
             pump_curve = [(p[:power],0.0)] #power pump types gives fixed power value,
             #0 is dummy variable to fit tuple type until we decide what we want to do
         end
-            energyprice = TimeSeries.TimeArray(today(), [0.0])
+        price = wn[:options][:energy][:global_price]
+        price_array = ones(length(time_ahead))
+        energyprice = TimeSeries.TimeArray(time_ahead, price_array)
         push!(pumps,ConstSpeedPump(pump,@NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice))
     end
-    num_nodes = wn[:num_nodes]
-    num_links = wn[:num_links]
-    return junctions, tanks, reservoirs, pipes, valves, pumps, num_nodes, num_links
+    #additional arrays
+    links = vcat(pipes, valves, pumps)
+    storage = vcat(tanks,reservoirs)
+    demands = Array{WaterDemand}(0)
+    max_demand = 20 #placeholder
+    for i = 1:length(junctions)
+        name = junctions[i].name
+        demand = node_results["demand"][name][:values]
+        push!(demands, WaterDemand(name, junctions[i],true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
+    end
+    network = Network(links, junctions)
+    return junctions, links, storage, demands, network
 end

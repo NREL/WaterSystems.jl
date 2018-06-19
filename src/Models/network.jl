@@ -4,16 +4,17 @@ include("transport_elements.jl")
 # 1. Consider a dynamic rate problem, add time series in the rate calculations.
 
 struct Network
-    links::Array{Link}
+    links::Vector{Link}
     incidence::Array{Int}
+    null::Array{Float64}
 end
 
-function Network(links::Array{B}, nodes::Array{Junction}) where {B<:Link}
+function Network(links::Vector{B}, nodes::Vector{Junction}) where {B<:Link}
     nodecount = length(nodes)
     A = WaterSystems.build_incidence(nodecount, links, nodes)
+    null_A = WaterSystems.build_incidence_null(A)
+    return Network(links, A, null_A)
 
-    return Network(links, A) 
-    
 end
 
 function build_incidence(nodecount, links::Array{B}, nodes::Array{Junction}) where {B<:Link}
@@ -32,5 +33,8 @@ function build_incidence(nodecount, links::Array{B}, nodes::Array{Junction}) whe
 
     end
     return  A
-
+end
+function build_incidence_null(A)
+    null_A = nullspace(full(A))
+    return null_A
 end
