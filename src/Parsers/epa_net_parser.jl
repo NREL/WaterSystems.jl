@@ -50,7 +50,7 @@ function wn_to_struct(inp_file)
         j = wn[:get_node](junc)
         head = node_results["head"][junc][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][junc][:values][1] #demand at first timestep (initial_demand)
-        push!(junctions,Junction(index_junc, junc, j[:elevation], convert(Float64,head), convert(Float64,demand), j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1])))
+        push!(junctions,Junction(index_junc, junc, j[:elevation], convert(Float64,head), convert(Float64,demand), j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1]), "Junction"))
     end
     @time println("junction array")
     #Tanks
@@ -71,7 +71,7 @@ function wn_to_struct(inp_file)
         volume = area * t[:init_level];
         volumelimits = [x * area for x in [t[:min_level],t[:max_level]]];
 
-        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), convert(Float64,demand), min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
+        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), convert(Float64,demand), min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]),"Tank")
         push!(junctions, node)
         push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
@@ -84,7 +84,7 @@ function wn_to_struct(inp_file)
         r = wn[:get_node](res)
         head = node_results["head"][res][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][res][:values][1] #demand at first timestep (initial_demand)
-        node = Junction(index_res, res, r[:base_head], convert(Float64,head), convert(Float64,demand), 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1])) #array of pseudo junctions @ res
+        node = Junction(index_res, res, r[:base_head], convert(Float64,head), convert(Float64,demand), 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1]), "Reservoir") #array of pseudo junctions @ res
         push!(junctions, node)
         push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
 
