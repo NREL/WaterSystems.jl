@@ -1,6 +1,6 @@
 @pyimport wntr.network.model as model #import wntr network model
 @pyimport wntr.sim.epanet as sim
-
+@time print("pyimport")
 function seconds_to_clock(time_value)
     if time_value <= 60
         time = "0:00:$time_value"
@@ -26,10 +26,13 @@ function wn_to_struct(inp_file)
 
     #set up WaterNetwork using WNTR
     wn = model.WaterNetworkModel(inp_file) #Water Network
+    @time println("Wntr model")
     wns = sim.EpanetSimulator(wn) #Simulation either Demand Driven(DD) or Presure Dependent Demand(PDD), default DD
     results = wns[:run_sim]()
+    @time println("Wntr simulation")
     node_results = results[:node] #dictionary of head, pressure, demand, quality
     link_results = results[:link] #dictionary of status, flowrate, velocity, {headloss, setting, friciton factor, reaction rate, link quality} = epanet simulator only
+
     #timeseries information
     duration = wn[:options][:time][:duration]
     time_step = wn[:options][:time][:report_timestep]
@@ -49,7 +52,7 @@ function wn_to_struct(inp_file)
         demand = node_results["demand"][junc][:values][1] #demand at first timestep (initial_demand)
         push!(junctions,Junction(index_junc, junc, j[:elevation], convert(Float64,head), convert(Float64,demand), j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1])))
     end
-
+    @time println("junction array")
     #Tanks
     #currently for roundtank only
     index_tank = wn[:num_junctions]
@@ -73,7 +76,7 @@ function wn_to_struct(inp_file)
         push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
     end
-
+    @time println("tank array")
     #Reservoirs
     index_res = wn[:num_junctions] + wn[:num_tanks]
     for res in wn[:reservoir_name_list]
@@ -86,7 +89,7 @@ function wn_to_struct(inp_file)
         push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
 
     end
-
+    @time println("res array")
 
     #Pipes
     for pipe in wn[:pipe_name_list]
@@ -142,8 +145,9 @@ function wn_to_struct(inp_file)
                     end
                 end
             end
-            push!(pipes,RegularPipe(pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate), p[:initial_status]))
+            push!(pipes,RegularPipe(pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate), p[:initial_status], "Pipe"))
         end
+    @time println("pipe array includes if statements")
     #Valves
     #currently for Pressure Reducing Valve Only
     for valve in wn[:valve_name_list]
@@ -200,9 +204,9 @@ function wn_to_struct(inp_file)
         end
         status_index = v[:initial_status] + 1  # 1=Closed, 2=Open, 3 = Active, 4 = CheckValve
         status_string = ["Closed", "Open", "Active","Check Valve"][status_index]
-        push!(valves, PressureReducingValve(valve, @NT(from = junction_start, to = junction_end), status_string , v[:diameter], v[:setting]))
+        push!(valves, PressureReducingValve(valve, @NT(from = junction_start, to = junction_end), status_string , v[:diameter], v[:setting], "Valve"))
     end
-
+    @time println("valves array includes if statements ")
     #Pumps
     for pump in wn[:pump_name_list]
         p = wn[:get_link](pump)
@@ -264,8 +268,9 @@ function wn_to_struct(inp_file)
         price = wn[:options][:energy][:global_price]
         price_array = ones(length(time_ahead))
         energyprice = TimeSeries.TimeArray(time_ahead, price_array)
-        push!(pumps,ConstSpeedPump(pump,@NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice))
+        push!(pumps,ConstSpeedPump(pump,@NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice, "Pump"))
     end
+    @time println("pumps array includes if statements ")
     #additional arrays
     links = vcat(pipes, valves, pumps)
     storage = vcat(tanks,reservoirs)
@@ -274,8 +279,10 @@ function wn_to_struct(inp_file)
     for i = 1:length(junctions)
         name = junctions[i].name
         demand = node_results["demand"][name][:values]
-        push!(demands, WaterDemand(name, junctions[i],true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
+        push!(demands, WaterDemand(name, junctions[i], true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
     end
+    @time println("WaterDemand")
     network = Network(links, junctions)
+    @time println("make network")
     return junctions, links, storage, demands, network
 end
