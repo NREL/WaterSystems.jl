@@ -37,10 +37,15 @@ function wn_to_struct(inp_file)
     duration = wn[:options][:time][:duration]
     time_step = wn[:options][:time][:report_timestep]
     start_time = wn[:options][:time][:report_start]
-
+    num_timesteps = duration/time_step
+    if mod(num_timesteps, 1) == 0
+        num_timesteps = Int(num_timesteps)
+    else
+        error("Duration does not correspond to a full timestep.")
+    end
     start = seconds_to_clock(start_time)
     start_day =  DateTime(start, "H:M:S")
-    time_ahead = collect(start_day:Second(time_step):start_day+Second(duration))
+    time_ahead = collect(start_day:Second(time_step):start_day + Second(duration-time_step))
 
     #Junctions
     index_junc = 0
@@ -49,8 +54,9 @@ function wn_to_struct(inp_file)
         #head and demand are current at each node
         j = wn[:get_node](junc)
         head = node_results["head"][junc][:values][1] #head at first timestep (initial_head)
-        demand = node_results["demand"][junc][:values][1] #demand at first timestep (initial_demand)
-        push!(junctions,Junction(index_junc, junc, j[:elevation], convert(Float64,head), convert(Float64,demand), j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1]), "Junction"))
+        demand = node_results["demand"][junc][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
+        demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
+        push!(junctions,Junction(index_junc, junc, j[:elevation], convert(Float64,head), demand_timeseries, j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1]), "Junction"))
     end
     @time println("junction array")
     #Tanks
@@ -66,12 +72,13 @@ function wn_to_struct(inp_file)
         min_pressure = j[:minimum_pressure]
 
         head = node_results["head"][tank][:values][1] #head at first timestep (initial_head)
-        demand = node_results["demand"][tank][:values][1] #demand at first timestep (initial_demand)
-        area = π * t[:diameter] ;
+        demand = node_results["demand"][tank][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
+        demand_timeseries = TimeSeries.TimeArray(time_ahead, demand) #demand at first timestep (initial_demand)
+        area = π * (t[:diameter]/2)^2 ;
         volume = area * t[:init_level];
         volumelimits = [x * area for x in [t[:min_level],t[:max_level]]];
 
-        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), convert(Float64,demand), min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]),"Tank")
+        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), demand_timeseries, min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]),"Tank")
         push!(junctions, node)
         push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
@@ -83,8 +90,9 @@ function wn_to_struct(inp_file)
         index_res = index_res +1
         r = wn[:get_node](res)
         head = node_results["head"][res][:values][1] #head at first timestep (initial_head)
-        demand = node_results["demand"][res][:values][1] #demand at first timestep (initial_demand)
-        node = Junction(index_res, res, r[:base_head], convert(Float64,head), convert(Float64,demand), 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1]), "Reservoir") #array of pseudo junctions @ res
+        demand = node_results["demand"][res][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
+        demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
+        node = Junction(index_res, res, r[:base_head], convert(Float64,head), demand_timeseries, 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1]), "Reservoir") #array of pseudo junctions @ res
         push!(junctions, node)
         push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
 
@@ -97,8 +105,8 @@ function wn_to_struct(inp_file)
         p = wn[:get_link](pipe)
         headloss = link_results["headloss"][pipe][:values][1] #headloss at first time step
         flowrate = link_results["flowrate"][pipe][:values][1] #flowrate at first time step
-        junction_start = Junction()
-        junction_end = Junction()
+        junction_start = nothing
+        junction_end = nothing
         s = wn[:get_node](p[:start_node_name])
         e = wn[:get_node](p[:end_node_name])
         #from node
@@ -210,8 +218,8 @@ function wn_to_struct(inp_file)
     #Pumps
     for pump in wn[:pump_name_list]
         p = wn[:get_link](pump)
-        junction_start = Junction()
-        junction_end = Junction()
+        junction_start = nothing
+        junction_end = nothing
         s= wn[:get_node](p[:start_node_name])
         e = wn[:get_node](p[:end_node_name])
         #from node
@@ -278,7 +286,7 @@ function wn_to_struct(inp_file)
     max_demand = 20 #placeholder
     for i = 1:length(junctions)
         name = junctions[i].name
-        demand = node_results["demand"][name][:values]
+        demand = node_results["demand"][name][:values][1:num_timesteps]
         push!(demands, WaterDemand(name, junctions[i], true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
     end
     @time println("WaterDemand")

@@ -2,9 +2,9 @@
 include("Parsers/epa_net_parser.jl")
 @time print("include epa_net_parser")
 function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}
-    t = length(loads[1].demand) - 1 #WNTR assumes recurring so length(l.demand) = 25 but should be 24
+    t = length(loads[1].demand)
     for l in loads
-        if t == length(l.demand) - 1
+        if t == length(l.demand)
             continue
         else
             error("Inconsistent load scaling factor time series length")

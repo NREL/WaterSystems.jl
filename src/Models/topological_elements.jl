@@ -4,7 +4,7 @@ struct Junction
     name::String
     elevation::Real
     head::Union{Nothing,Float64}
-    demand::Any
+    demand::TimeSeries.TimeArray
     minimum_pressure::Float64
     coordinates::Union{@NT(lat::Float64, lon::Float64),Nothing}
     junction_type::String
