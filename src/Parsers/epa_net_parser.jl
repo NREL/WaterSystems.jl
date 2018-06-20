@@ -37,7 +37,6 @@ function wn_to_struct(inp_file)
 
     start = seconds_to_clock(start_time)
     start_day =  DateTime(start, "H:M:S")
-    demand = node_results["demand"]["11"][:values]
     time_ahead = collect(start_day:Second(time_step):start_day+Second(duration))
 
     #Junctions
