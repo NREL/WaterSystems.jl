@@ -100,8 +100,9 @@ function wn_to_struct(inp_file)
     @time println("res array")
 
     #Pipes
+    pipe_index = 0
     for pipe in wn[:pipe_name_list]
-
+        pipe_index = pipe_index + 1
         p = wn[:get_link](pipe)
         headloss = link_results["headloss"][pipe][:values][1] #headloss at first time step
         flowrate = link_results["flowrate"][pipe][:values][1] #flowrate at first time step
@@ -153,13 +154,14 @@ function wn_to_struct(inp_file)
                     end
                 end
             end
-            push!(pipes,RegularPipe(pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate), p[:initial_status], "Pipe"))
+            push!(pipes,RegularPipe(pipe_index, pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate), p[:initial_status], "Pipe"))
         end
     @time println("pipe array includes if statements")
     #Valves
     #currently for Pressure Reducing Valve Only
+    valve_index = wn[:num_pipes]
     for valve in wn[:valve_name_list]
-
+        valve_index = valve_index + 1
         v = wn[:get_link](valve)
         junction_start = Junction()
         junction_end = Junction()
@@ -212,11 +214,13 @@ function wn_to_struct(inp_file)
         end
         status_index = v[:initial_status] + 1  # 1=Closed, 2=Open, 3 = Active, 4 = CheckValve
         status_string = ["Closed", "Open", "Active","Check Valve"][status_index]
-        push!(valves, PressureReducingValve(valve, @NT(from = junction_start, to = junction_end), status_string , v[:diameter], v[:setting], "Valve"))
+        push!(valve_index, valves, PressureReducingValve(valve, @NT(from = junction_start, to = junction_end), status_string , v[:diameter], v[:setting], "Valve"))
     end
     @time println("valves array includes if statements ")
     #Pumps
+    pump_index = wn[:num_pipes] + wn[:num_valves]
     for pump in wn[:pump_name_list]
+        pump_index = pump_index + 1
         p = wn[:get_link](pump)
         junction_start = nothing
         junction_end = nothing
@@ -276,7 +280,7 @@ function wn_to_struct(inp_file)
         price = wn[:options][:energy][:global_price]
         price_array = ones(length(time_ahead))
         energyprice = TimeSeries.TimeArray(time_ahead, price_array)
-        push!(pumps,ConstSpeedPump(pump,@NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice, "Pump"))
+        push!(pumps,ConstSpeedPump(pump_index, pump, @NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice, "Pump"))
     end
     @time println("pumps array includes if statements ")
     #additional arrays

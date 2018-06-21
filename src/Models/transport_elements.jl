@@ -3,6 +3,7 @@ abstract type
 end
 
 struct RegularPipe <: Link
+    number::Int64
     name::String
     connectionpoints:: @NT(from::Junction, to::Junction)
     diameter::Float64
@@ -15,6 +16,7 @@ struct RegularPipe <: Link
 end
 
 RegularPipe(;
+            number = 1,
             name="init",
             connectionpoints=(from::Junction(), to::Junction()),
             diameter = 0,
@@ -24,10 +26,11 @@ RegularPipe(;
             flow = nothing,
             initial_status = 0,
             link_type = "Pipe"
-            ) = RegularPipe(name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, link_type)
+            ) = RegularPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, link_type)
 
 
 struct PressureReducingValve <: Link
+    number::Int64
     name::String
     connectionpoints::@NT(from::Junction, to::Junction)
     status::String
@@ -37,10 +40,11 @@ struct PressureReducingValve <: Link
 end
 
 PressureReducingValve(;
+                    number = 1,
                     name="init",
                     connectionpoints= @NT(from::Junction(), to::Junction()),
                     status="Closed",
                     diameter=1.0,
                     setting=nothing,
                     link_type = "Valve"
-                    ) = PressureReducingValve(name, connectionpoints, status, diameter, setting, link_type)
+                    ) = PressureReducingValve(number, name, connectionpoints, status, diameter, setting, link_type)
