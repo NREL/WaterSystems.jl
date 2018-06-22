@@ -35,7 +35,7 @@ struct PressureReducingValve <: Link
     connectionpoints::@NT(from::Junction, to::Junction)
     status::String
     diameter::Union{Nothing,Float64}
-    setting::Union{Nothing,Float64}
+    pressure_drop::Union{Nothing,Float64}
     link_type::String
 end
 
@@ -45,6 +45,6 @@ PressureReducingValve(;
                     connectionpoints= @NT(from::Junction(), to::Junction()),
                     status="Closed",
                     diameter=1.0,
-                    setting=nothing,
+                    pressure_drop=nothing,
                     link_type = "Valve"
-                    ) = PressureReducingValve(number, name, connectionpoints, status, diameter, setting, link_type)
+                    ) = PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop, link_type)

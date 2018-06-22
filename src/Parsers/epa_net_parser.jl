@@ -163,8 +163,8 @@ function wn_to_struct(inp_file)
     for valve in wn[:valve_name_list]
         valve_index = valve_index + 1
         v = wn[:get_link](valve)
-        junction_start = Junction()
-        junction_end = Junction()
+        junction_start = nothing
+        junction_end = nothing
         s = wn[:get_node](v[:start_node_name])
         e = wn[:get_node](v[:end_node_name])
 
