@@ -56,7 +56,7 @@ function wn_to_struct(inp_file)
         head = node_results["head"][junc][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][junc][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
-        push!(junctions,Junction(index_junc, junc, j[:elevation], convert(Float64,head), demand_timeseries, j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1]), "Junction"))
+        push!(junctions, Junction(index_junc, junc, j[:elevation], convert(Float64,head), demand_timeseries, j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1])))
     end
     @time println("junction array")
     #Tanks
@@ -78,7 +78,7 @@ function wn_to_struct(inp_file)
         volume = area * t[:init_level];
         volumelimits = [x * area for x in [t[:min_level],t[:max_level]]];
 
-        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), demand_timeseries, min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]),"Tank")
+        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), demand_timeseries, min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
         push!(junctions, node)
         push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
@@ -92,7 +92,7 @@ function wn_to_struct(inp_file)
         head = node_results["head"][res][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][res][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
-        node = Junction(index_res, res, r[:base_head], convert(Float64,head), demand_timeseries, 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1]), "Reservoir") #array of pseudo junctions @ res
+        node = Junction(index_res, res, r[:base_head], convert(Float64,head), demand_timeseries, 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1])) #array of pseudo junctions @ res
         push!(junctions, node)
         push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
 
@@ -154,7 +154,7 @@ function wn_to_struct(inp_file)
                     end
                 end
             end
-            push!(pipes,RegularPipe(pipe_index, pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate), p[:initial_status], "Pipe"))
+            push!(pipes,RegularPipe(pipe_index, pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate), p[:initial_status]))
         end
     @time println("pipe array includes if statements")
     #Valves
@@ -214,7 +214,7 @@ function wn_to_struct(inp_file)
         end
         status_index = v[:initial_status] + 1  # 1=Closed, 2=Open, 3 = Active, 4 = CheckValve
         status_string = ["Closed", "Open", "Active","Check Valve"][status_index]
-        push!(valve_index, valves, PressureReducingValve(valve, @NT(from = junction_start, to = junction_end), status_string , v[:diameter], v[:setting], "Valve"))
+        push!(valves, PressureReducingValve(valve_index, valve, @NT(from = junction_start, to = junction_end), status_string , v[:diameter], v[:setting]))
     end
     @time println("valves array includes if statements ")
     #Pumps
@@ -280,7 +280,7 @@ function wn_to_struct(inp_file)
         price = wn[:options][:energy][:global_price]
         price_array = ones(length(time_ahead))
         energyprice = TimeSeries.TimeArray(time_ahead, price_array)
-        push!(pumps,ConstSpeedPump(pump_index, pump, @NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice, "Pump"))
+        push!(pumps,ConstSpeedPump(pump_index, pump, @NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice))
     end
     @time println("pumps array includes if statements ")
     #additional arrays

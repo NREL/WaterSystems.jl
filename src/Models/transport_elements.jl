@@ -12,7 +12,6 @@ struct RegularPipe <: Link
     headloss::Float64
     flow::Union{Nothing,Float64}
     initial_status:: Int64
-    link_type::String
 end
 
 RegularPipe(;
@@ -24,9 +23,8 @@ RegularPipe(;
             roughness = 0,
             headloss = nothing,
             flow = nothing,
-            initial_status = 0,
-            link_type = "Pipe"
-            ) = RegularPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, link_type)
+            initial_status = 0
+            ) = RegularPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status)
 
 
 struct PressureReducingValve <: Link
@@ -36,7 +34,6 @@ struct PressureReducingValve <: Link
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
-    link_type::String
 end
 
 PressureReducingValve(;
@@ -45,6 +42,5 @@ PressureReducingValve(;
                     connectionpoints= @NT(from::Junction(), to::Junction()),
                     status="Closed",
                     diameter=1.0,
-                    pressure_drop=nothing,
-                    link_type = "Valve"
-                    ) = PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop, link_type)
+                    pressure_drop=nothing
+                    ) = PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop)
