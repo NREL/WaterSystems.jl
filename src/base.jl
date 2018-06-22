@@ -14,9 +14,11 @@ function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}
 end
 
 struct WaterSystem
+    nodes::Array{Junction}
     junctions::Array{Junction}
+    tanks::Array{RoundTank}
+    reservoirs::Array{Reservoir}
     links::Array{T} where {T<:Link}
-    storages::Array{T} where {T<:Storage}
     pipes::Array{RegularPipe}
     valves::Array{PressureReducingValve}
     pumps::Array{ConstSpeedPump}
@@ -24,13 +26,15 @@ struct WaterSystem
     network::Union{Nothing,Network}
     duration::Int
 
-    function WaterSystem(junctions, links, storages, pipes, valves, pumps, demands, network)
+    function WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network)
 
         time_length = TimeSeriesCheckDemand(demands)
 
-        new(junctions,
+        new(nodes,
+            junctions,
+            tanks,
+            reservoirs,
             links,
-            storages,
             pipes,
             valves,
             pumps,
@@ -41,18 +45,20 @@ struct WaterSystem
     end
 end
 
-function WaterSystem(junctions::Array{Junction},
+function WaterSystem(nodes::Array{Junction},
+                    junctions::Array{Junction},
+                    tanks::Array{RoundTank},
+                    reservoirs::Array{Reservoir},
                     links::Array{T} where {T<:Link},
-                    storages::Array{T} where {T<:Storage},
                     pipes::Array{RegularPipe},
                     valves::Array{PressureReducingValve},
                     pumps::Array{ConstSpeedPump},
                     demands::Array{WaterDemand})
 
-    WaterSystem(junctions, links, storages, pipes, valves, pumps, demands, Network(links, junctions))
+    WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, Network(links, nodes))
 end
 function MakeWaterSystem(inp_file)
-    junctions, links, storages, pipes, valves, pumps, demands, networks = wn_to_struct(inp_file)
-    return WaterSystem(junctions, links, storages, pipes, valves, pumps, demands, networks)
+    nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, networks = wn_to_struct(inp_file)
+    return WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, networks)
 end
 @time ("make waterSystem from inp")

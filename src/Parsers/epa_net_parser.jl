@@ -16,10 +16,11 @@ end
 
 function wn_to_struct(inp_file)
     #initialize arrays for input into package
-    junctions = Array{Junction}(0)
+    junctions = Array{Junction}(0) #only junctions with demands
+    nodes = Array{Junction}(0) #all nodes (junctions, tanks, reservoirs)
     tanks = Array{RoundTank}(0)
     reservoirs = Array{Reservoir}(0)
-    reservoir_junctions = Array{Junction}(0)
+    reservoir_nodes = Array{Junction}(0)
     pipes = Array{RegularPipe}(0)
     valves = Array{PressureReducingValve}(0)
     pumps = Array{ConstSpeedPump}(0)
@@ -47,7 +48,7 @@ function wn_to_struct(inp_file)
     start_day =  DateTime(start, "H:M:S")
     time_ahead = collect(start_day:Second(time_step):start_day + Second(duration-time_step))
 
-    #Junctions
+    #nodes
     index_junc = 0
     for junc in wn[:junction_name_list]
         index_junc = index_junc + 1
@@ -56,17 +57,19 @@ function wn_to_struct(inp_file)
         head = node_results["head"][junc][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][junc][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
-        push!(junctions, Junction(index_junc, junc, j[:elevation], convert(Float64,head), demand_timeseries, j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1])))
+        node = Junction(index_junc, junc, j[:elevation], convert(Float64,head), demand_timeseries, j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1]))
+        push!(junctions, node )
+        push!(nodes, node)
     end
     @time println("junction array")
     #Tanks
     #currently for roundtank only
-    index_tank = wn[:num_junctions]
+    index_tank = wn[:num_nodes]
     for tank in wn[:tank_name_list]
         #head  and demand are initial values
         index_tank = index_tank + 1
         t = wn[:get_node](tank)
-        #assign minimum pressure to the stardard for junctions
+        #assign minimum pressure to the stardard for nodes
         junc = wn[:junction_name_list]
         j = wn[:get_node](junc[1])
         min_pressure = j[:minimum_pressure]
@@ -79,21 +82,21 @@ function wn_to_struct(inp_file)
         volumelimits = [x * area for x in [t[:min_level],t[:max_level]]];
 
         node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), demand_timeseries, min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
-        push!(junctions, node)
+        push!(nodes, node)
         push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
     end
     @time println("tank array")
     #Reservoirs
-    index_res = wn[:num_junctions] + wn[:num_tanks]
+    index_res = wn[:num_nodes] + wn[:num_tanks]
     for res in wn[:reservoir_name_list]
         index_res = index_res +1
         r = wn[:get_node](res)
         head = node_results["head"][res][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][res][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
-        node = Junction(index_res, res, r[:base_head], convert(Float64,head), demand_timeseries, 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1])) #array of pseudo junctions @ res
-        push!(junctions, node)
+        node = Junction(index_res, res, r[:base_head], convert(Float64,head), demand_timeseries, 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1])) #array of pseudo nodes @ res
+        push!(nodes, node)
         push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
 
     end
@@ -112,9 +115,9 @@ function wn_to_struct(inp_file)
         e = wn[:get_node](p[:end_node_name])
         #from node
         if s[:node_type]  == "Junction"
-            for junc = 1:length(junctions)
-                if junctions[junc].name == s[:name]
-                    junction_start = junctions[junc]
+            for junc = 1:length(nodes)
+                if nodes[junc].name == s[:name]
+                    junction_start = nodes[junc]
                     break
                 end
             end
@@ -134,9 +137,9 @@ function wn_to_struct(inp_file)
         end
         #to node
         if e[:node_type] == "Junction"
-            for junc =1:length(junctions)
-                if junctions[junc].name == e[:name]
-                    junction_end = junctions[junc]
+            for junc =1:length(nodes)
+                if nodes[junc].name == e[:name]
+                    junction_end = nodes[junc]
                     break
                 end
             end
@@ -170,9 +173,9 @@ function wn_to_struct(inp_file)
 
         #from node
         if s[:node_type]  == "Junction"
-            for junc = 1:length(junctions)
-                if junctions[junc].name == s[:name]
-                    junction_start = junctions[junc]
+            for junc = 1:length(nodes)
+                if nodes[junc].name == s[:name]
+                    junction_start = nodes[junc]
                     break
                 end
             end
@@ -192,9 +195,9 @@ function wn_to_struct(inp_file)
         end
         #to node
         if e[:node_type] == "Junction"
-            for junc = 1:length(junctions)
-                if junctions[junc].name == e[:name]
-                    junction_end = junctions[junc]
+            for junc = 1:length(nodes)
+                if nodes[junc].name == e[:name]
+                    junction_end = nodes[junc]
                     break
                 end
             end
@@ -228,9 +231,9 @@ function wn_to_struct(inp_file)
         e = wn[:get_node](p[:end_node_name])
         #from node
         if s[:node_type]  == "Junction"
-            for junc = 1:length(junctions)
-                if junctions[junc].name == s[:name]
-                    junction_start = junctions[junc]
+            for junc = 1:length(nodes)
+                if nodes[junc].name == s[:name]
+                    junction_start = nodes[junc]
                     break
                 end
             end
@@ -250,9 +253,9 @@ function wn_to_struct(inp_file)
         end
         #to node
         if e[:node_type] == "Junction"
-            for junc =1:length(junctions)
-                if junctions[junc].name == e[:name]
-                    junction_end = junctions[junc]
+            for junc =1:length(nodes)
+                if nodes[junc].name == e[:name]
+                    junction_end = nodes[junc]
                     break
                 end
             end
@@ -285,16 +288,15 @@ function wn_to_struct(inp_file)
     @time println("pumps array includes if statements ")
     #additional arrays
     links = vcat(pipes, valves, pumps)
-    storage = vcat(tanks,reservoirs)
     demands = Array{WaterDemand}(0)
     max_demand = 20 #placeholder
-    for i = 1:length(junctions)
-        name = junctions[i].name
+    for i = 1:length(nodes)
+        name = nodes[i].name
         demand = node_results["demand"][name][:values][1:num_timesteps]
-        push!(demands, WaterDemand(name, junctions[i], true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
+        push!(demands, WaterDemand(name, nodes[i], true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
     end
     @time println("WaterDemand")
-    network = Network(links, junctions)
+    network = Network(links, nodes)
     @time println("make network")
-    return junctions, links, storage, pipes, valves, pumps, demands, network
+    return nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network
 end
