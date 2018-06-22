@@ -64,7 +64,7 @@ function wn_to_struct(inp_file)
     @time println("junction array")
     #Tanks
     #currently for roundtank only
-    index_tank = wn[:num_nodes]
+    index_tank = wn[:num_junctions]
     for tank in wn[:tank_name_list]
         #head  and demand are initial values
         index_tank = index_tank + 1
