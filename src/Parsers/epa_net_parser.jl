@@ -296,5 +296,5 @@ function wn_to_struct(inp_file)
     @time println("WaterDemand")
     network = Network(links, junctions)
     @time println("make network")
-    return junctions, links, storage, demands, network
+    return junctions, links, storage, pipes, valves, pumps, demands, network
 end
