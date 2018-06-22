@@ -88,7 +88,7 @@ function wn_to_struct(inp_file)
     end
     @time println("tank array")
     #Reservoirs
-    index_res = wn[:num_nodes] + wn[:num_tanks]
+    index_res = wn[:num_junctions] + wn[:num_tanks]
     for res in wn[:reservoir_name_list]
         index_res = index_res +1
         r = wn[:get_node](res)
