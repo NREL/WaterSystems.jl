@@ -43,7 +43,7 @@ function WaterSystem(junctions::Array{Junction},
     WaterSystem(junctions, links, storages, demands, Network(links, junctions))
 end
 function MakeWaterSystem(inp_file)
-    junctions, links, storages, demands, networks = wn_to_struct(inp_file)
+    junctions, links, storages, pipes, valves, pumps, demands, networks = wn_to_struct(inp_file)
     return WaterSystem(junctions, links, storages, demands, networks)
 end
 @time ("make waterSystem from inp")
