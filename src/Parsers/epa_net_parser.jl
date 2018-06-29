@@ -1,17 +1,20 @@
 @pyimport wntr.network.model as model #import wntr network model
 @pyimport wntr.sim.epanet as sim
 @time print("pyimport")
-function seconds_to_clock(time_value)
-    if time_value <= 60
-        time = "0:00:$time_value"
-    elseif time_value <= 3600
-        minutes, seconds = fldmod(time_value, 60)
-        time = "0:$minutes:$seconds"
-    else
-        minutes, seconds = fldmod(time_value,60)
+
+function from_seconds(time)
+    hours =0
+    minutes = 0
+    seconds = 0
+    if time >= 3600
+        minutes, seconds = fldmod(time, 60)
         hours, minutes = fldmod(minutes, 60)
-        time = "$hours:$minutes:$seconds"
+    elseif time >=60
+        minutes, seconds = fldmod(time, 60)
+    else
+        seconds = time
     end
+    return hours, minutes, seconds
 end
 
 function wn_to_struct(inp_file)
@@ -37,14 +40,28 @@ function wn_to_struct(inp_file)
     #timeseries information
     duration = wn[:options][:time][:duration]
     time_step = wn[:options][:time][:report_timestep]
+    duration_hours = from_seconds(duration)
+    time_step_hours = time_step/3600
+
+    if duration_hours[2] & duration_hours[3] != 0
+        warn("Duration is not and integer number of hours.")
+    else
+        duration_hours = Int64(duration_hours[1])
+    end
+
     start_time = wn[:options][:time][:report_start]
     num_timesteps = duration/time_step
+
     if mod(num_timesteps, 1) == 0
         num_timesteps = Int(num_timesteps)
     else
         error("Duration does not correspond to a full timestep.")
     end
-    start = seconds_to_clock(start_time)
+    hrs_mins_secs = from_seconds(start_time)
+    hours = hrs_mins_secs[1]
+    minutes = hrs_mins_secs[2]
+    seconds = hrs_mins_secs[3]
+    start = "$hours:$minutes:$seconds"
     start_day =  DateTime(start, "H:M:S")
     time_ahead = collect(start_day:Second(time_step):start_day + Second(duration-time_step))
 
@@ -296,7 +313,5 @@ function wn_to_struct(inp_file)
         push!(demands, WaterDemand(name, nodes[i], true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
     end
     @time println("WaterDemand")
-    network = Network(links, nodes)
-    @time println("make network")
-    return nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network
+    return nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, duration_hours, time_step_hours
 end

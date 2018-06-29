@@ -5,6 +5,7 @@ module WaterSystems
 
 # water system
 export WaterSystem
+export MakeWaterSystem
 
 # network
 export Network
@@ -27,7 +28,7 @@ export RegularPipe
 export PressureReducingValve
 
 # demands
-export WaterDemand 
+export WaterDemand
 
 # parser
 export wn_to_struct
@@ -50,7 +51,7 @@ include("Models/water_demand.jl")
 
 include("base.jl")
 
-#Parser 
+#Parser
 include("Parsers/epa_net_parser.jl")
 
 #__precompile__() # this module is NOT safe to precompile
@@ -88,7 +89,7 @@ catch
 end
 const wntr = PyNULL()
 function __init__()
-    copy!(wntr, pyimport("wntr")) 
+    copy!(wntr, pyimport("wntr"))
 end
 
 end # module
