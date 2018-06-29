@@ -1,5 +1,6 @@
 @pyimport wntr.network.model as model #import wntr network model
 @pyimport wntr.sim.epanet as sim
+@pyimport wntr.metrics.economic as metric
 @time print("pyimport")
 
 function from_seconds(time)
@@ -239,7 +240,9 @@ function wn_to_struct(inp_file)
     @time println("valves array includes if statements ")
     #Pumps
     pump_index = wn[:num_pipes] + wn[:num_valves]
+
     for pump in wn[:pump_name_list]
+        energy = 0
         pump_index = pump_index + 1
         p = wn[:get_link](pump)
         junction_start = nothing
@@ -297,10 +300,29 @@ function wn_to_struct(inp_file)
             pump_curve = [(p[:power],0.0)] #power pump types gives fixed power value,
             #0 is dummy variable to fit tuple type until we decide what we want to do
         end
+        #energy price
         price = wn[:options][:energy][:global_price]
-        price_array = ones(length(time_ahead))
+        pattern = wn[:options][:energy][:global_pattern]
+        if price == 0
+            warn("Price is set to 0. Using randomly generated price array with higher weights during peak hours (4pm-8pm).")
+            price_array = [2*rand(16)+1; 7*rand(4)+3; 2*rand(4)+3]
+        elseif pattern == None
+            price_array = price * ones(length(time_ahead))
+        else
+            price_array = price * pattern
+        end
         energyprice = TimeSeries.TimeArray(time_ahead, price_array)
-        push!(pumps,ConstSpeedPump(pump_index, pump, @NT(from = junction_start, to = junction_end),p[:status], pump_curve, p[:efficiency], energyprice))
+
+        #efficiency
+        efficiency = p[:efficiency]
+        if efficiency == nothing
+            warn("Pump efficiency is 0. Default will be 65% for pump $pump.")
+            efficiency = .65
+        end
+
+        #energy
+        energy = TimeSeries.TimeArray(time_ahead, metric.pump_energy(link_results["flowrate"], node_results["head"], wn)[pump][:values][1:num_timesteps])
+        push!(pumps,ConstSpeedPump(pump_index, pump, @NT(from = junction_start, to = junction_end),p[:status], pump_curve, efficiency, energyprice, energy))
     end
     @time println("pumps array includes if statements ")
     #additional arrays
