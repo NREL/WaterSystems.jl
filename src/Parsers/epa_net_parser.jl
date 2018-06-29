@@ -303,14 +303,29 @@ function wn_to_struct(inp_file)
         #energy price
         price = wn[:options][:energy][:global_price]
         pattern = wn[:options][:energy][:global_pattern]
-        if price == 0
+        price_array2 = Array{Any}(0)
+
+        if price == 0.0
             warn("Price is set to 0. Using randomly generated price array with higher weights during peak hours (4pm-8pm).")
-            price_array = [2*rand(16)+1; 7*rand(4)+3; 2*rand(4)+3]
+            timesteps_per_hour = 1/(time_step_hours)
+            #TO:DO check to make sure time_steps / hour is an int or divisor of 4
+            price_array = [2*rand(Int(timesteps_per_hour*16))+1; 7*rand(Int(timesteps_per_hour*4))+3; 2*rand(Int(timesteps_per_hour*4))+3]
+            if duration_hours > 24
+                days = Int(duration_hours/24)
+                for i=1:days
+                    price_array2 = vcat(price_array2, price_array)
+                end
+                price_array = price_array2
+            end
         elseif pattern == None
             price_array = price * ones(length(time_ahead))
         else
             price_array = price * pattern
         end
+        len = length(price_array)
+        len2 = length(time_ahead)
+        println("$len")
+        println("$len2")
         energyprice = TimeSeries.TimeArray(time_ahead, price_array)
 
         #efficiency
