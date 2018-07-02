@@ -25,11 +25,10 @@ struct WaterSystem
     pumps::Array{ConstSpeedPump}
     demands::Array{WaterDemand}
     network::Union{Nothing,Network}
-    duration::Int64
-    wntr_timestep::Float64
+    simulation::Simulation
 end
 
-function WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network, duration, wntr_timestep)
+function WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network, simulation)
 
         new(nodes,
             junctions,
@@ -41,8 +40,7 @@ function WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, 
             pumps,
             demands,
             network,
-            duration,
-            wntr_timestep)
+            simulation)
 end
 
 function WaterSystem(nodes::Array{Junction},
@@ -54,13 +52,12 @@ function WaterSystem(nodes::Array{Junction},
                     valves::Array{PressureReducingValve},
                     pumps::Array{ConstSpeedPump},
                     demands::Array{WaterDemand},
-                    duration::Int64,
-                    wntr_timestep::Float64)
+                    simulation::Simulation)
 
-    WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, Network(links, nodes), duration, wntr_timestep)
+    WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, Network(links, nodes), simulation)
 end
 function MakeWaterSystem(inp_file)
-    nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, duration, wntr_timestep = wn_to_struct(inp_file)
-    return WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, duration, wntr_timestep)
+    nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation = wn_to_struct(inp_file)
+    return WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation)
 end
 @time ("make waterSystem from inp")

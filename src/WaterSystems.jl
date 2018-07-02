@@ -47,6 +47,7 @@ include("Models/topological_elements.jl")
 include("Models/storage.jl")
 include("Models/network.jl")
 include("Models/pumps.jl")
+include("Models/simulations.jl")
 include("Models/water_demand.jl")
 
 include("base.jl")

@@ -42,7 +42,7 @@ function wn_to_struct(inp_file)
     duration = wn[:options][:time][:duration]
     time_step = wn[:options][:time][:report_timestep]
     duration_hours = from_seconds(duration)
-    time_step_hours = time_step/3600
+    timestep_hours = time_step/3600
 
     if duration_hours[2] & duration_hours[3] != 0
         warn("Duration is not and integer number of hours.")
@@ -64,8 +64,9 @@ function wn_to_struct(inp_file)
     seconds = hrs_mins_secs[3]
     start = "$hours:$minutes:$seconds"
     start_day =  DateTime(start, "H:M:S")
-    time_ahead = collect(start_day:Second(time_step):start_day + Second(duration-time_step))
-
+    end_day = start_day + Second(duration-time_step)
+    time_ahead = collect(start_day:Second(time_step):end_day)
+    simulation_data = Simulation(duration_hours, timestep_hours, num_timesteps, start_day, end_day)
     #nodes
     index_junc = 0
     for junc in wn[:junction_name_list]
@@ -75,7 +76,8 @@ function wn_to_struct(inp_file)
         head = node_results["head"][junc][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][junc][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
-        node = Junction(index_junc, junc, j[:elevation], convert(Float64,head), demand_timeseries, j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1]))
+        demand_forcast = demand_timeseries #will possibly add perturbation later
+        node = Junction(index_junc, junc, j[:elevation], convert(Float64,head), demand_timeseries, demand_forcast, j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1]))
         push!(junctions, node )
         push!(nodes, node)
     end
@@ -95,11 +97,12 @@ function wn_to_struct(inp_file)
         head = node_results["head"][tank][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][tank][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand) #demand at first timestep (initial_demand)
+        demand_forcast = demand_timeseries #will possibly add perturbation later
         area = π * (t[:diameter]/2)^2 ;
         volume = area * t[:init_level];
         volumelimits = [x * area for x in [t[:min_level],t[:max_level]]];
 
-        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), demand_timeseries, min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
+        node = Junction(index_tank, t[:name], t[:elevation], convert(Float64,head), demand_timeseries, demand_forcast, min_pressure, @NT(lat = t[:coordinates][2], lon = t[:coordinates][1]))
         push!(nodes, node)
         push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
@@ -113,7 +116,8 @@ function wn_to_struct(inp_file)
         head = node_results["head"][res][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][res][:values][1:num_timesteps] #to chop the last demand value (recurring initial value)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
-        node = Junction(index_res, res, r[:base_head], convert(Float64,head), demand_timeseries, 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1])) #array of pseudo nodes @ res
+        demand_forcast = demand_timeseries #will possibly add perturbation later
+        node = Junction(index_res, res, r[:base_head], convert(Float64,head), demand_timeseries, demand_forcast, 0, @NT(lat = r[:coordinates][2], lon = r[:coordinates][1])) #array of pseudo nodes @ res
         push!(nodes, node)
         push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
 
@@ -307,7 +311,7 @@ function wn_to_struct(inp_file)
 
         if price == 0.0
             warn("Price is set to 0. Using randomly generated price array with higher weights during peak hours (4pm-8pm).")
-            timesteps_per_hour = 1/(time_step_hours)
+            timesteps_per_hour = 1/(timestep_hours)
             #TO:DO check to make sure time_steps / hour is an int or divisor of 4
             price_array = [2*rand(Int(timesteps_per_hour*16))+1; 7*rand(Int(timesteps_per_hour*4))+3; 2*rand(Int(timesteps_per_hour*4))+3]
             if duration_hours > 24
@@ -317,7 +321,7 @@ function wn_to_struct(inp_file)
                 end
                 price_array = price_array2
             end
-        elseif pattern == None
+        elseif typeof(pattern) == Void
             price_array = price * ones(length(time_ahead))
         else
             price_array = price * pattern
@@ -350,5 +354,5 @@ function wn_to_struct(inp_file)
         push!(demands, WaterDemand(name, nodes[i], true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
     end
     @time println("WaterDemand")
-    return nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, duration_hours, time_step_hours
+    return nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation_data
 end
