@@ -326,10 +326,7 @@ function wn_to_struct(inp_file)
         else
             price_array = price * pattern
         end
-        len = length(price_array)
-        len2 = length(time_ahead)
-        println("$len")
-        println("$len2")
+
         energyprice = TimeSeries.TimeArray(time_ahead, price_array)
 
         #efficiency
@@ -340,8 +337,9 @@ function wn_to_struct(inp_file)
         end
 
         #energy
-        energy = TimeSeries.TimeArray(time_ahead, metric.pump_energy(link_results["flowrate"], node_results["head"], wn)[pump][:values][1:num_timesteps])
-        push!(pumps,ConstSpeedPump(pump_index, pump, @NT(from = junction_start, to = junction_end),p[:status], pump_curve, efficiency, energyprice, energy))
+        intercept, slope = LeastSquares(pump, wn, link_results, node_results, num_timesteps)
+
+        push!(pumps,ConstSpeedPump(pump_index, pump, @NT(from = junction_start, to = junction_end),p[:status], pump_curve, efficiency, energyprice, intercept, slope))
     end
     @time println("pumps array includes if statements ")
     #additional arrays

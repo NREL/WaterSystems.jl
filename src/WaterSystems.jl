@@ -42,6 +42,7 @@ using DataFrames
 using Compat
 using PyCall
 using NamedTuples
+using CurveFit
 
 include("Models/topological_elements.jl")
 include("Models/storage.jl")
@@ -53,6 +54,7 @@ include("Models/water_demand.jl")
 include("base.jl")
 
 #Parser
+include("Parsers/LeastSquares.jl")
 include("Parsers/epa_net_parser.jl")
 
 #__precompile__() # this module is NOT safe to precompile

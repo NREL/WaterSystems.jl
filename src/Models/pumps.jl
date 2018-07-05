@@ -7,7 +7,8 @@ struct ConstSpeedPump <: Link
     pumpcurve::Union{Function,Array{Tuple{Float64,Float64}}}
     efficiency::Union{Nothing,Float64}
     energyprice::TimeSeries.TimeArray
-    energy::TimeSeries.TimeArray
+    intercept::Float64
+    slope::Float64
 end
 
 # function pump curves
@@ -19,8 +20,9 @@ ConstSpeedPump(
     pumpcurve::Function,
     efficiency::Union{Nothing,Float64},
     energyprice::TimeSeries.TimeArray,
-    energy::TimeSeries.TimeArray
-    ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, energy)
+    intercept::Float64,
+    slope::Float64
+    ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, intercept, slope)
 
 # PWL pump curves
 ConstSpeedPump(
@@ -31,8 +33,9 @@ ConstSpeedPump(
     pumpcurve::Array{Tuple{Float64,Float64}},
     efficiency::Union{Nothing,Float64},
     energyprice::TimeSeries.TimeArray,
-    energy::TimeSeries.TimeArray
-    )= ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, energy)
+    intercept::Float64,
+    slope::Float64
+    )= ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, intercept, slope)
 
 ConstSpeedPump(;
                 number = 1,
@@ -42,5 +45,6 @@ ConstSpeedPump(;
                 pumpcurve = [(0.0,0.0)],
                 efficiency = 1.0,
                 energyprice = TimeSeries.TimeArray(today(), [0.0]),
-                energy = TimeSeries.TimeArray(today(), [0.0])
-                ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, energy)
+                intercept = 0.0,
+                slope = 0.0
+                ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, intercept, slope)
