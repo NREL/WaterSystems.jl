@@ -1,7 +1,6 @@
 ## Time Series Length ##
 
 include("Parsers/epa_net_parser.jl")
-@time print("include epa_net_parser")
 function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}
     t = length(loads[1].demand)
     for l in loads
@@ -60,4 +59,3 @@ function MakeWaterSystem(inp_file)
     nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation = wn_to_struct(inp_file)
     return WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation)
 end
-@time ("make waterSystem from inp")

@@ -1,22 +1,6 @@
 @pyimport wntr.network.model as model #import wntr network model
 @pyimport wntr.sim.epanet as sim
 @pyimport wntr.metrics.economic as metric
-@time print("pyimport")
-
-function from_seconds(time)
-    hours =0
-    minutes = 0
-    seconds = 0
-    if time >= 3600
-        minutes, seconds = fldmod(time, 60)
-        hours, minutes = fldmod(minutes, 60)
-    elseif time >=60
-        minutes, seconds = fldmod(time, 60)
-    else
-        seconds = time
-    end
-    return hours, minutes, seconds
-end
 
 function wn_to_struct(inp_file)
     #initialize arrays for input into package
@@ -31,10 +15,8 @@ function wn_to_struct(inp_file)
 
     #set up WaterNetwork using WNTR
     wn = model.WaterNetworkModel(inp_file) #Water Network
-    @time println("Wntr model")
     wns = sim.EpanetSimulator(wn) #Simulation either Demand Driven(DD) or Presure Dependent Demand(PDD), default DD
     results = wns[:run_sim]()
-    @time println("Wntr simulation")
     node_results = results[:node] #dictionary of head, pressure, demand, quality
     link_results = results[:link] #dictionary of status, flowrate, velocity, {headloss, setting, friciton factor, reaction rate, link quality} = epanet simulator only
 
@@ -81,7 +63,6 @@ function wn_to_struct(inp_file)
         push!(junctions, node )
         push!(nodes, node)
     end
-    @time println("junction array")
     #Tanks
     #currently for roundtank only
     index_tank = wn[:num_junctions]
@@ -107,7 +88,6 @@ function wn_to_struct(inp_file)
         push!(tanks,RoundTank(tank, node, @NT(min = volumelimits[1],max = volumelimits[2]), t[:diameter], volume, area, t[:init_level], @NT(min = t[:min_level], max = t[:max_level])))
 
     end
-    @time println("tank array")
     #Reservoirs
     index_res = wn[:num_junctions] + wn[:num_tanks]
     for res in wn[:reservoir_name_list]
@@ -122,7 +102,6 @@ function wn_to_struct(inp_file)
         push!(reservoirs,Reservoir(res, node, r[:base_head])) #base_head = elevation
 
     end
-    @time println("res array")
 
     #Pipes
     pipe_index = 0
@@ -181,7 +160,6 @@ function wn_to_struct(inp_file)
             end
             push!(pipes,RegularPipe(pipe_index, pipe, @NT(from = junction_start, to = junction_end),p[:diameter],p[:length],p[:roughness], convert(Float64,headloss), convert(Float64,flowrate), p[:initial_status]))
         end
-    @time println("pipe array includes if statements")
     #Valves
     #currently for Pressure Reducing Valve Only
     valve_index = wn[:num_pipes]
@@ -241,7 +219,6 @@ function wn_to_struct(inp_file)
         status_string = ["Closed", "Open", "Active","Check Valve"][status_index]
         push!(valves, PressureReducingValve(valve_index, valve, @NT(from = junction_start, to = junction_end), status_string , v[:diameter], v[:setting]))
     end
-    @time println("valves array includes if statements ")
     #Pumps
     pump_index = wn[:num_pipes] + wn[:num_valves]
 
@@ -341,7 +318,6 @@ function wn_to_struct(inp_file)
 
         push!(pumps,ConstSpeedPump(pump_index, pump, @NT(from = junction_start, to = junction_end),p[:status], pump_curve, efficiency, energyprice, intercept, slope))
     end
-    @time println("pumps array includes if statements ")
     #additional arrays
     links = vcat(pipes, valves, pumps)
     demands = Array{WaterDemand}(0)
@@ -351,6 +327,20 @@ function wn_to_struct(inp_file)
         demand = node_results["demand"][name][:values][1:num_timesteps]
         push!(demands, WaterDemand(name, nodes[i], true, max_demand, TimeSeries.TimeArray(time_ahead, demand)))
     end
-    @time println("WaterDemand")
     return nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation_data
+end
+
+function from_seconds(time)
+    hours =0
+    minutes = 0
+    seconds = 0
+    if time >= 3600
+        minutes, seconds = fldmod(time, 60)
+        hours, minutes = fldmod(minutes, 60)
+    elseif time >=60
+        minutes, seconds = fldmod(time, 60)
+    else
+        seconds = time
+    end
+    return hours, minutes, seconds
 end
