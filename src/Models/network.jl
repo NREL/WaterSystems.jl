@@ -11,8 +11,8 @@ end
 
 function Network(links::Vector{B}, nodes::Vector{Junction}) where {B<:Link}
     nodecount = length(nodes)
-    A = WaterSystems.build_incidence(nodecount, links, nodes)
-    null_A = WaterSystems.build_incidence_null(A)
+    A = build_incidence(nodecount, links, nodes)
+    null_A = build_incidence_null(A)
     return Network(links, A, null_A)
 
 end

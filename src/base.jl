@@ -27,20 +27,20 @@ struct WaterSystem
     simulation::Simulation
 end
 
-function WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network, simulation)
-
-        new(nodes,
-            junctions,
-            tanks,
-            reservoirs,
-            links,
-            pipes,
-            valves,
-            pumps,
-            demands,
-            network,
-            simulation)
-end
+# function WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network, simulation)
+#
+#         new(nodes,
+#             junctions,
+#             tanks,
+#             reservoirs,
+#             links,
+#             pipes,
+#             valves,
+#             pumps,
+#             demands,
+#             network,
+#             simulation)
+# end
 
 function WaterSystem(nodes::Array{Junction},
                     junctions::Array{Junction},
