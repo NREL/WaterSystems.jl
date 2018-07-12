@@ -1,5 +1,10 @@
+include("../src/WaterSystems.jl")
 using WaterSystems
 using Base.Test
+using TimeSeries
+using DataFrames
+using NamedTuples
+
 # write your own tests here
 tic()
 println("Read data from WNTR networks 1, 2, and 3.")

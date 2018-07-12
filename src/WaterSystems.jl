@@ -30,6 +30,9 @@ export PressureReducingValve
 # demands
 export WaterDemand
 
+#simulation
+export Simulation
+
 # parser
 export wn_to_struct
 
