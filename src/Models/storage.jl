@@ -31,6 +31,6 @@ end
 struct Reservoir <: Storage
     name::String
     node::Junction
-    elevation::Real
+    elevation::Float64
     #head_timeseries::TimeSeries.TimeArray
 end

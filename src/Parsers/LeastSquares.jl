@@ -1,4 +1,4 @@
-function LeastSquares(name, wn, link_results, node_results, num_timesteps)
+function LeastSquares(name::String, wn_dict::Dict{Any,Any}, wn::PyCall.PyObject, link_results::Dict{Any,Any}, node_results::Dict{Any,Any}, num_timesteps::Int64)
     energy = metric.pump_energy(link_results["flowrate"], node_results["head"], wn)[name][:values][1:num_timesteps]
     flow = link_results["flowrate"][name][:values][1:num_timesteps]
     flows = Array{Float64}(0)
@@ -11,13 +11,12 @@ function LeastSquares(name, wn, link_results, node_results, num_timesteps)
     end
     #if pump never turns on, delete control that inhibits pump, calulation energy, then replace control
     if length(energies) == 0
-        warn("$name does not turn on. Ajusting controls to allow for turn on of pump.")
-        controls_dict = MakeControlsDict(wn)
-        pump_control_names = controls_dict[name]
+        # warn("$name does not turn on. Ajusting controls to allow for turn on of pump.")
+        controls_dict = wn_dict["controls"]
         control_info = Array{PyCall.PyObject}(0)
         control_names = Array{String}(0)
-        for control in pump_control_names
-            push!(control_info, wn[:get_control](control))
+        for control in keys(controls_dict)
+            push!(control_info, controls_dict[control])
             push!(control_names, control)
             wn[:remove_control](control)
         end
@@ -51,27 +50,4 @@ function LeastSquares(name, wn, link_results, node_results, num_timesteps)
     return intercept, b
     # total_error = energies - (intercept + b * flows)
 
-end
-
-function MakeControlsDict(wn)
-    control_dict = Dict()
-    for name in wn[:control_name_list]
-       for node in wn[:get_control](name)[:requires]()
-            node_name = node[:name]
-            if haskey(control_dict, node_name)
-                value = control_dict[node_name]
-                if typeof(value) == String
-                    values = append!([value],[name])
-                    control_dict[node_name] = values
-
-                else
-                    append!(value,[name])
-                    control_dict[node_name] = value
-                end
-            else
-                control_dict[node_name] = name
-            end
-        end
-    end
-    return control_dict
 end

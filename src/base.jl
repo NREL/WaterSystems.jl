@@ -1,6 +1,8 @@
 ## Time Series Length ##
 
-include("Parsers/epa_net_parser.jl")
+include("Parsers/dict_to_struct.jl")
+include("Parsers/wntr_dict.jl")
+include("Parsers/wntr_dict_parser.jl")
 function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}
     t = length(loads[1].demand)
     for l in loads
@@ -55,7 +57,8 @@ function WaterSystem(nodes::Array{Junction},
 
     WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, Network(links, nodes), simulation)
 end
-function MakeWaterSystem(inp_file)
-    nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation = wn_to_struct(inp_file)
+function WaterSystem(inp_file::String)
+    data = make_dict(inp_file)
+    nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation = dict_to_struct(data)
     return WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation)
 end

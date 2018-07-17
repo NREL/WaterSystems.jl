@@ -5,7 +5,6 @@ module WaterSystems
 
 # water system
 export WaterSystem
-export MakeWaterSystem
 
 # network
 export Network
@@ -34,7 +33,10 @@ export WaterDemand
 export Simulation
 
 # parser
-export wn_to_struct
+# export wn_to_struct
+export dict_to_struct
+export make_dict
+export wntr_dict
 
 #################################################################################
 # Imports
@@ -57,8 +59,12 @@ include("Models/water_demand.jl")
 include("base.jl")
 
 #Parser
-include("Parsers/LeastSquares.jl")
-include("Parsers/epa_net_parser.jl")
+include("Parsers/LeastSquaresAvg.jl")
+# include("Parsers/epa_net_parser.jl")
+# include("Parsers/FastParser.jl")
+include("Parsers/wntr_dict.jl")
+include("Parsers/wntr_dict_parser.jl")
+include("Parsers/dict_to_struct.jl")
 
 #__precompile__() # this module is NOT safe to precompile
 

@@ -2,6 +2,7 @@
 @pyimport wntr.sim.epanet as sim
 @pyimport wntr.metrics.economic as metric
 
+
 function wn_to_struct(inp_file)
     #initialize arrays for input into package
     junctions = Array{Junction}(0) #only junctions with demands
@@ -12,7 +13,9 @@ function wn_to_struct(inp_file)
     pipes = Array{RegularPipe}(0)
     valves = Array{PressureReducingValve}(0)
     pumps = Array{ConstSpeedPump}(0)
-
+    # data=Dict{String,Any}()
+    # data["Pipes"] =Dict{String,Any}()
+    #data["Junctions"] =Dict{String,Any}()
     #set up WaterNetwork using WNTR
     wn = model.WaterNetworkModel(inp_file) #Water Network
     wns = sim.EpanetSimulator(wn) #Simulation either Demand Driven(DD) or Presure Dependent Demand(PDD), default DD
@@ -27,7 +30,7 @@ function wn_to_struct(inp_file)
     timestep_hours = time_step/3600
 
     if duration_hours[2] & duration_hours[3] != 0
-        warn("Duration is not and integer number of hours.")
+        # warn("Duration is not and integer number of hours.")
     else
         duration_hours = Int64(duration_hours[1])
     end
@@ -60,6 +63,7 @@ function wn_to_struct(inp_file)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
         demand_forcast = demand_timeseries #will possibly add perturbation later
         node = Junction(index_junc, junc, j[:elevation], convert(Float64,head), demand_timeseries, demand_forcast, j[:minimum_pressure], @NT(lat = j[:coordinates][2], lon = j[:coordinates][1]))
+
         push!(junctions, node )
         push!(nodes, node)
     end
@@ -116,6 +120,9 @@ function wn_to_struct(inp_file)
         e = wn[:get_node](p[:end_node_name])
         #from node
         if s[:node_type]  == "Junction"
+            # pipe
+            # data["$pipe"] = pipe2struct(Dict("index","name",evel, head ))
+            # data["Tanks"][tanl_name] =
             for junc = 1:length(nodes)
                 if nodes[junc].name == s[:name]
                     junction_start = nodes[junc]
@@ -309,7 +316,7 @@ function wn_to_struct(inp_file)
         #efficiency
         efficiency = p[:efficiency]
         if efficiency == nothing
-            warn("Pump efficiency is 0. Default will be 65% for pump $pump.")
+            # warn("Pump efficiency is 0. Default will be 65% for pump $pump.")
             efficiency = .65
         end
 

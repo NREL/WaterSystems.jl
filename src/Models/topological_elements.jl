@@ -2,7 +2,7 @@
 struct Junction
     number::Int
     name::String
-    elevation::Real
+    elevation::Float64
     head::Union{Nothing,Float64}
     demand::TimeSeries.TimeArray
     demandforcast::TimeSeries.TimeArray
