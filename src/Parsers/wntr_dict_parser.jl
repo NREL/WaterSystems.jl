@@ -34,7 +34,7 @@ function make_dict(inp_file::String)
     end_day = start_day + Second(duration-time_periods)
     time_ahead = collect(start_day:Second(time_periods):end_day)
 
-    data["wntr"] = Dict{String,Any}("duration"=> duration-hours, "timeperiods" => timeperiods_hours, "num_timeperiods" => num_timeperiods, "start" => start_day, "end" => end_day)
+    data["wntr"] = Dict{String,Any}("duration"=> duration_hours, "timeperiods" => timeperiods_hours, "num_timeperiods" => num_timeperiods, "start" => start_day, "end" => end_day)
 
     node_results = wn["node_results"]
     link_results = wn["link_results"]
@@ -140,7 +140,7 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
     num_links = wn["num_pipes"] + wn["num_valves"]
     index_pump = num_links
     wn_python = wn["wn"]
-    # @time slopes, intercepts = slope_intercept(wn, wn_python, link_results, node_results, num_timeperiods)
+    slopes, intercepts = slope_intercept(wn, wn_python, link_results, node_results, num_timeperiods)
     for (key,pump) in wn["pumps"]
         energy = 0
         name = pump["name"]
@@ -190,17 +190,14 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
         l == p ? energyprice = TimeSeries.TimeArray(time_ahead, price_array) : println("$l and $p")
         # energyprice = TimeSeries.TimeArray(time_ahead, price_array)
         #efficiency
+
         efficiency = pump["efficiency"]
-        if efficiency == nothing
-            # warn("Pump efficiency is 0. Default will be 65% for pump $pump.")
-            efficiency = .65
-        end
 
         #energy
 
         # @time intercept, slope = LeastSquares(name, wn, wn_python, link_results, node_results, num_timeperiods)
-        intercept = 1 #intercepts[key]
-        slope = 1 #slopes[key]
+        intercept = intercepts[key]
+        slope = slopes[key]
         data["Pump"][index_pump - num_links] =Dict{String,Any}("number" => index_pump, "name" => name, "connectionpoints" => @NT(from = junction_start, to = junction_end), "status" => pump["status"], "pumpcurve" => pump_curve, "efficiency" => efficiency, "energyprice" => energyprice, "intercept" => intercept, "slope" => slope)
     end
 end

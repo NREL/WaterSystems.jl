@@ -7,8 +7,9 @@ function slope_intercept(wn_dict::Dict{Any,Any}, wn::PyCall.PyObject, link_resul
     count = 0
     for (key, pump) in wn_dict["pumps"]
         name = pump["name"]
-        @time energy = metric.pump_energy(link_results["flowrate"], node_results["head"], wn)[name][:values][1:num_timesteps]
         flow = link_results["flowrate"][name][:values][1:num_timesteps]
+        headloss = link_results["headloss"][name][:values][1:num_timesteps]
+        energy = [((1000.0 * 9.81 * headloss[i] * flow[i])/pump["efficiency"]) for i = 1:num_timesteps]
         flows = Array{Float64}(0)
         energies = Array{Float64}(0)
         for i= 1:length(energy)

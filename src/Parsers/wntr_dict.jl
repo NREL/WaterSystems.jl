@@ -34,6 +34,10 @@ function link_dicts(links::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any, Any})
         elseif link["link_type"] == "Pump"
             m = m + 1
             pump_dict[m] = link
+            if pump_dict[m]["efficiency"] == nothing
+                # warn("Pump efficiency is 0. Default will be 65% for pump $pump.")
+                pump_dict[m]["efficiency"] = 0.65
+            end
         else
             n = n + 1
             valve_dict[n] = link
