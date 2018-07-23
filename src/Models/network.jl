@@ -3,8 +3,8 @@ include("transport_elements.jl")
 # To Do
 # 1. Consider a dynamic rate problem, add time series in the rate calculations.
 
-struct Network
-    links::Vector{Link}
+struct Network{T<:Array{<:Link}}
+    links::T
     incidence::Array{Int}
     null::Array{Float64}
 end
