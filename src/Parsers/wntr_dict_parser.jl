@@ -71,14 +71,13 @@ end
 function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, data::Dict{String,Any}, tanks::Dict{Int64, Any}, nodes::Dict{String,Any}, num_timeperiods::Int64, time_ahead::Vector{DateTime})
     num_nodes = wn["num_junctions"]
     index_tank = num_nodes
+    #assign minimum pressure to the stardard for nodes
+    junc = wn["junctions"][1]
+    min_pressure = junc["minimum_pressure"]
     for (key,tank) in wn["tanks"]
         #head  and demand are initial values
         index_tank = index_tank + 1
-        name = tank["name"]
-        #assign minimum pressure to the stardard for nodes
-        junc = wn["junctions"][1]
-        min_pressure = junc["minimum_pressure"]
-
+        name = key
         head = node_results["head"][name][:values][1] #head at first timestep (initial_head)
         demand = node_results["demand"][name][:values][1:num_timeperiods] #to chop the last demand value (recurring initial value)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand) #demand at first timestep (initial_demand)
@@ -143,7 +142,7 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
     slopes, intercepts = slope_intercept(wn, wn_python, link_results, node_results, num_timeperiods)
     for (key,pump) in wn["pumps"]
         energy = 0
-        name = pump["name"]
+        name = key
         index_pump = index_pump + 1
         junction_start = data["Node"][pump["start_node_name"]]
         junction_end = data["Node"][pump["end_node_name"]]

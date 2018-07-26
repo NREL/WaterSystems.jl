@@ -20,7 +20,7 @@ struct WaterSystem
     junctions::Array{Junction}
     tanks::Array{RoundTank}
     reservoirs::Array{Reservoir}
-    links::Array{T} where {T<:Link}
+    links::Array{T} where T<:Link
     pipes::Array{RegularPipe}
     valves::Array{PressureReducingValve}
     pumps::Array{ConstSpeedPump}
@@ -29,6 +29,7 @@ struct WaterSystem
     simulation::Simulation
 end
 
+# function WaterSystem(links::Array{<:Link})
 # function WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network, simulation)
 #
 #         new(nodes,
@@ -48,7 +49,7 @@ function WaterSystem(nodes::Array{Junction},
                     junctions::Array{Junction},
                     tanks::Array{RoundTank},
                     reservoirs::Array{Reservoir},
-                    links::Array{T} where {T<:Link},
+                    links::Array{T} where T<:Link,
                     pipes::Array{RegularPipe},
                     valves::Array{PressureReducingValve},
                     pumps::Array{ConstSpeedPump},

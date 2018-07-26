@@ -1,7 +1,7 @@
 function slope_intercept(wn_dict::Dict{Any,Any}, wn::PyCall.PyObject, link_results::Dict{Any,Any}, node_results::Dict{Any,Any}, num_timesteps::Int64)
-    slopes = Dict{Int64,Any}()
-    intercepts = Dict{Int64, Any}()
-    pump_off = Array{Int64}(0)
+    slopes = Dict{String,Any}()
+    intercepts = Dict{String, Any}()
+    pump_off = Dict{String, Any}()
     slope_sum = 0
     intercept_sum = 0
     count = 0
@@ -13,12 +13,12 @@ function slope_intercept(wn_dict::Dict{Any,Any}, wn::PyCall.PyObject, link_resul
         flows = Array{Float64}(0)
         energies = Array{Float64}(0)
         for i= 1:length(energy)
-            if energy[i] != 0 && flow[i] !=0
+            if energy[i] != 0.0 && flow[i] != 0.0
                 flows = vcat(flows,flow[i])
                 energies = vcat(energies, energy[i])
             end
         end
-        if length(energies) != 0
+        if length(energies) != 0.0
             count = count +1
             intercept, slope = LeastSquares(flows, energies)
             slopes[key] = slope
@@ -26,13 +26,13 @@ function slope_intercept(wn_dict::Dict{Any,Any}, wn::PyCall.PyObject, link_resul
             slope_sum = slope_sum + slope
             intercept_sum = intercept_sum + intercept
         else
-            push!(pump_off, key)
+            pump_off[key] = key
         end
     end
 
     avg_slope = slope_sum/count
     avg_intercept = intercept_sum/count
-    for key in pump_off
+    for (key, name) in pump_off
         slopes[key] = avg_slope
         intercepts[key] = avg_intercept
     end

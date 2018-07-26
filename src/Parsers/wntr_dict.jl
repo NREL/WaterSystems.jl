@@ -23,20 +23,21 @@ end
 function link_dicts(links::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any, Any})
     pipe_dict = Dict{Int64, Any}()
     valve_dict = Dict{Int64, Any}()
-    pump_dict = Dict{Int64, Any}()
+    pump_dict = Dict{String, Any}()
     l = 0
     m = 0
     n = 0
     for link in links
+        name = link["name"]
         if link["link_type"] == "Pipe"
             l = l + 1
             pipe_dict[l] = link
         elseif link["link_type"] == "Pump"
             m = m + 1
-            pump_dict[m] = link
-            if pump_dict[m]["efficiency"] == nothing
+            pump_dict[name] = link
+            if pump_dict[name]["efficiency"] == nothing
                 # warn("Pump efficiency is 0. Default will be 65% for pump $pump.")
-                pump_dict[m]["efficiency"] = 0.65
+                pump_dict[name]["efficiency"] = 0.65
             end
         else
             n = n + 1
@@ -53,18 +54,19 @@ end
 
 function node_dicts(nodes::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any,Any})
     junction_dict= Dict{Int64, Any}()
-    tank_dict = Dict{Int64, Any}()
+    tank_dict = Dict{String, Any}()
     reservoir_dict = Dict{Int64, Any}()
     i = 0
     j = 0
     k = 0
     for node in nodes
+        name = node["name"]
         if node["node_type"] == "Junction"
             i = i+1
             junction_dict[i] = node
         elseif node["node_type"] == "Tank"
             j = j + 1
-            tank_dict[j] = node
+            tank_dict[name] = node
         else
             k = k + 1
             reservoir_dict[k] = node

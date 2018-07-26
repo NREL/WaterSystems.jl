@@ -17,7 +17,7 @@ function Network(links::Vector{B}, nodes::Vector{Junction}) where {B<:Link}
 
 end
 
-function build_incidence(nodecount::Int64, links::Array{B}, nodes::Array{Junction}) where {B<:Link}
+function build_incidence(nodecount::Int64, links::Array{B<:Array{<:Link}}, nodes::Array{Junction})
 
     linkcount = length(links)
 
