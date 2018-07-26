@@ -1,0 +1,5 @@
+abstract type
+    Link
+end
+
+
