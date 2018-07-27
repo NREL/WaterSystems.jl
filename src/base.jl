@@ -15,15 +15,19 @@ function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}
     return t
 end
 
-struct WaterSystem
+struct WaterSystem{T <: Union{Nothing, Array{ <: Tank,1}},
+                   L <: Union{Nothing, Array{ <: Link,1}},
+                   V <: Union{Nothing, Array{ <: Valve,1}},
+                   P <: Union{Nothing, Array{ <: Pipe,1}},
+                   M <: Union{Nothing, Array{ <: Pump,1}}}
     nodes::Array{Junction}
     junctions::Array{Junction}
-    tanks::Array{RoundTank}
+    tanks::T
     reservoirs::Array{Reservoir}
-    links::Array{T} where T<:Link
-    pipes::Array{RegularPipe}
-    valves::Array{PressureReducingValve}
-    pumps::Array{ConstSpeedPump}
+    links::L
+    pipes::P
+    valves::V
+    pumps::M
     demands::Array{WaterDemand}
     network::Union{Nothing,Network}
     simulation::Simulation
@@ -47,14 +51,14 @@ end
 
 function WaterSystem(nodes::Array{Junction},
                     junctions::Array{Junction},
-                    tanks::Array{RoundTank},
+                    tanks::T,
                     reservoirs::Array{Reservoir},
-                    links::Array{T} where T<:Link,
-                    pipes::Array{RegularPipe},
-                    valves::Array{PressureReducingValve},
-                    pumps::Array{ConstSpeedPump},
+                    links::L,
+                    pipes::P,
+                    valves::V,
+                    pumps::M,
                     demands::Array{WaterDemand},
-                    simulation::Simulation)
+                    simulation::Simulation) where {T<:Array{<:Tank}, L<:Array{<:Link}, P<:Array{<:Pipe}, V<:Array{<:Valve}, M<:Array{<:Pump}}
 
     WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, Network(links, nodes), simulation)
 end

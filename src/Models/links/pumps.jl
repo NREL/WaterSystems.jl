@@ -1,7 +1,7 @@
 
-abstract type Pump <: Link end
+abstract type Pump<:Link end
 
-struct ConstSpeedPump <: Pump
+struct ConstSpeedPump<:Pump
     number::Int64
     name::String
     connectionpoints::@NT(from::Junction, to::Junction)

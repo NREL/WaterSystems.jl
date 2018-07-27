@@ -2,8 +2,8 @@
 abstract type
     Storage
 end
-
-struct RoundTank <: Storage
+abstract type Tank <: Storage end
+struct RoundTank <: Tank
     name::String
     node::Junction
     volumelimits::Union{@NT(min::Float64, max::Float64),Nothing}

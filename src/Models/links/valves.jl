@@ -1,5 +1,4 @@
-
-struct PressureReducingValve <: Link
+struct PressureReducingValve<:Valve
     number::Int64
     name::String
     connectionpoints::@NT(from::Junction, to::Junction)
@@ -16,4 +15,3 @@ PressureReducingValve(;
                     diameter=1.0,
                     pressure_drop=nothing
                     ) = PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop)
-

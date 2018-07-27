@@ -1,5 +1,5 @@
 
-struct RegularPipe <: Link
+struct RegularPipe<:Pipe
     number::Int64
     name::String
     connectionpoints:: @NT(from::Junction, to::Junction)
@@ -22,4 +22,3 @@ RegularPipe(;
             flow = nothing,
             initial_status = 0
             ) = RegularPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status)
-

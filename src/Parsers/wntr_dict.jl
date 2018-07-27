@@ -24,29 +24,25 @@ function link_dicts(links::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any, Any})
     pipe_dict = Dict{Int64, Any}()
     valve_dict = Dict{Int64, Any}()
     pump_dict = Dict{String, Any}()
-    l = 0
-    m = 0
-    n = 0
     for link in links
         name = link["name"]
         if link["link_type"] == "Pipe"
-            l = l + 1
+            l = length(pipe_dict) + 1
             pipe_dict[l] = link
         elseif link["link_type"] == "Pump"
-            m = m + 1
             pump_dict[name] = link
             if pump_dict[name]["efficiency"] == nothing
                 # warn("Pump efficiency is 0. Default will be 65% for pump $pump.")
                 pump_dict[name]["efficiency"] = 0.65
             end
         else
-            n = n + 1
+            n = length(valve_dict) + 1
             valve_dict[n] = link
         end
     end
-    wntr_dict["num_pipes"] = l
-    wntr_dict["num_pumps"] = m
-    wntr_dict["num_valves"] = n
+    wntr_dict["num_pipes"] = length(pipe_dict)
+    wntr_dict["num_pumps"] = length(pump_dict)
+    wntr_dict["num_valves"] = length(valve_dict)
     wntr_dict["pipes"] = pipe_dict
     wntr_dict["valves"] = valve_dict
     wntr_dict["pumps"] = pump_dict
@@ -56,25 +52,22 @@ function node_dicts(nodes::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any,Any})
     junction_dict= Dict{Int64, Any}()
     tank_dict = Dict{String, Any}()
     reservoir_dict = Dict{Int64, Any}()
-    i = 0
-    j = 0
-    k = 0
+
     for node in nodes
         name = node["name"]
         if node["node_type"] == "Junction"
-            i = i+1
+            i = length(junction_dict) + 1
             junction_dict[i] = node
         elseif node["node_type"] == "Tank"
-            j = j + 1
             tank_dict[name] = node
         else
-            k = k + 1
+            k = length(reservoir_dict) + 1
             reservoir_dict[k] = node
         end
     end
-    wntr_dict["num_junctions"] = i
-    wntr_dict["num_tanks"] = j
-    wntr_dict["num_reservoirs"] = k
+    wntr_dict["num_junctions"] = length(junction_dict)
+    wntr_dict["num_tanks"] = length(tank_dict)
+    wntr_dict["num_reservoirs"] = length(reservoir_dict)
     wntr_dict["junctions"] = junction_dict
     wntr_dict["tanks"] = tank_dict
     wntr_dict["reservoirs"] = reservoir_dict

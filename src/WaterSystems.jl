@@ -14,6 +14,7 @@ export ConstSpeedPump
 
 # storages
 export Storage
+export Tank
 export RoundTank
 export Reservoir
 
@@ -23,6 +24,8 @@ export PressureZone
 
 # transport elements
 export Link
+export Pipe
+export Valve
 export RegularPipe
 export PressureReducingValve
 
@@ -52,9 +55,13 @@ using CurveFit
 include("Models/topological_elements.jl")
 include("Models/storage.jl")
 include("Models/network.jl")
-include("Models/pumps.jl")
 include("Models/simulations.jl")
 include("Models/water_demand.jl")
+include("Models/links.jl")
+include("Models/links/pipes.jl")
+include("Models/links/pumps.jl")
+include("Models/links/valves.jl")
+
 
 include("base.jl")
 
