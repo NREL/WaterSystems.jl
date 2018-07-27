@@ -1,6 +1,3 @@
-
-abstract type Pump<:Link end
-
 struct ConstSpeedPump<:Pump
     number::Int64
     name::String

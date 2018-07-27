@@ -52,6 +52,8 @@ using PyCall
 using NamedTuples
 using CurveFit
 
+abstract type WaterSystemDevice end
+
 include("Models/topological_elements.jl")
 include("Models/storage.jl")
 include("Models/network.jl")

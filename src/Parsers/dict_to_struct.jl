@@ -66,7 +66,7 @@ end
  end
 
 function pump_to_struct(data::Dict{Int64,Any})
-    pumps = Array{ConstSpeedPump}(length(data))
+    pumps = Array{ConstSpeedPump}(0)
     for (key, p) in data
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to

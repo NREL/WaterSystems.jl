@@ -1,8 +1,9 @@
 
 abstract type
-    Storage
+    Storage <: WaterSystemDevice
 end
 abstract type Tank <: Storage end
+
 struct RoundTank <: Tank
     name::String
     node::Junction

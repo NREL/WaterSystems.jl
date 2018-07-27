@@ -1,4 +1,4 @@
-struct Simulation
+struct Simulation <: WaterSystemDevice
     duration::Int64
     timestep::Float64
     num_timesteps::Int64

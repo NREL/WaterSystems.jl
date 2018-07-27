@@ -1,6 +1,6 @@
 @pyimport wntr.network.controls as controls
 @pyimport wntr.sim.epanet as sims
-function Q_extrema(wn_dict::Dict{Any,Any}, Q_lb::Float64, tight_coef::Float64, max_sim::Int64)
+function Q_extrema(wn_dict::Dict{Any,Any}, Q_lb::Float64, tight_coef::Float64)
     Qmax_dict = Dict{String, Float64}()
     Qmin_dict = Dict{String, Float64}()
     wn = wn_dict["wn"]
@@ -12,7 +12,7 @@ function Q_extrema(wn_dict::Dict{Any,Any}, Q_lb::Float64, tight_coef::Float64, m
     ############ Tank Controls and Level Limits #####################
     remove_controls(wn)
 
-    tank_controls(wn, wn_dict, controls_dict, control_names, Qmax_dict, Qmin_dict, tight_coef, Q_lb)
+    tank_triggers(wn, wn_dict, controls_dict, control_names, Qmax_dict, Qmin_dict, tight_coef, Q_lb)
     ################ Tank Controls only #############################
     for (key, tank) in wn_dict["tanks"]
         wn[:get_node](key)[:init_level] = tank["init_level"]
@@ -29,7 +29,7 @@ function Q_extrema(wn_dict::Dict{Any,Any}, Q_lb::Float64, tight_coef::Float64, m
 
     ############## Random Tank Controls and Random Level Limits ######
     remove_controls(wn)
-    tank_controls_rand(wn, wn_dict, controls_dict, control_names, Qmax_dict, Qmin_dict, tight_coef, Q_lb)
+    tank_triggers_rand(wn, wn_dict, controls_dict, control_names, Qmax_dict, Qmin_dict, tight_coef, Q_lb)
 
     ############# Random Tank Controls Only ##########################
     for (key, tank) in wn_dict["tanks"]
@@ -47,10 +47,9 @@ function Q_extrema(wn_dict::Dict{Any,Any}, Q_lb::Float64, tight_coef::Float64, m
 
 end
 
-function tank_controls(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, controls_dict::Dict{Any,Any}, control_names::Base.KeyIterator{Dict{Any,Any}}, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, tight_coef::Float64, Q_lb::Float64)
+function tank_triggers(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, controls_dict::Dict{Any,Any}, control_names::Base.KeyIterator{Dict{Any,Any}}, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, tight_coef::Float64, Q_lb::Float64)
     num_controls = length(control_names)
     for name in control_names
-        println("$name")
         source_obj = controls_dict[name][:_condition][:_source_obj]
         source_obj_name = source_obj[:name]
         tank = wn_dict["tanks"][source_obj_name]
@@ -85,7 +84,7 @@ function tank_level(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, Qmax_dict::Dict
     end
 end
 
-function tank_controls_rand(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, controls_dict::Dict{Any,Any}, control_names::Base.KeyIterator{Dict{Any,Any}}, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, tight_coef::Float64, Q_lb::Float64)
+function tank_triggers_rand(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, controls_dict::Dict{Any,Any}, control_names::Base.KeyIterator{Dict{Any,Any}}, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, tight_coef::Float64, Q_lb::Float64)
     controls_dict = wn_dict["controls"]
     control_names = keys(controls_dict)
     for name in control_names
@@ -135,6 +134,7 @@ end
 
 function run_sims(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, num_sim::Int64, sim::Int64, tight_coef::Float64, Q_lb::Float64)
     wns = sims.EpanetSimulator(wn)
+    print(sim)
     results = wns[:run_sim]()
     link_results = results[:link]
     pipes = wn_dict["pipes"]
@@ -192,10 +192,14 @@ function run_sims(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, Qmax_dict::Dict{S
                 Qmax_val = Qmax_dict[name]
 
                 gap = Qmax_val - Qmin_val
-
-                pump_curve_name = pump["pump_curve_name"]
-                (pump_curve_name)
-                pump_curve = wn_dict["curves"][pump_curve_name]["points"]
+                println("$name")
+                if pump["pump_type"] == "HEAD"
+                    println("$sim")
+                    pump_curve_name = pump["pump_curve_name"]
+                    pump_churve = wn_dict["curves"][pump_curve_name]["points"]
+                else
+                    pump_curve = [(pump["power"],0.0)] #power pump types gives fixed power value,
+                end
 
                 Qmin_dict[name] = maximum([pump_curve[1][1], Qmin_val - tight_coef*gap])
                 Qmax_dict[name] = minimum([pump_curve[length(pump_curve)][1], Qmax_val + tight_coef*gap])

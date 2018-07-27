@@ -1,5 +1,5 @@
 
-struct Junction
+struct Junction <: WaterSystemDevice
     number::Int
     name::String
     elevation::Float64

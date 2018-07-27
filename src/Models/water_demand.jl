@@ -1,5 +1,5 @@
 
-struct WaterDemand
+struct WaterDemand <: WaterSystemDevice
     name::String
     number::Int64
     junction::Junction

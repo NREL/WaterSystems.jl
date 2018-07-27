@@ -1,5 +1,5 @@
 abstract type
-    Link
+    Link<:WaterSystemDevice
 end
 abstract type
     Pipe<:Link

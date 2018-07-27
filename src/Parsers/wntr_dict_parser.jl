@@ -152,7 +152,7 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
         #energy price
         price = wn["options"]["energy"]["global_price"] # Power  $/kW hrs
         pattern = wn["options"]["energy"]["global_pattern"]# $/kW hrs
-        price_array2 = Array{Any}(duration_hours)
+        price_array2 = Array{Any}(0)
 
         if price == 0.0
             # warn("Price is set to 0. Using randomly generated price array with higher weights during peak hours (4pm-8pm).")
