@@ -3,8 +3,8 @@ struct PressureReducingValve<:Valve
     name::String
     connectionpoints::@NT(from::Junction, to::Junction)
     status::String
-    diameter::Union{Nothing,Float64}
-    pressure_drop::Union{Nothing,Float64}
+    diameter::Union{Nothing,Float64} #m
+    pressure_drop::Union{Nothing,Float64} #m
 end
 
 PressureReducingValve(;

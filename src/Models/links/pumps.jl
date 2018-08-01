@@ -3,11 +3,9 @@ struct ConstSpeedPump<:Pump
     name::String
     connectionpoints::@NT(from::Junction, to::Junction)
     status::Bool
-    pumpcurve::Union{Function,Array{Tuple{Float64,Float64}}}
-    efficiency::Union{Nothing,Float64}
-    energyprice::TimeSeries.TimeArray
-    intercept::Float64
-    slope::Float64
+    pumpcurve::Union{Function,Array{Tuple{Float64,Float64}}} #Q: m^3/sec, Total Head: m
+    efficiency::Union{Nothing,Float64, Array{Tuple{Float64,Float64}}} #% or curve Q: m^3/sec eff: %*100
+    energyprice::TimeSeries.TimeArray #$/kW hrs
 end
 
 # function pump curves
@@ -18,10 +16,8 @@ ConstSpeedPump(
     status::Bool,
     pumpcurve::Function,
     efficiency::Union{Nothing,Float64},
-    energyprice::TimeSeries.TimeArray,
-    intercept::Float64,
-    slope::Float64
-    ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, intercept, slope)
+    energyprice::TimeSeries.TimeArray
+    ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice)
 
 #aPWL pump curves
 # ConstSpeedPump(

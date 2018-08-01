@@ -9,7 +9,17 @@ function slope_intercept(wn_dict::Dict{Any,Any}, wn::PyCall.PyObject, link_resul
         name = pump["name"]
         flow = link_results["flowrate"][name][:values][1:num_timesteps]
         headloss = link_results["headloss"][name][:values][1:num_timesteps]
-        energy = [((1000.0 * 9.81 * headloss[i] * flow[i])/pump["efficiency"]) for i = 1:num_timesteps]
+        efficiency = nothing
+        try
+            efficiency = pump["efficiency"][:points]
+        catch
+            wn_dict["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn_dict["options"]["energy"]["global_efficiency"]: efficiency = 0.65
+        end
+        if length(efficiency) > 1
+            energy = [((1000.0 * 9.81 * headloss[i] * flow[i])/efficiency[1][1]) for i = 1:num_timesteps]
+        else
+            energy = [((1000.0 * 9.81 * headloss[i] * flow[i])/efficiency) for i = 1:num_timesteps]
+        end
         flows = Array{Float64}(0)
         energies = Array{Float64}(0)
         for i= 1:length(energy)

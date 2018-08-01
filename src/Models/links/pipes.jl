@@ -3,11 +3,11 @@ struct RegularPipe<:Pipe
     number::Int64
     name::String
     connectionpoints:: @NT(from::Junction, to::Junction)
-    diameter::Float64
-    length::Float64
-    roughness::Float64
-    headloss::Float64
-    flow::Union{Nothing,Float64}
+    diameter::Float64 #m
+    length::Float64 #m
+    roughness::Float64 #unitless unless using Darcy-Weisbach then mm
+    headloss::Float64 #m
+    flow::Union{Nothing,Float64} #m^3/s
     initial_status:: Int64
 end
 

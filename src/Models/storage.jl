@@ -7,12 +7,12 @@ abstract type Tank <: Storage end
 struct RoundTank <: Tank
     name::String
     node::Junction
-    volumelimits::Union{@NT(min::Float64, max::Float64),Nothing}
-    diameter::Float64
-    volume::Union{Nothing,Float64}
-    area::Union{Nothing,Float64}
-    level::Union{Nothing,Float64}
-    levellimits::Union{@NT(min::Float64, max::Float64),Nothing}
+    volumelimits::Union{@NT(min::Float64, max::Float64),Nothing} #m^3
+    diameter::Float64 #m
+    volume::Union{Nothing,Float64} #m^3
+    area::Union{Nothing,Float64} #m^2
+    level::Union{Nothing,Float64} #m initial level
+    levellimits::Union{@NT(min::Float64, max::Float64),Nothing} #m
     #vol_curve::Union{Nothing,NamedTuple}
 end
 

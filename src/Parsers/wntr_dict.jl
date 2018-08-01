@@ -52,9 +52,10 @@ function node_dicts(nodes::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any,Any})
     junction_dict= Dict{Int64, Any}()
     tank_dict = Dict{String, Any}()
     reservoir_dict = Dict{Int64, Any}()
-
+    nodes_name = Dict{String,Any}()
     for node in nodes
         name = node["name"]
+        nodes_name[name] = node
         if node["node_type"] == "Junction"
             i = length(junction_dict) + 1
             junction_dict[i] = node
@@ -63,8 +64,11 @@ function node_dicts(nodes::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any,Any})
         else
             k = length(reservoir_dict) + 1
             reservoir_dict[k] = node
+            reservoir_dict[k]["elevation"] = reservoir_dict[k]["base_head"]
         end
     end
+    delete!(wntr_dict, "nodes")
+    wntr_dict["nodes"] = nodes_name
     wntr_dict["num_junctions"] = length(junction_dict)
     wntr_dict["num_tanks"] = length(tank_dict)
     wntr_dict["num_reservoirs"] = length(reservoir_dict)

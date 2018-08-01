@@ -35,6 +35,8 @@ export WaterDemand
 #simulation
 export Simulation
 
+#parameterize
+export Parameters
 # parser
 # export wn_to_struct
 export dict_to_struct
@@ -53,7 +55,7 @@ using NamedTuples
 using CurveFit
 
 abstract type WaterSystemDevice end
-
+#Models
 include("Models/topological_elements.jl")
 include("Models/storage.jl")
 include("Models/network.jl")
@@ -63,7 +65,18 @@ include("Models/links.jl")
 include("Models/links/pipes.jl")
 include("Models/links/pumps.jl")
 include("Models/links/valves.jl")
+include("Models/Parameters.jl")
 
+#Utils
+include("Utils/CheckValveCoefs.jl")
+include("Utils/ManipulatePumps.jl")
+include("Utils/ManipulateTanks.jl")
+include("Utils/UpdateExtrema.jl")
+include("Utils/MaxMinLevels.jl")
+include("Utils/FlowDirections.jl")
+include("Utils/PipeCoefs.jl")
+include("Utils/PumpCoefs.jl")
+include("Utils/Parameterization.jl")
 
 include("base.jl")
 

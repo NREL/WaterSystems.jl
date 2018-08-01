@@ -36,7 +36,7 @@ function make_dict(inp_file::String)
 
     node_results = wn["node_results"]
     link_results = wn["link_results"]
-
+    data["wntr_dict"] = wn
 
     junction_dict(wn, node_results, data, junctions, nodes, num_timeperiods, time_ahead)
     tank_dict(wn, node_results, data, tanks, nodes, num_timeperiods, time_ahead)
@@ -121,6 +121,7 @@ function valve_dict(wn::Dict{Any,Any}, data::Dict{String,Any}, valves::Dict{Int6
     for (key,valve) in wn["valves"]
         index_valve = index_valve + 1
         name = valve["name"]
+        #valve_type = valve["link_type"]
         junction_start = data["Node"][valve["start_node_name"]]
         junction_end = data["Node"][valve["end_node_name"]]
         status_index = valve["initial_status"] + 1  # 1=Closed, 2=Open, 3 = Active, 4 = CheckValve
@@ -133,9 +134,10 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
     num_links = wn["num_pipes"] + wn["num_valves"]
     index_pump = num_links
     wn_python = wn["wn"]
-    slopes, intercepts = slope_intercept(wn, wn_python, link_results, node_results, num_timeperiods)
+    #slopes, intercepts = slope_intercept(wn, wn_python, link_results, node_results, num_timeperiods)
     for (key,pump) in wn["pumps"]
         energy = 0
+        efficiency = nothing
         name = key
         index_pump = index_pump + 1
         junction_start = data["Node"][pump["start_node_name"]]
@@ -183,20 +185,21 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
         l == p ? energyprice = TimeSeries.TimeArray(time_ahead, price_array) : println("$l and $p")
         # energyprice = TimeSeries.TimeArray(time_ahead, price_array)
         #efficiency
-
-        efficiency = pump["efficiency"] #percentage
-
+        try
+            efficiency = pump["efficiency"][:points]
+        catch
+            wn_dict["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn_dict["options"]["energy"]["global_efficiency"]: efficiency = 0.65
+        end
         #energy
 
         # @time intercept, slope = LeastSquares(name, wn, wn_python, link_results, node_results, num_timeperiods)
-        intercept = intercepts[key]
-        slope = slopes[key]
-        data["Pump"][index_pump - num_links] =Dict{String,Any}("number" => index_pump, "name" => name, "connectionpoints" => @NT(from = junction_start, to = junction_end), "status" => pump["status"], "pumpcurve" => pump_curve, "efficiency" => efficiency, "energyprice" => energyprice, "intercept" => intercept, "slope" => slope)
+        # intercept = intercepts[key]
+        # slope = slopes[key]
+        data["Pump"][index_pump - num_links] =Dict{String,Any}("number" => index_pump, "name" => name, "connectionpoints" => @NT(from = junction_start, to = junction_end), "status" => pump["status"], "pumpcurve" => pump_curve, "efficiency" => efficiency, "energyprice" => energyprice)
     end
 end
 
 function demands_dict(data::Dict{String,Any}, nodes::Dict{String,Any}, node_results::Dict{Any,Any}, time_ahead::Vector{DateTime}, num_timeperiods::Int64)
-    demands = Array{WaterDemand}(num_timeperiods)
     max_demand = 20 #placeholder
     for (ix, nodes) in enumerate(nodes)
         node = nodes[2]

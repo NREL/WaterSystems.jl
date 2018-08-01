@@ -2,9 +2,9 @@
 struct Junction <: WaterSystemDevice
     number::Int
     name::String
-    elevation::Float64
-    head::Union{Nothing,Float64}
-    minimum_pressure::Float64
+    elevation::Float64 #m
+    head::Union{Nothing,Float64} #Meters Total Head/Hydraulic Head = Pressure Head + Elevation
+    minimum_pressure::Float64 #m
     coordinates::Union{@NT(lat::Float64, lon::Float64),Nothing}
 end
 

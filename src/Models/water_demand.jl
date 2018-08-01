@@ -4,9 +4,9 @@ struct WaterDemand <: WaterSystemDevice
     number::Int64
     junction::Junction
     status::Bool
-    maxdemand::Float64
-    demand::TimeSeries.TimeArray
-    demandforecast::TimeSeries.TimeArray
+    maxdemand::Float64 #m^3/sec
+    demand::TimeSeries.TimeArray #m^3/sec
+    demandforecast::TimeSeries.TimeArray #m^3/sec
 end
 
 WaterDemand(;
