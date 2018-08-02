@@ -9,6 +9,7 @@ struct RegularPipe<:Pipe
     headloss::Float64 #m
     flow::Union{Nothing,Float64} #m^3/s
     initial_status:: Int64
+    control_pipe::Bool
 end
 
 RegularPipe(;
@@ -20,5 +21,6 @@ RegularPipe(;
             roughness = 0,
             headloss = nothing,
             flow = nothing,
-            initial_status = 0
-            ) = RegularPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status)
+            initial_status = 0,
+            control_pipe = false
+            ) = RegularPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, control_pipe)

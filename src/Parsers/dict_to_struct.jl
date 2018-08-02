@@ -64,7 +64,7 @@ function pipe_to_struct(data::Dict{Int64,Any})
         j_to = p["connectionpoints"].to
         junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
         junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
-        push!(pipes,RegularPipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"]))
+        push!(pipes,RegularPipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"]))
     end
     return pipes
 end

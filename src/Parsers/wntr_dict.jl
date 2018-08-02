@@ -24,17 +24,19 @@ function link_dicts(links::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any, Any})
     pipe_dict = Dict{Int64, Any}()
     valve_dict = Dict{Int64, Any}()
     pump_dict = Dict{String, Any}()
+    control_pipe = Array{String}(0)
+    for (i, (name,control)) in enumerate(wntr_dict["controls"])
+        target = control[:_then_actions][1][:_target_obj]
+        target[:link_type] == "Pipe" ? push!(control_pipe, target[:name]) : nothing
+    end
     for link in links
         name = link["name"]
         if link["link_type"] == "Pipe"
             l = length(pipe_dict) + 1
             pipe_dict[l] = link
+            pipe_dict[l]["control_pipe"] = link["name"] in control_pipe
         elseif link["link_type"] == "Pump"
             pump_dict[name] = link
-            if pump_dict[name]["efficiency"] == nothing
-                # warn("Pump efficiency is 0. Default will be 65% for pump $pump.")
-                pump_dict[name]["efficiency"] = 0.65
-            end
         else
             n = length(valve_dict) + 1
             valve_dict[n] = link
