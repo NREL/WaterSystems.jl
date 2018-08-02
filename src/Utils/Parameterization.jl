@@ -26,7 +26,7 @@ function Parameterize(wn_dict::Dict{Any,Any}, n::Int64, Q_lb::Float64, logspace_
 
     #Flow Directions
     PositiveFlowLinks, NegativeFlowLinks, ReversibleFlowLinks = FlowDirection(wn_dict, Qmin, Qmax)
-    return aPipe_over, bPipe_over, aPipe_under, bPipe_under, aPumpPower_flow,
-        bPumpPower_flow, aPumpPower_head, bPumpPower_head,aValve_over, bValve_over,
-        aValve_under, bValve_under, PositiveFlowLinks, NegativeFlowLinks, ReversibleFlowLinks
+    return aPipe_over, bPipe_over, aPipe_under, bPipe_under, Q_baseP, aValve_over, bValve_over,
+    aValve_under, bValve_under, Q_base_cv, PositiveFlowLinks, NegativeFlowLinks, ReversibleFlowLinksflow,
+    flow, head, power, aPumpPower_flow, bPumpPower_flow, aPumpPower_head, bPumpPower_head
 end
