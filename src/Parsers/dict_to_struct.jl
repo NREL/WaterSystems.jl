@@ -13,7 +13,7 @@ function dict_to_struct(data::Dict{String,Any})
     return nodes, junctions, tanks, res, links, pipes, valves, pumps, demands, simulations
 end
 function dict_to_struct(data::Dict{String,Any}, n::Int64, Q_lb::Float64, logspace_ratio::Float64, dH_critical::Float64, dense_coef::Float64, tight_coef::Float64)
-    Parameters = Parameterize(wn_dict, n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
+    Parameters = Parameterize(data["wntr_dict"], n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
     haskey(data, "Junction") ? junctions = junction_to_struct(data["Junction"]) : warn("Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array")
     haskey(data, "Node") ? nodes = node_to_struct(data["Node"]) : warn("Key Error : key 'Node' not found in WaterSystems dictionary, this will result in an empty Node array")
     haskey(data, "Tank") ? tanks = tank_to_struct(data["Tank"]) : warn("Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array")
@@ -59,20 +59,26 @@ function res_to_struct(data::Dict{Int64, Any})
 end
 
 function pipe_to_struct(data::Dict{Int64,Any})
-    pipes = Array{RegularPipe}(0)
-    for (key, p) in data
+    pipes = Array{Pipe}(length(data))
+    for (ix, (key, p)) in enumerate(data)
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
         junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
         junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
         if p["cv"] == false
-            push!(pipes,RegularPipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"]))
+            if p["control_pipe"]
+                pipes[ix] = ControlPipe(ReversibleFlowPipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"]), GateValve(p["initial_status"]))
+            else
+                pipes[ix] = ReversibleFlowPipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"])
+
+            end
         else
-            push!(pipe, CheckValvePipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"]))
+            pipes[ix] = CheckValvePipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"])
         end
     end
     return pipes
 end
+
  function valve_to_struct(data::Dict{Int64, Any})
      valves = Array{PressureReducingValve}(0)
      for (key, v) in data
@@ -82,7 +88,7 @@ end
          j_to = v["connectionpoints"].to
          junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
          junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
-         push!(valves,PressureReducingValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"]))
+         push!(valves, PressureReducingValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"]))
      end
      return valves
  end
@@ -109,50 +115,72 @@ function demand_to_struct(data::Dict{Int64,Any})
     return demands
 end
 
-function parameter_to_struct(wn_dict::Dict{Any,Any}, n::Int64, Q_lb::Float64, logspace_ratio::Float64, dH_critical::Float64, dense_coef::Float64, tight_coef::Float64)
-    aPipe_over, bPipe_over, aPipe_under, bPipe_under, aPumpPower_flow,
-    bPumpPower_flow, aPumpPower_head, bPumpPower_head,aValve_over, bValve_over,
-    aValve_under, bValve_under, PositiveFlowLinks, NegativeFlowLinks, ReversibleFlowLinks = Parameterize(wn_dict, n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
-    parameters = Parameters(aPipe_over, bPipe_over, aPipe_under, bPipe_under,
-                            aPumpPower_flow, bPumpPower_flow, aPumpPower_head,
-                            bPumpPower_head,aValve_over, bValve_over,aValve_under,
-                            bValve_under, PositiveFlowLinks, NegativeFlowLinks,
-                            ReversibleFlowLinks)
-    return parameters
-end
 
 function pipe_to_struct(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
-    pipes = Array{RegularPipe}(0)
-    for (key, p) in data
+    pipes = Array{Pipe}(length(data))
+    for (ix, (key, p)) in enumerate(data)
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
         junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
         junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
-        flow_direction = "Not Assigned"
-        if p["name"] in Parameters["ReversibleFlowLinks"]
-            flow_direction = "Reversible"
-        elseif p["name"] in Parameters["PositiveFlowLinks"]
-            flow_direction = "Positive"
-        else
-            flow_direction = "Negative"
-        end
+        name = p["name"]
         if p["cv"] == false
-            push!(pipes,RegularPipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"], flow_direction, Parameters["aPipe_over"], Parameters["bPipe_over"], Parameters["aPipe_under"], Parameters["bPipe_under"], Parameters["Q_basePipe"]))
+            flows = Parameters["Q_basePipe"][name]
+            slopes = Parameters["bPipe_under"][name]
+            intercepts = Parameters["aPipe_under"][name]
+            headloss_parameters = Array{@NT(flow::Float64, slope::Float64, intercept::Float64)}(length(flows))
+            for j = 1:length(flows)
+                headloss_parameters[j] = @NT(flow = flows[j], slope = slopes[j], intercept = intercepts[j])
+            end
+            if p["control_pipe"]
+                if name in Parameters["ReversibleFlowLinks"]
+                    pipes[ix] = ControlPipe(ReversibleFlowPipe(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], headloss_parameters), GateValve(p["initial_status"]))
+                elseif name in Parameters["PositiveFlowLinks"]
+                    pipes[ix] = ControlPipe(PositveFlowPipe(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], headloss_parameters), GateValve(p["initial_status"]))
+
+                else
+                    pipes[ix] = ControlPipe(NegativeFlowPipe(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], headloss_parameters), GateValve(p["initial_status"]))
+                end
+            else
+                if name in Parameters["ReversibleFlowLinks"]
+                    pipes[ix] = ReversibleFlowPipe(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], headloss_parameters)
+                elseif name in Parameters["PositiveFlowLinks"]
+                    pipes[ix] = PositveFlowPipe(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], headloss_parameters)
+
+                else
+                    pipes[ix] = NegativeFlowPipe(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], headloss_parameters)
+                end
+            end
         else
-            push!(pipe, CheckValvePipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"], flow_direction, Parameters["aCheckValve_over"], Parameters["bCheckValve_over"], Parameters["aCheckValve_under"], Parameters["bCheckValve_under"], Parameters["Q_baseCV"]))
+            flows = Parameters["Q_baseCV"][name]
+            slopes = Parameters["bCheckValve_under"][name]
+            intercepts = Parameters["aCheckValve_under"][name]
+            headloss_parameters = Array{@NT(flow::Float64, slope::Float64, intercept::Float64)}(length(flows))
+            for j = 1:length(flows)
+                headloss_parameters[j] = @NT(flow = flows[j], slope = slopes[j], intercept = intercepts[j])
+            end
+            pipes[ix] = CheckValvePipe(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], headloss_parameters)
         end
     end
     return pipes
 end
 
-function pump_to_struct_parameters(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
-    pumps = Array{ConstSpeedPump}(0)
-    for (key, p) in data
+function pump_to_struct(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
+    pumps = Array{ConstSpeedPump}(length(data))
+    for (ix, (key, p)) in enumerate(data)
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
+        flows = Parameters["flow"][name]
+        powers = Parameters["power"][name]
+        slopes = Parameters["bPumpPower_flow"][name]
+        intercepts = Parameters["aPumpPower_flow"][name]
+        power_parameters = Array{@NT(flow::Float64, power::Float64, slope::Float64, intercept::Float64)}(length(flows))
+        for j = 1:length(flows)
+            power_parameters[j] = @NT(flow = flows[j], power = powers[j], slope = slopes[j], intercept = intercepts[j])
+        end
         junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
         junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
-        push!(pumps, ConstSpeedPump(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"], Parameters["flow"], Parameters["head"], Parameters["power"], Parameters["aPumpPower_flow"], Parameters["bPumpPower_flow"],Parameters["aPumpPower_head"], Parameters["bPumpPower_head"]))
+        pumps[ix] =  ConstSpeedPump(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"], power_parameters)
     end
     return pumps
 end

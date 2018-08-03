@@ -111,7 +111,7 @@ function pipe_dict(wn::Dict{Any,Any}, link_results::Dict{Any, Any}, data ::Dict{
         flowrate = link_results["flowrate"][name][:values][1] #m^3/sec
         junction_start = data["Node"][pipe["start_node_name"]]
         junction_end = data["Node"][pipe["end_node_name"]]
-        data["Pipe"][index_pipe] = Dict{String,Any}("number" => index_pipe, "name" => name, "connectionpoints" => @NT(from = junction_start, to = junction_end), "diameter" => pipe["diameter"], "length" => pipe["length"],"roughness" => pipe["roughness"], "headloss" => convert(Float64,headloss), "flow" => convert(Float64,flowrate), "initial_status" => pipe["initial_status"], "control_pipe" => pipe["control_pipe"])
+        data["Pipe"][index_pipe] = Dict{String,Any}("number" => index_pipe, "name" => name, "connectionpoints" => @NT(from = junction_start, to = junction_end), "diameter" => pipe["diameter"], "length" => pipe["length"],"roughness" => pipe["roughness"], "headloss" => convert(Float64,headloss), "flow" => convert(Float64,flowrate), "initial_status" => pipe["initial_status"], "control_pipe" => pipe["control_pipe"], "cv" => pipe["cv"])
     end
 end
 

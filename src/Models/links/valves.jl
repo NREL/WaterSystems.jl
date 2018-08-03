@@ -15,3 +15,11 @@ PressureReducingValve(;
                     diameter=1.0,
                     pressure_drop=nothing
                     ) = PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop)
+
+struct GateValve <: Valve
+    status::Int64
+end
+
+GateValve(;
+        status = 0
+        ) = GateValve(status)
