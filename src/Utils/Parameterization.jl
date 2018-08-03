@@ -10,23 +10,22 @@ include("FlowDirections.jl")
 function Parameterize(wn_dict::Dict{Any,Any}, n::Int64, Q_lb::Float64, logspace_ratio::Float64, dH_critical::Float64, dense_coef::Float64, tight_coef::Float64)
 #Thought: should we make one q_base with pipe and valve names?
     #Pipes
-    Qmin, Qmax, Hmin, Hmax  = Q_extrema(wn_dict, Q_lb, tight_coef)
+    Parameters = Dict{String,Any}()
+    Parameters["Qmin"], Parameters["Qmax"], Parameters["Hmin"], Parameters["Hmax"]  = Q_extrema(wn_dict, Q_lb, tight_coef)
 
-    Q_baseP = Q_base_pipe(wn_dict, Qmin, Qmax, n, Q_lb, logspace_ratio, dH_critical, dense_coef)
-    aPipe_over, bPipe_over = PipeCoefsOver(wn_dict, Q_baseP)
-    aPipe_under, bPipe_under = PipeCoefsUnder(wn_dict, Q_baseP)
+    Parameters["Q_basePipe"] = Q_base_pipe(wn_dict, Qmin, Qmax, n, Q_lb, logspace_ratio, dH_critical, dense_coef)
+    Parameters["aPipe_over"], Parameters["bPipe_over"] = PipeCoefsOver(wn_dict, Q_baseP)
+    Parameters["aPipe_under"], Parameters["bPipe_under"] = PipeCoefsUnder(wn_dict, Q_baseP)
     # Pumps
-    flow, head, power = FlowHeadPower(wn_dict)
-    aPumpPower_flow, bPumpPower_flow = PumpPowerCoefs_Flow(wn_dict, flow, power)
-    aPumpPower_head, bPumpPower_head = PumpPowerCoefs_Head(wn_dict, head, power)
+    Parameters["flow"], Parameters["head"], Parameters["power"] = FlowHeadPower(wn_dict)
+    Parameters["aPumpPower_flow"], Parameters["bPumpPower_flow"] = PumpPowerCoefs_Flow(wn_dict, flow, power)
+    Parameters["aPumpPower_head"], Parameters["bPumpPower_head"] = PumpPowerCoefs_Head(wn_dict, head, power)
     #Check Valves
-    Q_base_cv = Q_base_checkvalve(wn_dict, Qmax, n, Q_lb, logspace_ratio, dH_critical, dense_coef)
-    aValve_over, bValve_over = CheckValveCoefsOver(Q_base_cv)
-    aValve_under, bValve_under = CheckValveCoefsUnder(Q_base_cv)
+    Parameters["Q_baseCV"] = Q_base_checkvalve(wn_dict, Qmax, n, Q_lb, logspace_ratio, dH_critical, dense_coef)
+    Parameters["aCheckValve_over"], Parameters["bCheckValve_over"] = CheckValveCoefsOver(Q_base_cv)
+    Parameters["aCheckValve_under"], Parameters["bCheckValve_under"] = CheckValveCoefsUnder(Q_base_cv)
 
     #Flow Directions
-    PositiveFlowLinks, NegativeFlowLinks, ReversibleFlowLinks = FlowDirection(wn_dict, Qmin, Qmax)
-    return aPipe_over, bPipe_over, aPipe_under, bPipe_under, Q_baseP, aValve_over, bValve_over,
-    aValve_under, bValve_under, Q_base_cv, PositiveFlowLinks, NegativeFlowLinks, ReversibleFlowLinksflow,
-    flow, head, power, aPumpPower_flow, bPumpPower_flow, aPumpPower_head, bPumpPower_head
+    Parameters["PositiveFlowLinks"], Parameters["NegativeFlowLinks"], Parameters["ReversibleFlowLinks"] = FlowDirection(wn_dict, Qmin, Qmax)
+    return Parameters
 end

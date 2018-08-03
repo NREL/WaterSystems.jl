@@ -13,28 +13,17 @@ function dict_to_struct(data::Dict{String,Any})
     return nodes, junctions, tanks, res, links, pipes, valves, pumps, demands, simulations
 end
 function dict_to_struct(data::Dict{String,Any}, n::Int64, Q_lb::Float64, logspace_ratio::Float64, dH_critical::Float64, dense_coef::Float64, tight_coef::Float64)
+    Parameters = Parameterize(wn_dict, n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
     haskey(data, "Junction") ? junctions = junction_to_struct(data["Junction"]) : warn("Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array")
     haskey(data, "Node") ? nodes = node_to_struct(data["Node"]) : warn("Key Error : key 'Node' not found in WaterSystems dictionary, this will result in an empty Node array")
     haskey(data, "Tank") ? tanks = tank_to_struct(data["Tank"]) : warn("Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array")
     haskey(data, "Reservoir") ? res = res_to_struct(data["Reservoir"]) : warn("Key Error : key 'Reservoir' not found in WaterSystems dictionary, this will result in an empty Reservoir array")
-    haskey(data, "Valve") ? valves = valve_to_struct(data["Valve"]) : warn("Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array")
+    haskey(data, "Pipe") ? pipes = pipe_to_struct(data["Pipe"], Parameters) : warn("Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array")
+    haskey(data, "Valve") ? valves = valve_to_struct(data["Valve"], Parameters) : warn("Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array")
+    haskey(data, "Pump") ? pumps = pump_to_struct(data["Pump"]) : warn("Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pump array")
     haskey(data, "demand") ? demands = demand_to_struct(data["demand"]) : warn("Key Error : key 'demand' not found in WaterSystems dictionary, this will result in an empty demand array")
     haskey(data, "wntr_dict") ? parameters = parameter_to_struct(data["wntr_dict"], n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef) : warn("Key Error : key 'wntr_dict' not found in WaterSystems dictionary, this will result in an empty demand array")
     d = data["wntr"]
-    aPipe_over, bPipe_over, aPipe_under, bPipe_under, Q_baseP, aValve_over, bValve_over,
-    aValve_under, bValve_under, Q_base_cv, PositiveFlowLinks, NegativeFlowLinks, ReversibleFlowLinksflow,
-    flow, head, power, aPumpPower_flow, bPumpPower_flow, aPumpPower_head, bPumpPower_head = Parameterize(wn_dict, n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
-    if haskey(data, "Pipe")
-        pipes = pipe_to_struct_parameters(data["Pipe"], aPipe_over, bPipe_over, aPipe_under, bPipe_under, Q_baseP, aValve_over, bValve_over,
-        aValve_under, bValve_under, Q_base_cv, PositiveFlowLinks, NegativeFlowLinks, ReversibleFlowLinksflow)
-    else
-        warn("Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array")
-    end
-    if haskey(data, "Pump")
-        pumps = pump_to_struct_parameters(data["Pump"], flow, head, power, aPumpPower_flow, bPumpPower_flow, aPumpPower_head, bPumpPower_head)
-    else
-        warn("Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pipe array")
-    end
     simulations = Simulation(d["duration"], d["timeperiods"], d["num_timeperiods"], d["start"], d["end"])
     links = vcat(pipes, valves, pumps)
     return nodes, junctions, tanks, res, links, pipes, valves, pumps, demands, simulations, parameters
@@ -132,13 +121,7 @@ function parameter_to_struct(wn_dict::Dict{Any,Any}, n::Int64, Q_lb::Float64, lo
     return parameters
 end
 
-function pipe_to_struct_parameters(data::Dict{Int64,Any}, aPipe_over:: Dict{String, Array{Float64,1}},
-                                    bPipe_over::Dict{String, Array{Float64,1}}, aPipe_under::Dict{String, Array{Float64,1}},
-                                    bPipe_under::Dict{String, Array{Float64,1}}, Q_Base:: Array{Float64},
-                                    aValve_over:: Dict{String, Array{Float64,1}}, bValve_over::Dict{String, Array{Float64,1}},
-                                    aValve_under::Dict{String, Array{Float64,1}},bValve_under::Dict{String, Array{Float64,1}},
-                                    Q_Base_cv:: Array{Float64}, PositiveFlowLinks::Array{String},
-                                    NegativeFlowLinks::Array{String}, ReversibleFlowLinks::Array{String})
+function pipe_to_struct(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
     pipes = Array{RegularPipe}(0)
     for (key, p) in data
         j_from = p["connectionpoints"].from
@@ -146,33 +129,30 @@ function pipe_to_struct_parameters(data::Dict{Int64,Any}, aPipe_over:: Dict{Stri
         junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
         junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
         flow_direction = "Not Assigned"
-        if p["name"] in ReversibleFlowLinks
+        if p["name"] in Parameters["ReversibleFlowLinks"]
             flow_direction = "Reversible"
-        elseif p["name"] in PositiveFlowLinks
+        elseif p["name"] in Parameters["PositiveFlowLinks"]
             flow_direction = "Positive"
         else
             flow_direction = "Negative"
         end
         if p["cv"] == false
-            push!(pipes,RegularPipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"], flow_direction, aPipe_over, bPipe_over, aPipe_under, bPipe_under, Q_Base))
+            push!(pipes,RegularPipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"], flow_direction, Parameters["aPipe_over"], Parameters["bPipe_over"], Parameters["aPipe_under"], Parameters["bPipe_under"], Parameters["Q_basePipe"]))
         else
-            push!(pipe, CheckValvePipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"], flow_direction, aValve_over, bValve_over, aValve_under, bValve_under, Q_Base_cv))
+            push!(pipe, CheckValvePipe(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"], p["control_pipe"], flow_direction, Parameters["aCheckValve_over"], Parameters["bCheckValve_over"], Parameters["aCheckValve_under"], Parameters["bCheckValve_under"], Parameters["Q_baseCV"]))
         end
     end
     return pipes
 end
 
-function pump_to_struct_parameters(data::Dict{Int64,Any}, flow::Dict{String, Array{Float64,1}}, head::Dict{String, Array{Float64,1}},
-                                    power::Dict{String, Array{Float64,1}}, aPumpPower_flow::Dict{String, Array{Float64,1}},
-                                    bPumpPower_flow::Dict{String, Array{Float64,1}}, aPumpPower_head::Dict{String, Array{Float64,1}},
-                                    bPumpPower_head::Dict{String, Array{Float64,1}})
+function pump_to_struct_parameters(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
     pumps = Array{ConstSpeedPump}(0)
     for (key, p) in data
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
         junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
         junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
-        push!(pumps, ConstSpeedPump(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"], flow, head, power, aPumpPower_flow, bPumpPower_flow, aPumpPower_head, bPumpPower_head))
+        push!(pumps, ConstSpeedPump(p["number"], p["name"], @NT(from = junction_from, to = junction_to) ,p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"], Parameters["flow"], Parameters["head"], Parameters["power"], Parameters["aPumpPower_flow"], Parameters["bPumpPower_flow"],Parameters["aPumpPower_head"], Parameters["bPumpPower_head"]))
     end
     return pumps
 end
