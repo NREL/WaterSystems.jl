@@ -35,6 +35,7 @@ function WaterSystem(
                     pipes::P,
                     valves::V,
                     pumps::M,
+                    demands::Array{WaterDemand}
                     ) where {T<:Array{<:Tank}, P<:Array{<:Pipe}, V<:Array{<:Valve}, M<:Array{<:Pump}}
 
     WaterSystem(junctions, tanks, reservoirs, pipes, valves, pumps, demands)
@@ -45,7 +46,7 @@ struct Network
     null::Array{Float64}
 end
 
-function Network(links::Vector{T}, nodes::Vector{WaterSystemDevice}) where T <:Link#didn't work as Vector{T<:Array{<:Link}}
+function Network(links::Vector{T}, nodes::Vector{N}) where {T<:Link, N<:WaterSystemDevice} #didn't work as Vector{T<:Array{<:Link}}
     nodecount = length(nodes)
     A = build_incidence(nodecount, links)
     null_A = build_incidence_null(A)
@@ -57,20 +58,25 @@ function build_incidence(nodecount::Int64, links::Array{T}) where T<:Link
 
     linkcount = length(links)
 
-    A = spzeros(Int64,nodecount,linkcount);
+    A = spzeros(Int64,nodecount,linkcount)
 
    #build incidence matrix
    #incidence_matrix = A
     for (ix,b) in enumerate(links)
+        if typeof(b) <: ControlPipe
+            A[b.pipe.connectionpoints.from.number, ix] =  1;
 
-        A[b.connectionpoints.from.number, ix] =  1;
+            A[b.pipe.connectionpoints.to.number, ix] = -1;
+        else
+            A[b.connectionpoints.from.number, ix] =  1;
 
-        A[b.connectionpoints.to.number, ix] = -1;
+            A[b.connectionpoints.to.number, ix] = -1;
+        end
 
     end
     return  A
 end
-function build_incidence_null(A)
+function build_incidence_null(A::AbstractArray{Int64})
     null_A = nullspace(full(A))
     return null_A
 end
