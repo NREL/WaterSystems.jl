@@ -23,12 +23,12 @@ function CheckValveCoefsUnder(Q_base::Dict{String, Array{Float64,1}})
     bCheckValve = Dict{String, Array{Float64,1}}()
     for (name, Q_base_current) in Q_base
         Q_power_current = Array{Float64}(length(Q_base_current))
-        aCheckValve_current = Array{Float64}(length(Q_base_current)-1)
-        bCheckValve_current = Array{Float64}(length(Q_base_current)-1)
+        aCheckValve_current = Array{Float64}(length(Q_base_current))
+        bCheckValve_current = Array{Float64}(length(Q_base_current))
         for i = 1:length(Q_base_current)
             Q_power_current[i] = Q_base_current[i]^1.852
         end
-        for i = 1:length(Q_base_current)-1
+        for i = 1:length(Q_base_current)
             bCheckValve_current[i] = 1.852*Q_base_current[i] ^0.852
             aCheckValve_current[i] = Q_power_current[i] - bCheckValve_current[i]*Q_base_current[i]
         end

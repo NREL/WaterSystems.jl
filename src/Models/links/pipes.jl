@@ -58,7 +58,7 @@ struct ControlPipe{T} <:Pipe where T<:Array{<:RegularPipe}
     valve:: GateValve
 end
 
-PositiveFlowPipe(;
+StandardPositiveFlowPipe(;
             number = 1,
             name="init",
             connectionpoints=(from::Junction(), to::Junction()),
@@ -116,7 +116,7 @@ ControlPipe(;
             valve = CheckValve()
             ) = ControlPipe(pipe, valve)
 
-function PositiveFlowPipe(number::Int64, name::String, connectionpoints:: @NT(from::Junction, to::Junction), diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
+function StandardPositiveFlowPipe(number::Int64, name::String, connectionpoints:: @NT(from::Junction, to::Junction), diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     headloss_parameters = [@NT(flow = 0.0, slope = 0.0, intercept = 0.0)]
     return PositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, headloss_parameters)
 end

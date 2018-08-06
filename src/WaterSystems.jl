@@ -16,7 +16,7 @@ export ConstSpeedPump
 export Storage
 export Tank
 export RoundTank
-export Reservoir
+export StorageReservoir
 
 # topological elements
 export Junction
@@ -58,14 +58,13 @@ abstract type WaterSystemDevice end
 #Models
 include("Models/topological_elements.jl")
 include("Models/storage.jl")
-include("Models/network.jl")
+include("Models/sources.jl")
 include("Models/simulations.jl")
 include("Models/water_demand.jl")
 include("Models/links.jl")
 include("Models/links/pipes.jl")
 include("Models/links/pumps.jl")
 include("Models/links/valves.jl")
-include("Models/Parameters.jl")
 
 #Utils
 include("Utils/CheckValveCoefs.jl")

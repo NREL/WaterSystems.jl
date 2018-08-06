@@ -29,7 +29,7 @@ function RoundTank(; name="init", node=Junction(), diameter = 0.0, levellimits=@
     return RoundTank(name, node, volumelimits, volume, area, level, levellimits)
 end
 
-struct Reservoir <: Storage
+struct StorageReservoir <: Storage
     name::String
     node::Junction
     elevation::Float64

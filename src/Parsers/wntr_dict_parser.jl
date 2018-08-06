@@ -188,7 +188,7 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
         try
             efficiency = pump["efficiency"][:points]
         catch
-            wn_dict["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn_dict["options"]["energy"]["global_efficiency"]: efficiency = 0.65
+            wn["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn["options"]["energy"]["global_efficiency"]: efficiency = 0.65
         end
         #energy
 
