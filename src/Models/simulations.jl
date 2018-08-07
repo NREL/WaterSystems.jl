@@ -1,7 +1,7 @@
 struct Simulation <: WaterSystemDevice
     duration::Int64 #hours
     timestep::Float64 #hours
-    num_timesteps::Int64 #hours 
+    num_timesteps::Int64 #hours
     start_day::DateTime
     end_day::DateTime
 end

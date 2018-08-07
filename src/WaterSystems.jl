@@ -27,8 +27,13 @@ export Link
 export Pipe
 export Valve
 export RegularPipe
+export StandardPositiveFlowPipe
+export NegativeFlowPipe
+export ReversibleFlowPipe
+export CheckValvePipe
+export ControlPipe
 export PressureReducingValve
-
+export GateValve
 # demands
 export WaterDemand
 
