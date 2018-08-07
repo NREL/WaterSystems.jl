@@ -85,6 +85,7 @@ end
          j_to = v["connectionpoints"].to
          junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
          junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
+         #if v["valvetype"] == "FCV"
          valves[ix] = PressureReducingValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
      end
      return valves
@@ -172,8 +173,8 @@ function pump_to_struct(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
         j_to = p["connectionpoints"].to
         flows = Parameters["flow"][name]
         powers = Parameters["power"][name]
-        slopes = Parameters["bPumpPower_flow"][name]
-        intercepts = Parameters["aPumpPower_flow"][name]
+        slopes = Parameters["bPumpPower_head"][name]
+        intercepts = Parameters["aPumpPower_head"][name]
         power_parameters = Array{@NT(flow::Float64, power::Float64, slope::Float64, intercept::Float64)}(length(flows))
         for j = 1:length(flows)
             power_parameters[j] = @NT(flow = flows[j], power = powers[j], slope = slopes, intercept = intercepts)
