@@ -19,6 +19,13 @@ PressureReducingValve(;
                     pressure_drop=nothing
                     ) = PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop)
 
+struct GateValve <: Valve
+    status::Int64
+end
+
+GateValve(;
+        status = 0
+        ) = GateValve(status)
 # Ariel addidng other valves below
 # MISSING?! -- minor_loss, _user_status AND _initial_status, initial_setting, head loss, pressure difference instead of drop?!?!?!?
 
