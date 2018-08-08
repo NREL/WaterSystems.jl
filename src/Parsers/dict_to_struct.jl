@@ -96,6 +96,7 @@ function valve_to_struct(data::Dict{Int64, Any})
             valves[ix] = ThrottleControlValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
         else
             valves[ix] = GeneralPurposeValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+        end
     end
     return valves
 end
