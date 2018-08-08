@@ -175,13 +175,14 @@ function pump_to_struct(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
         powers = Parameters["power"][name]
         slopes = Parameters["bPumpPower_head"][name]
         intercepts = Parameters["aPumpPower_head"][name]
+        limits = @NT(Qmin = Parameters["Qmin"][name], Qmax = Parameters["Qmax"][name], Hmin =  Parameters["Hmin"][name], Hmax = Parameters["Hmax"][name])
         power_parameters = Array{@NT(flow::Float64, power::Float64, slope::Float64, intercept::Float64)}(length(flows))
         for j = 1:length(flows)
             power_parameters[j] = @NT(flow = flows[j], power = powers[j], slope = slopes, intercept = intercepts)
         end
         junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
         junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
-        pumps[ix] =  ConstSpeedPump(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"], power_parameters)
+        pumps[ix] =  ConstSpeedPump(p["number"], name, @NT(from = junction_from, to = junction_to) ,p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"], power_parameters, limits)
     end
     return pumps
 end
