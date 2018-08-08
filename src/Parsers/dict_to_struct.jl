@@ -76,20 +76,29 @@ function pipe_to_struct(data::Dict{Int64,Any})
     return pipes
 end
 
- function valve_to_struct(data::Dict{Int64, Any})
-     valves = Array{PressureReducingValve}(length(data))
-     for (ix,(key, v)) in enumerate(data)
-         #if v["valve_type"] == "PRV"
-         #push!(valves, PressureReducingValve(...))
-         j_from = v["connectionpoints"].from
-         j_to = v["connectionpoints"].to
-         junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
-         junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
-         #if v["valvetype"] == "FCV"
-         valves[ix] = PressureReducingValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
-     end
-     return valves
- end
+function valve_to_struct(data::Dict{Int64, Any})
+    valves = Array{PressureReducingValve}(length(data))
+    for (ix,(key, v)) in enumerate(data)
+        #push!(valves, PressureReducingValve(...))
+        j_from = v["connectionpoints"].from
+        j_to = v["connectionpoints"].to
+        junction_from = Junction(j_from["number"], j_from["name"], j_from["elevation"], j_from["head"], j_from["minimum_pressure"], j_from["coordinates"])
+        junction_to = Junction(j_to["number"], j_to["name"], j_to["elevation"], j_to["head"], j_to["minimum_pressure"], j_to["coordinates"])
+        if v["valvetype"] == "PRV"
+            valves[ix] = PressureReducingValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+        elseif v["valvetype"] == "PSV"
+            valves[ix] = PressureSustainingValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+        elseif v["valvetype"] == "PBV"
+            valves[ix] = PressureBreakerValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+        elseif v["valvetype"] == "FCV"
+            valves[ix] = FlowControlValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+        elseif v["valvetype"] == "TCV"
+            valves[ix] = ThrottleControlValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+        else
+            valves[ix] = GeneralPurposeValve(v["number"], v["name"], @NT(from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+    end
+    return valves
+end
 
 function pump_to_struct(data::Dict{Int64,Any})
     pumps = Array{ConstSpeedPump}(length(data))
