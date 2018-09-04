@@ -42,7 +42,7 @@ function FlowHeadPower(wn_dict::Dict{Any,Any})
                     else
                         back = 1
                         while pump_curve[i - back][1] > eff_curve[length(eff_curve)][1]
-                            back = back +1
+                            back = back + 1
                             eff[i] = f(pump_curve[i-back][1])
                         end
                     end

@@ -1,10 +1,10 @@
 # Defining all valve types
-
+const From_To_Junction = NamedTuple{(:from, :to), Tuple{Junction, Junction}}
 # WNTR valve = PRValve
 struct PressureReducingValve<:Valve
     number::Int64 #for incidence matrix
     name::String
-    connectionpoints::@NT(from::Junction, to::Junction) # for topology of network and knowing what connects to what
+    connectionpoints:: From_To_Junction # for topology of network and knowing what connects to what
     status::String #open/closed/active
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
@@ -13,7 +13,7 @@ end
 PressureReducingValve(;
                     number = 1,
                     name="init",
-                    connectionpoints= @NT(from::Junction(), to::Junction()),
+                    connectionpoints= From_To_Junction,
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
@@ -33,7 +33,7 @@ GateValve(;
 struct PressureSustainingValve<:Valve
     number::Int64
     name::String
-    connectionpoints::@NT(from::Junction, to::Junction)
+    connectionpoints::From_To_Junction
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
@@ -42,7 +42,7 @@ end
 PressureSustainingValve(;
                     number = 1,
                     name="init",
-                    connectionpoints= @NT(from::Junction(), to::Junction()),
+                    connectionpoints= From_To_Junction,
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
@@ -52,7 +52,7 @@ PressureSustainingValve(;
 struct PressureBreakerValve<:Valve
     number::Int64
     name::String
-    connectionpoints::@NT(from::Junction, to::Junction)
+    connectionpoints:: From_To_Junction
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
@@ -61,7 +61,7 @@ end
 PressureBreakerValve(;
                     number = 1,
                     name="init",
-                    connectionpoints= @NT(from::Junction(), to::Junction()),
+                    connectionpoints= From_To_Junction,
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
@@ -71,7 +71,7 @@ PressureBreakerValve(;
 struct FlowControlValve<:Valve
     number::Int64
     name::String
-    connectionpoints::@NT(from::Junction, to::Junction)
+    connectionpoints::From_To_Junction
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
@@ -80,7 +80,7 @@ end
 FlowControlValve(;
                     number = 1,
                     name="init",
-                    connectionpoints= @NT(from::Junction(), to::Junction()),
+                    connectionpoints= From_To_Junction,
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
@@ -90,7 +90,7 @@ FlowControlValve(;
 struct ThrottleControlValve<:Valve
     number::Int64
     name::String
-    connectionpoints::@NT(from::Junction, to::Junction)
+    connectionpoints::From_To_Junction
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
@@ -99,7 +99,7 @@ end
 ThrottleControlValve(;
                     number = 1,
                     name="init",
-                    connectionpoints= @NT(from::Junction(), to::Junction()),
+                    connectionpoints= From_To_Junction,
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
@@ -109,7 +109,7 @@ ThrottleControlValve(;
 struct GeneralPurposeValve<:Valve
     number::Int64
     name::String
-    connectionpoints::@NT(from::Junction, to::Junction)
+    connectionpoints::From_To_Junction
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
@@ -118,7 +118,7 @@ end
 GeneralPurposeValve(;
                     number = 1,
                     name="init",
-                    connectionpoints= @NT(from::Junction(), to::Junction()),
+                    connectionpoints= From_To_Junction,
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing

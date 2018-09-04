@@ -53,11 +53,9 @@ export wntr_dict
 
 using TimeSeries
 using DataFrames
-# This packages will be removed with Julia v0.7
 using Compat
 using PyCall
-using NamedTuples
-using CurveFit
+#using CurveFit
 
 abstract type WaterSystemDevice end
 #Models
