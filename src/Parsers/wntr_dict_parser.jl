@@ -16,7 +16,7 @@ function make_dict(inp_file::String)
     duration = wn["options"]["time"]["duration"]
     time_periods = wn["options"]["time"]["report_timestep"]
 
-    duration != 0 ? duration_hours = from_seconds(duration): error("Duration is set to 0. Simulation will not run. Modify .inp file.")
+    duration != 0 ? duration_hours = from_seconds(duration) : error("Duration is set to 0. Simulation will not run. Modify .inp file.")
 
     timeperiods_hours = time_periods/3600
 
@@ -24,7 +24,7 @@ function make_dict(inp_file::String)
     start_time = wn["options"]["time"]["report_start"]
     num_timeperiods = duration/time_periods
 
-    mod(num_timeperiods, 1) == 0 ? num_timeperiods = Int(num_timeperiods): error("Duration does not correspond to a full timestep.")
+    mod(num_timeperiods, 1) == 0 ? num_timeperiods = Int(num_timeperiods) : error("Duration does not correspond to a full timestep.")
 
     hours, minutes, seconds  = from_seconds(start_time)
     start = "$hours:$minutes:$seconds"
