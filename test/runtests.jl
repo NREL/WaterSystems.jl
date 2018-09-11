@@ -1,9 +1,7 @@
-include("../src/WaterSystems.jl")
 using WaterSystems
-using Base.Test
+using Test
 using TimeSeries
 using DataFrames
-using NamedTuples
 
 # write your own tests here
 tic()
