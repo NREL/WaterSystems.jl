@@ -18,3 +18,9 @@ WaterDemand(;
                 demand=TimeSeries.TimeArray(today(), [0.0]),
                 demandforecast = TimeSeries.TimeArray(today(), [0.0])
                 ) = WaterDemand(name,number,junction,status,maxdemand,demand, demandforecast)
+
+function WaterDemand(name::String, number::Int64, junction::Junction, maxdemand::Float64, demand::TimeSeries.TimeArray)
+    demandforecast = demand;
+    status = true;
+    return WaterDemand(name,number,junction,status,maxdemand,demand,demandforecast)
+end

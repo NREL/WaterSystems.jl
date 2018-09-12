@@ -18,6 +18,9 @@ export Tank
 export RoundTank
 export StorageReservoir
 
+# sources
+export SourceReservoir
+
 # topological elements
 export Junction
 export PressureZone

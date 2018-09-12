@@ -16,10 +16,6 @@ struct RoundTank <: Tank
     #vol_curve::Union{Nothing,NamedTuple}
 end
 
-# RoundTank with diameter and levels
-function RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
-    RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
-end
 
 function RoundTank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
 

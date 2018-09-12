@@ -2,7 +2,7 @@ abstract type
     Link<:WaterSystemDevice
 end
 abstract type
-    pipe <: Link
+    Pipe <: Link
 end
 
 abstract type

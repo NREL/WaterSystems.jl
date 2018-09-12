@@ -15,31 +15,34 @@ function TimeSeriesCheckDemand(loads::Array{T}) where {T<:WaterDemand}
     return t
 end
 
-struct WaterSystem{T <: Union{Nothing, Array{ <: Tank,1}},
+struct WaterSystem{T <: Union{Nothing, Array{ <: Storage,1}},
                    V <: Union{Nothing, Array{ <: Valve,1}},
                    P <: Union{Nothing, Array{ <: Pipe,1}},
-                   M <: Union{Nothing, Array{ <: Pump,1}}}
+                   M <: Union{Nothing, Array{ <: Pump,1}},
+                   S <: Union{Nothing, Array{ <: Source,1}}}
     junctions::Array{Junction}
-    tanks::T
-    reservoirs::Array{StorageReservoir}
+    storages::T
+    sources::S
     pipes::P
     valves::V
     pumps::M
     demands::Array{WaterDemand}
 end
 
+#=
 function WaterSystem(
                     junctions::Array{Junction},
-                    tanks::T,
-                    reservoirs::Array{StorageReservoir},
+                    storages::T,
+                    sources::S,
                     pipes::P,
                     valves::V,
                     pumps::M,
                     demands::Array{WaterDemand}
-                    ) where {T<:Array{<:Tank}, P<:Array{<:Pipe}, V<:Array{<:Valve}, M<:Array{<:Pump}}
+                    ) where {T<:Array{<:Storage}, P<:Array{<:Pipe}, V<:Array{<:Valve}, M<:Array{<:Pump}, S<:Array{<:Source}}
 
-    WaterSystem(junctions, tanks, reservoirs, pipes, valves, pumps, demands)
+    WaterSystem(junctions, storages, sources, pipes, valves, pumps, demands)
 end
+=#
 
 struct Network
     incidence::AbstractArray{Int64}
@@ -80,36 +83,21 @@ function build_incidence_null(A::AbstractArray{Int64})
     null_A = nullspace(full(A))
     return null_A
 end
-# function WaterSystem(links::Array{<:Link})
-# function WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, network, simulation)
-#
-#         new(nodes,
-#             junctions,
-#             tanks,
-#             reservoirs,
-#             links,
-#             pipes,
-#             valves,
-#             pumps,
-#             demands,
-#             network,
-#             simulation)
-# end
 
 function WaterSystem(inp_file::String)
     data = make_dict(inp_file)
-    junctions, tanks, reservoirs, pipes, valves, pumps, demands, simulations = dict_to_struct(data)
+    junctions, storages, sources, pipes, valves, pumps, demands, simulations = dict_to_struct(data)
     links = vcat(pipes,valves,pumps)
-    nodes = vcat(junctions, tanks, reservoirs)
+    nodes = vcat(junctions, storages, sources)
     net = Network(links, nodes)
-    return WaterSystem(junctions, tanks, reservoirs, pipes, valves, pumps, demands), simulations, net
+    return WaterSystem(junctions, storages, sources, pipes, valves, pumps, demands), simulations, net
 end
 
 function WaterSystem(inp_file::String, n::Int64, Q_lb::Float64, logspace_ratio::Float64, dH_critical::Float64, dense_coef::Float64, tight_coef::Float64)
     data = make_dict(inp_file)
-    junctions, tanks, reservoirs, pipes, valves, pumps, demands, simulations = dict_to_struct(data, n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
+    junctions, storages, sources, pipes, valves, pumps, demands, simulations = dict_to_struct(data, n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
     links = vcat(pipes, valves, pumps)
-    nodes = vcat(junctions, tanks, reservoirs)
+    nodes = vcat(junctions, storages, sources)
     net = Network(links, nodes)
-    return WaterSystem(junctions, tanks, reservoirs, pipes, valves, pumps, demands), simulations, net
+    return WaterSystem(junctions, storages, sources, pipes, valves, pumps, demands), simulations, net
 end

@@ -46,12 +46,12 @@ ConstSpeedPump(
                 pumpcurve = [(0.0,0.0)],
                 efficiency = 1.0,
                 energyprice = TimeSeries.TimeArray(today(), [0.0]),
-                power_parameters = [(flow = 0.0, power = 0.0, slope = 0.0, intercept = 0.0)],
-                limits =(Qmin = 0.0, Qmax = 0.0, Hmin = 0.0, Hmax = 0.0)
+                power_parameters = (flow = 0.0, power = 0.0, slope = 0.0, intercept = 0.0),
+                limits = (Qmin = 0.0, Qmax = 0.0, Hmin = 0.0, Hmax = 0.0)
                 ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, power_parameters, limits)
 
 function ConstSpeedPump(number::Int64, name::String, From_To_Junction, status::Int64, pumpcurve::Union{Function,Array{Tuple{Float64,Float64}}}, efficiency::Union{Nothing,Float64, Array{Tuple{Float64,Float64}}}, energyprice::TimeSeries.TimeArray)
-    power_parameters = [(flow = 0.0, power = 0.0, slope = 0.0, intercept = 0.0)]
+    power_parameters = (flow = 0.0, power = 0.0, slope = 0.0, intercept = 0.0)
     limits = (Qmin = 0.0, Qmax = 0.0, Hmin = 0.0, Hmax = 0.0)
-    return ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, power_parameters, limits)
+    return ConstSpeedPump(number, name, From_To_Junction, status, pumpcurve, efficiency, energyprice, power_parameters, limits)
 end
