@@ -56,9 +56,14 @@ using DataFrames
 # This packages will be removed with Julia v0.7
 using Compat
 using PyCall
-using NamedTuples
+#using NamedTuples
 using CurveFit
-
+using SparseArrays
+using LinearAlgebra
+#pyimport stuff
+metric = pyimport("wntr.metrics.economic")
+model = pyimport("wntr.network.model") #import wntr network model
+sim = pyimport("wntr.sim.epanet")
 abstract type WaterSystemDevice end
 #Models
 include("Models/topological_elements.jl")
@@ -72,20 +77,20 @@ include("Models/links/pumps.jl")
 include("Models/links/valves.jl")
 
 #Utils
-include("Utils/CheckValveCoefs.jl")
-include("Utils/ManipulatePumps.jl")
-include("Utils/ManipulateTanks.jl")
-include("Utils/UpdateExtrema.jl")
-include("Utils/MaxMinLevels.jl")
-include("Utils/FlowDirections.jl")
-include("Utils/PipeCoefs.jl")
-include("Utils/PumpCoefs.jl")
-include("Utils/Parameterization.jl")
+# include("Utils/CheckValveCoefs.jl")
+# include("Utils/ManipulatePumps.jl")
+# include("Utils/ManipulateTanks.jl")
+# include("Utils/UpdateExtrema.jl")
+# include("Utils/MaxMinLevels.jl")
+# include("Utils/FlowDirections.jl")
+# include("Utils/PipeCoefs.jl")
+# include("Utils/PumpCoefs.jl")
+# include("Utils/Parameterization.jl")
 
 include("base.jl")
 
 #Parser
-include("Parsers/LeastSquaresAvg.jl")
+# include("Parsers/LeastSquaresAvg.jl")
 # include("Parsers/epa_net_parser.jl")
 # include("Parsers/FastParser.jl")
 include("Parsers/wntr_dict.jl")
@@ -95,14 +100,14 @@ include("Parsers/dict_to_struct.jl")
 #__precompile__() # this module is NOT safe to precompile
 
 try
-    @pyimport wntr
+    pyimport("wntr")
 catch
 
-    const PACKAGES = ["wntr"]
+    PACKAGES = ["wntr"]
 
     # Import pip
     try
-        @pyimport pip
+        pyimport("pip")
     catch
         # If it is not found, install it
         get_pip = joinpath(dirname(@__FILE__), "get-pip.py")
@@ -110,7 +115,7 @@ catch
         run(`$(PyCall.python) $get_pip --user`)
     end
 
-    @pyimport pip
+    pyimport("pip")
 
     args = []
     if haskey(ENV, "http_proxy")
@@ -125,7 +130,7 @@ catch
 
 
 end
-const wntr = PyNULL()
+wntr = PyNULL()
 function __init__()
     copy!(wntr, pyimport("wntr"))
 end

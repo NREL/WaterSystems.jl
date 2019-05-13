@@ -58,7 +58,7 @@ function build_incidence(nodecount::Int64, links::Array{T}) where T<:Link
 
     linkcount = length(links)
 
-    A = spzeros(Int64,nodecount,linkcount)
+    A = zeros(Int64,nodecount,linkcount)
 
    #build incidence matrix
    #incidence_matrix = A
@@ -77,7 +77,7 @@ function build_incidence(nodecount::Int64, links::Array{T}) where T<:Link
     return  A
 end
 function build_incidence_null(A::AbstractArray{Int64})
-    null_A = nullspace(full(A))
+    null_A = nullspace(A)
     return null_A
 end
 # function WaterSystem(links::Array{<:Link})

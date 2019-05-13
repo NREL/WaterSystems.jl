@@ -1,5 +1,3 @@
-@pyimport wntr.network.model as model #import wntr network model
-@pyimport wntr.sim.epanet as sim
 
 function wntr_dict(inp_file::String)
     wn = model.WaterNetworkModel(inp_file)
@@ -24,7 +22,7 @@ function link_dicts(links::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any, Any})
     pipe_dict = Dict{Int64, Any}()
     valve_dict = Dict{Int64, Any}()
     pump_dict = Dict{String, Any}()
-    control_pipe = Array{String}(0)
+    control_pipe = Array{Union{Nothing,String}}(nothing,0)
     for (i, (name,control)) in enumerate(wntr_dict["controls"])
         target = control[:_then_actions][1][:_target_obj]
         target[:link_type] == "Pipe" ? push!(control_pipe, target[:name]) : nothing

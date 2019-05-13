@@ -7,12 +7,12 @@ abstract type Tank <: Storage end
 struct RoundTank <: Tank
     name::String
     node::Junction
-    volumelimits::Union{@NT(min::Float64, max::Float64),Nothing} #m^3
+    volumelimits::Union{NamedTuple{(:min, :max), Tuple{Float64, Float64}},Nothing} #m^3
     diameter::Float64 #m
     volume::Union{Nothing,Float64} #m^3
     area::Union{Nothing,Float64} #m^2
     level::Union{Nothing,Float64} #m initial level
-    levellimits::Union{@NT(min::Float64, max::Float64),Nothing} #m
+    levellimits::Union{NamedTuple{(:min, :max), Tuple{Float64, Float64}},Nothing} #m
     #vol_curve::Union{Nothing,NamedTuple}
 end
 
@@ -21,7 +21,7 @@ function RoundTank(name, node, volumelimits, diameter, volume, area, level, leve
     RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
 end
 
-function RoundTank(; name="init", node=Junction(), diameter = 0.0, levellimits=@NT(min = 0.0, max = 0.0), level=0.0)
+function RoundTank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
 
     area = π * (diameter/2)^2 ;
     volume = area * level;
