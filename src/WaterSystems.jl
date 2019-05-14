@@ -41,7 +41,7 @@ export WaterDemand
 export Simulation
 
 #parameterize
-export Parameters
+#export Parameters
 # parser
 # export wn_to_struct
 export dict_to_struct

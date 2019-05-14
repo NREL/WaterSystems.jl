@@ -973,7 +973,7 @@ Balerma Network
 ;Tank            	Model
 
 [TIMES]
- Duration           	0:00 
+ Duration           	24:00 
  Hydraulic Timestep 	1:00 
  Quality Timestep   	0:06 
  Pattern Timestep   	1:00 

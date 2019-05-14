@@ -2296,7 +2296,7 @@ Global Water Full network - Peak Day (Avg * 1.9)
 ;Tank            	Model
 
 [TIMES]
- Duration           	0:00 
+ Duration           	24:00 
  Hydraulic Timestep 	1:00 
  Quality Timestep   	0:00 
  Pattern Timestep   	1:00 

@@ -54,7 +54,7 @@ function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, data::Dic
         name = junc["name"]
         index_junc = key
         #head and demand are current at each node
-        head = node_results["head"][name][:values][1] #Meters Total Head/ Hydraulic Head = Pressure Head + Elevation
+        head = get(node_results["head"],name).values[1] #Meters Total Head/ Hydraulic Head = Pressure Head + Elevation
         head = convert(Float64,head)
         data["Junction"][index_junc] = Dict{String,Any}("number" => index_junc, "name" => name, "elevation" => junc["elevation"], "head" => head, "minimum_pressure" => junc["minimum_pressure"], "coordinates" => (lat = junc["coordinates"][2], lon = junc["coordinates"][1]))
         data["Node"][name] = Dict{String,Any}("number" => index_junc, "name" => name, "elevation" => junc["elevation"], "head" => head, "minimum_pressure" => junc["minimum_pressure"], "coordinates" => (lat = junc["coordinates"][2], lon = junc["coordinates"][1]))
@@ -71,8 +71,8 @@ function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, data::Dict{St
         #head  and demand are initial values
         index_tank = index_tank + 1
         name = key
-        head = node_results["head"][name][:values][1] #m Total Head/Hydraulc Head
-        demand = node_results["demand"][name][:values][1:num_timeperiods] #m^3/sec
+        head = get(node_results["head"],name).values[1] #m Total Head/Hydraulc Head
+        demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand) #demand at first timestep (initial_demand)
         demand_forecast = demand_timeseries #will possibly add perturbation later
         area = π * (tank["diameter"]/2)^2 ; #m^2
@@ -91,8 +91,8 @@ function res_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, data::Dict{Str
     for (key,res) in wn["reservoirs"]
         index_res = index_res +1
         name = res["name"]
-        head = node_results["head"][name][:values][1] #m Total head/ Hydraulic head note: base_head = elevation
-        demand = node_results["demand"][name][:values][1:num_timeperiods] #m^3/sec
+        head = get(node_results["head"],name).values[1] #m Total head/ Hydraulic head note: base_head = elevation
+        demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
         demand_forecast = demand_timeseries #will possibly add perturbation later
         data["Node"][name] = Dict{String,Any}("number" => index_res, "name" => name, "elevation" => res["base_head"], "head" => convert(Float64,head), "minimum_pressure" => 0, "coordinates" => (lat = res["coordinates"][2], lon = res["coordinates"][1])) #array of pseudo nodes @ res
@@ -106,8 +106,8 @@ function pipe_dict(wn::Dict{Any,Any}, link_results::Dict{Any, Any}, data ::Dict{
     for (key,pipe) in wn["pipes"]
         index_pipe = index_pipe + 1
         name = pipe["name"]
-        headloss = link_results["headloss"][name][:values][1] #m
-        flowrate = link_results["flowrate"][name][:values][1] #m^3/sec
+        headloss = get(link_results["headloss"],name).values[1] #m
+        flowrate = get(link_results["flowrate"],name).values[1] #m^3/sec
         junction_start = data["Node"][pipe["start_node_name"]]
         junction_end = data["Node"][pipe["end_node_name"]]
         data["Pipe"][index_pipe] = Dict{String,Any}("number" => index_pipe, "name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "diameter" => pipe["diameter"], "length" => pipe["length"],"roughness" => pipe["roughness"], "headloss" => convert(Float64,headloss), "flow" => convert(Float64,flowrate), "initial_status" => pipe["initial_status"], "control_pipe" => pipe["control_pipe"], "cv" => pipe["cv"])
@@ -156,10 +156,9 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
         price_array2 = Array{Any}(undef,0)
         price_array = Array{Any}(undef,0)
 
-        if price == 0.0
-            price = 1.0
-        end 
-        energyprice = TimeSeries.TimeArray(today(), [0.0])
+
+        energyprice = TimeSeries.TimeArray(today(), [1.0])
+        # if price == 0
         #     pricearray = price
         #     # warn("Price is set to 0. Using randomly generated price array with higher weights during peak hours (4pm-8pm).")
         #     # timeperiods_per_hour = 1/(timeperiods)
@@ -190,7 +189,7 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
         # energyprice = TimeSeries.TimeArray(time_ahead, price_array)
         #efficiency
         try
-            efficiency = pump["efficiency"][:points]
+            efficiency = pump["efficiency"].points
         catch
             wn["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn["options"]["energy"]["global_efficiency"] : efficiency = 0.65
         end
@@ -208,7 +207,7 @@ function demands_dict(data::Dict{String,Any}, nodes::Dict{String,Any}, node_resu
     for (ix, nodes) in enumerate(nodes)
         node = nodes[2]
         name = nodes[1]
-        demand = node_results["demand"][name][:values][1:num_timeperiods] #m^3/sec
+        demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
         demand = convert(Array{Float64,1}, demand)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
         demand_forecast = demand_timeseries #will possibly add perturbation later

@@ -1,5 +1,6 @@
 include("../src/WaterSystems.jl")
-using WaterSystems
+#using WaterSystems
+include("../src/WaterSystems.jl")
 using Base.Test
 using TimeSeries
 using DataFrames
