@@ -120,12 +120,16 @@ function valve_dict(wn::Dict{Any,Any}, data::Dict{String,Any}, valves::Dict{Int6
     for (key,valve) in wn["valves"]
         index_valve = index_valve + 1
         name = valve["name"]
-        #valve_type = valve["link_type"]
+        if typeof(valve["valve_type"]) == String
+            valve_type = valve["valve_type"]
+        else
+            valve_type = "GPV"
+        end 
         junction_start = data["Node"][valve["start_node_name"]]
         junction_end = data["Node"][valve["end_node_name"]]
         status_index = valve["initial_status"] + 1  # 1=Closed, 2=Open, 3 = Active, 4 = CheckValve
         status_string = ["Closed", "Open", "Active","Check Valve"][status_index] #Active = partially open
-        data["Valve"][index_valve - num_links] = Dict{String,Any}("number" => index_valve, "name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => status_string , "diameter" => valve["diameter"], "pressure_drop" => valve["setting"])
+        data["Valve"][index_valve - num_links] = Dict{String,Any}("number" => index_valve, "name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => status_string , "diameter" => valve["diameter"], "pressure_drop" => valve["setting"], "valvetype"=>valve_type)
     end
 end
 

@@ -39,7 +39,10 @@ export WaterDemand
 
 #simulation
 export Simulation
-
+#Utils 
+export Incidence
+export build_incidence
+export build_incidence_null
 #parameterize
 #export Parameters
 # parser
@@ -77,6 +80,7 @@ include("Models/links/pumps.jl")
 include("Models/links/valves.jl")
 
 #Utils
+include("Utils/build_incidence.jl")
 # include("Utils/CheckValveCoefs.jl")
 # include("Utils/ManipulatePumps.jl")
 # include("Utils/ManipulateTanks.jl")
