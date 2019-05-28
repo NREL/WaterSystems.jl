@@ -118,7 +118,7 @@ function demand_to_struct(data::Dict{Int64,Any})
         node_data = d["node"]
         number = node_data["number"]
         node = Junction(number, node_data["name"], node_data["elevation"], node_data["head"], node_data["minimum_pressure"], node_data["coordinates"])
-        demands[number] = WaterDemand(d["name"], number, node , d["status"], d["max_demand"], d["demand"], d["demandforecast"])
+        demands[number] = WaterDemand(d["name"], number, node , d["status"], d["max_demand"], d["demand"])
     end
     return demands
 end

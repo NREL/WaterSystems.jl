@@ -8,7 +8,11 @@ struct PressureReducingValve<:Valve
     status::String #open/closed/active
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
+    internal:: WaterSystemInternal
 end
+function PressureReducingValve(number, name, connectionspoints, status, diameter, pressure_drop)
+    PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop, WaterSystemInternal())
+end 
 
 PressureReducingValve(;
                     number = 1,
@@ -21,11 +25,14 @@ PressureReducingValve(;
 
 struct GateValve <: Valve
     status::Int64
+    internal:: WaterSystemInternal
 end
-
+function GateValve(status)
+    GateValve(status, WaterSystemInternal())
+end 
 GateValve(;
         status = 0
-        ) = GateValve(status)
+        ) = GateValve(status, WaterSystemInternal())
 
 # Ariel addidng other valves below
 # MISSING?! -- minor_loss, _user_status AND _initial_status, initial_setting, head loss, pressure difference instead of drop?!?!?!?
@@ -38,8 +45,11 @@ struct PressureSustainingValve<:Valve
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
+    internal:: WaterSystemInternal
 end
-
+function PressureSustainingValve(number, name, connectionpoints, status, diameter, pressure_drop)
+    PressureSustainingValve(number, name, connectionpoints, status, diameter, pressure_drop, WaterSystemInternal())
+end 
 PressureSustainingValve(;
                     number = 1,
                     name="init",
@@ -57,8 +67,11 @@ struct PressureBreakerValve<:Valve
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
+    internal:: WaterSystemInternal
 end
-
+function PressureBreakerValve(number,name,connectionpoints, status, diameter, pressure_drop)
+    PressureBreakerValve(number, name, connectionpoints, status, diameter, pressure_drop, WaterSystemInternal())
+end 
 PressureBreakerValve(;
                     number = 1,
                     name="init",
@@ -66,7 +79,7 @@ PressureBreakerValve(;
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
-                    ) = PressureBreakerValve(number, name, connectionpoints, status, diameter, pressure_drop)
+                    ) = PressureBreakerValve(number, name, connectionpoints, status, diameter, pressure_drop) 
 
 # WNTR valve = FCValve
 struct FlowControlValve<:Valve
@@ -76,8 +89,12 @@ struct FlowControlValve<:Valve
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
+    internal:: WaterSystemInternal
 end
 
+function FlowControlValve(number, name, connectionpoints, status, diameter, pressure_drop)
+    FlowControlValve(number, name, connectionpoints, status, diameter, pressure_drop, WaterSystemInternal())
+end 
 FlowControlValve(;
                     number = 1,
                     name="init",
@@ -95,8 +112,11 @@ struct ThrottleControlValve<:Valve
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
+    internal:: WaterSystemInternal
 end
-
+function ThrottleControlValve(number,name, connectionpoints, status, diameter, pressure_drop)
+    ThrottleControlValve(number, name, connectionpoints, status, diameter, pressure_drop, WaterSystemInternal())
+end 
 ThrottleControlValve(;
                     number = 1,
                     name="init",
@@ -114,8 +134,11 @@ struct GeneralPurposeValve<:Valve
     status::String
     diameter::Union{Nothing,Float64}
     pressure_drop::Union{Nothing,Float64}
+    internal:: WaterSystemInternal
 end
-
+function GeneralPurposeValve(number, name, connectionpoints, status, diameter, pressure_drop)
+    GeneralPurposeValve(number, name, connectionpoints, status, diameter, pressure_drop, WaterSystemInternal())
+end 
 GeneralPurposeValve(;
                     number = 1,
                     name="init",
