@@ -5,6 +5,7 @@ module WaterSystems
 
 # water system
 export System
+export _System
 export Component
 export WaterSystemType
 export WaterSystemDevice

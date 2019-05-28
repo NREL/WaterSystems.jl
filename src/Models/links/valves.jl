@@ -10,7 +10,7 @@ struct PressureReducingValve<:Valve
     pressure_drop::Union{Nothing,Float64}
     internal:: WaterSystemInternal
 end
-function PressureReducingValve(number, name, connectionspoints, status, diameter, pressure_drop)
+function PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop)
     PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop, WaterSystemInternal())
 end 
 
