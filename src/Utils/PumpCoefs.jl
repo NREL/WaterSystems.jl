@@ -17,7 +17,7 @@ function FlowHeadPower(wn_dict::Dict{Any,Any})
         try
             eff_curve = pump["efficiency"][:points]
         catch
-            wn_dict["options"]["energy"]["global_efficiency"] != nothing ? eff_curve = wn_dict["options"]["energy"]["global_efficiency"]: eff_curve = 0.65
+            wn_dict["options"]["energy"]["global_efficiency"] != nothing ? eff_curve = wn_dict["options"]["energy"]["global_efficiency"] : eff_curve = 0.65
         end
         len = max(length(pump_curve), length(eff_curve))
         flow = Array{Float64}(length(pump_curve))

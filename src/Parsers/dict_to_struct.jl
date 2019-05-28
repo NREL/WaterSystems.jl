@@ -36,7 +36,7 @@ function node_to_struct(data::Dict{String, Any})
 end
 
 function tank_to_struct(data::Dict{Int64,Any})
-    tanks = Array{RoundTank}(length(data))
+    tanks = Array{Union{Nothing,RoundTank}, 1}(nothing,length(data))
     for (ix,(key, t)) in enumerate(data)
         node = t["node"]
         junction = Junction(node["number"], node["name"], node["elevation"], node["head"], node["minimum_pressure"], node["coordinates"])
@@ -46,7 +46,7 @@ function tank_to_struct(data::Dict{Int64,Any})
 end
 
 function res_to_struct(data::Dict{Int64, Any})
-    res = Array{StorageReservoir}(length(data))
+    res = Array{Union{Nothing,StorageReservoir},1}(nothing,length(data))
     for (ix, (key, r)) in enumerate(data)
         node = r["node"]
         junction = Junction(node["number"], node["name"], node["elevation"], node["head"], node["minimum_pressure"], node["coordinates"])
@@ -56,7 +56,7 @@ function res_to_struct(data::Dict{Int64, Any})
 end
 
 function pipe_to_struct(data::Dict{Int64,Any})
-    pipes = Array{Pipe}(length(data))
+    pipes = Array{Union{Nothing,T} where T<:Pipe,1}(nothing,length(data))
     for (ix, (key, p)) in enumerate(data)
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
@@ -77,7 +77,7 @@ function pipe_to_struct(data::Dict{Int64,Any})
 end
 
  function valve_to_struct(data::Dict{Int64, Any})
-     valves = Array{PressureReducingValve}(length(data))
+     valves = Array{Union{Nothing,PressureReducingValve},1}(nothing,length(data))
      for (ix,(key, v)) in enumerate(data)
          #if v["valve_type"] == "PRV"
          #push!(valves, PressureReducingValve(...))
@@ -92,7 +92,7 @@ end
  end
 
 function pump_to_struct(data::Dict{Int64,Any})
-    pumps = Array{ConstSpeedPump}(length(data))
+    pumps = Array{Union{Nothing,ConstSpeedPump},1}(nothing, length(data))
     for (ix, (key, p)) in enumerate(data)
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
@@ -103,7 +103,7 @@ function pump_to_struct(data::Dict{Int64,Any})
     return pumps
 end
 function demand_to_struct(data::Dict{Int64,Any})
-    demands = Array{WaterDemand}(length(data))
+    demands = Array{Union{Nothing,WaterDemand},1}(nothing,length(data))
     for (key, d) in data
         node_data = d["node"]
         number = node_data["number"]
@@ -115,7 +115,7 @@ end
 
 
 function pipe_to_struct(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
-    pipes = Array{Pipe}(length(data))
+    pipes = Array{Union{Nothing,Pipe},1}(nothing, length(data))
     for (ix, (key, p)) in enumerate(data)
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
@@ -166,7 +166,7 @@ function pipe_to_struct(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
 end
 
 function pump_to_struct(data::Dict{Int64,Any}, Parameters::Dict{String,Any})
-    pumps = Array{ConstSpeedPump}(length(data))
+    pumps = Array{Union{Nothing,ConstSpeedPump},1}(nothing, length(data))
     for (ix, (key, p)) in enumerate(data)
         name = p["name"]
         j_from = p["connectionpoints"].from

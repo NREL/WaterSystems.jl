@@ -1,5 +1,5 @@
 include("UpdateExtrema.jl")
-function tank_triggers(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, controls_dict::Dict{Any,Any}, control_names::Base.KeyIterator{Dict{Any,Any}}, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, Hmax_dict::Dict{String, Float64}, Hmin_dict::Dict{String,Float64}, tight_coef::Float64, Q_lb::Float64)
+function tank_triggers(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, controls_dict::Dict{Any,Any}, control_names::Any, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, Hmax_dict::Dict{String, Float64}, Hmin_dict::Dict{String,Float64}, tight_coef::Float64, Q_lb::Float64)
     num_controls = length(control_names)
     for name in control_names
         if contains(controls_dict[name][:_condition][:name], "SimTime") == false && contains(controls_dict[name][:_condition][:name], "ClockTime") == false
@@ -38,7 +38,7 @@ function tank_level(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, Qmax_dict::Dict
     end
 end
 
-function tank_triggers_rand(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, controls_dict::Dict{Any,Any}, control_names::Base.KeyIterator{Dict{Any,Any}}, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, Hmax_dict::Dict{String, Float64}, Hmin_dict::Dict{String,Float64}, tight_coef::Float64, Q_lb::Float64)
+function tank_triggers_rand(wn::PyCall.PyObject, wn_dict::Dict{Any,Any}, controls_dict::Dict{Any,Any}, control_names::Any, Qmax_dict::Dict{String, Float64}, Qmin_dict::Dict{String,Float64}, Hmax_dict::Dict{String, Float64}, Hmin_dict::Dict{String,Float64}, tight_coef::Float64, Q_lb::Float64)
     controls_dict = wn_dict["controls"]
     control_names = keys(controls_dict)
     for name in control_names

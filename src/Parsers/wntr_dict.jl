@@ -4,10 +4,10 @@
 function wntr_dict(inp_file::String)
     wn = model.WaterNetworkModel(inp_file)
     wns =  sim.EpanetSimulator(wn)
-    results = wns[:run_sim]()
-    node_results = results[:node] #dictionary of head, pressure, demand, quality
-    link_results = results[:link] #dictionary of status, flowrate, velocity, {headloss, setting, friciton factor, reaction rate, link quality} = epanet simulator only
-    wntr_dict = wn[:todict]()
+    results = wns.run_sim()
+    node_results = results.node #dictionary of head, pressure, demand, quality
+    link_results = results.link #dictionary of status, flowrate, velocity, {headloss, setting, friciton factor, reaction rate, link quality} = epanet simulator only
+    wntr_dict = wn.todict()
     nodes = wntr_dict["nodes"]
     links = wntr_dict["links"]
     node_dicts(nodes, wntr_dict)
@@ -24,7 +24,7 @@ function link_dicts(links::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any, Any})
     pipe_dict = Dict{Int64, Any}()
     valve_dict = Dict{Int64, Any}()
     pump_dict = Dict{String, Any}()
-    control_pipe = Array{String}(0)
+    control_pipe = Array{String,1}()
     for (i, (name,control)) in enumerate(wntr_dict["controls"])
         target = control[:_then_actions][1][:_target_obj]
         target[:link_type] == "Pipe" ? push!(control_pipe, target[:name]) : nothing

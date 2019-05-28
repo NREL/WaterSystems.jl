@@ -154,13 +154,13 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
         #energy price
         price = wn["options"]["energy"]["global_price"] # Power  $/kW hrs
         pattern = wn["options"]["energy"]["global_pattern"]# $/kW hrs
-        price_array2 = Array{Any}(0)
+        price_array2 = Array{Any,1}()
 
         if price == 0.0
             # warn("Price is set to 0. Using randomly generated price array with higher weights during peak hours (4pm-8pm).")
             timeperiods_per_hour = 1/(timeperiods)
             #TO:DO check to make sure time_steps / hour is an int or divisor of 4
-            price_array = [2*rand(Int(timeperiods_per_hour*16))+1; 7*rand(Int(timeperiods_per_hour*4))+3; 2*rand(Int(timeperiods_per_hour*4))+3]
+            price_array = [2*rand(Int(timeperiods_per_hour*16))+ ones(Int(timeperiods_per_hour*16)); 7*rand(Int(timeperiods_per_hour*4))+3*ones(Int(timeperiods_per_hour*4)); 2*rand(Int(timeperiods_per_hour*4))+3*ones(Int(timeperiods_per_hour*4))]
             if duration_hours > 24
                 days = Int(duration_hours/24)
                 for i=1:days
@@ -169,7 +169,7 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
                 price_array = price_array2
             end
         elseif typeof(pattern) == Void
-            price_array = price * ones(length(time_ahead))
+            price_array = Float64(price) * ones(length(time_ahead))
         else
             price_array = price * pattern
             if duration_hours > 24
@@ -188,7 +188,7 @@ function pump_dict(wn::Dict{Any, Any}, data::Dict{String,Any}, pumps::Dict{Int64
         try
             efficiency = pump["efficiency"][:points]
         catch
-            wn["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn["options"]["energy"]["global_efficiency"]: efficiency = 0.65
+            wn["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn["options"]["energy"]["global_efficiency"] : efficiency = 0.65
         end
         #energy
 
