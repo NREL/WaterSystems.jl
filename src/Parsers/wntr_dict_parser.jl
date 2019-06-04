@@ -1,4 +1,3 @@
-
 include("wntr_dict.jl")
 function make_dict(inp_file::String)
     junctions = Dict{Int64,Any}()

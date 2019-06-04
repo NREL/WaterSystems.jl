@@ -1,4 +1,6 @@
-
+metric = pyimport("wntr.metrics.economic")
+model = pyimport("wntr.network.model") #import wntr network model
+sim = pyimport("wntr.sim.epanet")
 function wntr_dict(inp_file::String)
     wn = model.WaterNetworkModel(inp_file)
     wns =  sim.EpanetSimulator(wn)
