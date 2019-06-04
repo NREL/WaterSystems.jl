@@ -57,6 +57,10 @@ export build_incidence_null
 export dict_to_struct
 export make_dict
 export wntr_dict
+#pycall 
+export model
+export sim
+export metric
 
 
 #################################################################################
