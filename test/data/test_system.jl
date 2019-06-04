@@ -10,7 +10,7 @@ junctions = [   Junction(number=2,name="J2",elevation=20, head = 20.0, minimum_p
 tanks = [ RoundTank("T1", junctions[4], (min = 0.0, max = 2500.0), 10.0, 500.0, pi*25, 200/(10*pi), (min=0.0, max=1000/(10*pi)))];
 
 reservoirs = [SourceReservoir("R1",junctions[1],0)];
-nodes = vcat(junctions,storages,sources)
+nodes = vcat(junctions,tanks,reservoirs)
 
 
 pipes = [   ReversibleFlowPipe(1,"P1", (from=junctions[4],to=junctions[3]), 0.6, 100.0, 200.0, 2.0, 10.0, 1),

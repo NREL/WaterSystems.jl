@@ -74,7 +74,7 @@ StandardPositiveFlowPipe(;
             initial_status = 0,
             flow_limits = (Qmin = 0.0, Qmax =0.0),
             headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-            ) = PositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, control_pipe, flow_direction, flow_limits, headloss_parameters)
+            ) = StandardPositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, control_pipe, flow_direction, flow_limits, headloss_parameters)
 
 NegativeFlowPipe(;
             number = 1,

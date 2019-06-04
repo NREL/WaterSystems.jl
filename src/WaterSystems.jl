@@ -57,11 +57,6 @@ export build_incidence_null
 export dict_to_struct
 export make_dict
 export wntr_dict
-#pycall 
-export model
-export sim
-export metric
-
 
 #################################################################################
 # Imports
@@ -75,10 +70,11 @@ using PyCall
 using CurveFit
 using SparseArrays
 using LinearAlgebra
-#pyimport stuff
+
 metric = pyimport("wntr.metrics.economic")
 model = pyimport("wntr.network.model") #import wntr network model
 sim = pyimport("wntr.sim.epanet")
+
 abstract type WaterSystemDevice end
 #Models
 include("Models/topological_elements.jl")
@@ -113,7 +109,7 @@ include("Parsers/wntr_dict.jl")
 include("Parsers/wntr_dict_parser.jl")
 include("Parsers/dict_to_struct.jl")
 
-# __precompile__() # this module is NOT safe to precompile
+#__precompile__() # this module is NOT safe to precompile
 
 try
     pyimport("wntr")
