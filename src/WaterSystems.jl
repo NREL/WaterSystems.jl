@@ -9,6 +9,10 @@ export WaterSystem
 # network
 export Network
 
+#Classes
+# export NodeClasses
+# export LinkClasses
+
 # pumps
 export ConstSpeedPump
 
@@ -34,6 +38,8 @@ export CheckValvePipe
 export ControlPipe
 export PressureReducingValve
 export GateValve
+#sources 
+export SourceReservoir
 # demands
 export WaterDemand
 
@@ -50,6 +56,7 @@ export build_incidence_null
 export dict_to_struct
 export make_dict
 export wntr_dict
+
 
 #################################################################################
 # Imports

@@ -9,16 +9,16 @@ struct RoundTank <: Tank
     node::Junction
     volumelimits::Union{NamedTuple{(:min, :max), Tuple{Float64, Float64}},Nothing} #m^3
     diameter::Float64 #m
-    volume::Union{Nothing,Float64} #m^3
-    area::Union{Nothing,Float64} #m^2
-    level::Union{Nothing,Float64} #m initial level
+    volume::Union{Nothing,Int64,Float64} #m^3
+    area::Union{Nothing,Int64,Float64} #m^2
+    level::Union{Nothing,Int64, Float64} #m initial level
     levellimits::Union{NamedTuple{(:min, :max), Tuple{Float64, Float64}},Nothing} #m
     #vol_curve::Union{Nothing,NamedTuple}
 end
 
 # RoundTank with diameter and levels
-function RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
-    RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
+function RoundTank(name::String, node::Junction, volumelimits::Union{NamedTuple{(:min, :max), Tuple{Float64, Float64}},Nothing}, diameter::Union{Int64, Float64}, volume::Union{Nothing,Int64, Float64}, area::Union{Nothing,Int64, Float64}, level::Union{Nothing,Float64, Int64}, levellimits::Union{NamedTuple{(:min, :max), Tuple{Float64, Float64}},Nothing})
+    return RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
 end
 
 function RoundTank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
