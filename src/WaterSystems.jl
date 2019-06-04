@@ -11,8 +11,8 @@ export WaterSystem
 export Network
 
 #Classes
-# export NodeClasses
-# export LinkClasses
+export NodeClasses
+export LinkClasses
 
 # pumps
 export ConstSpeedPump

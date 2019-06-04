@@ -26,7 +26,7 @@ pumps = [ConstSpeedPump(1,"PMP1",(from=junctions[5],to=junctions[4]), 1,
                         [(0.0,350.0),(400.0,328.0),(800.0,295.0),(1400.0,260.0),(1600.0,245.0),(1800.0,225.0),(2200.0,153.0)],
                         0.85,TimeSeries.TimeArray(DayAhead, elec_price))]
 
-demands = [ WaterDemand("D1", 1, junctions[3],10.0,TimeSeries.TimeArray(DayAhead, rand(24)))];
+demands = [ WaterDemand("D1", 1, junctions[3],true, 10.0, TimeSeries.TimeArray(DayAhead, rand(24)), TimeSeries.TimeArray(DayAhead, rand(24)))];
 #demand = TimeSeries.TimeArray(DayAhead, rand(length(DayAhead))), demandforcast = TimeSeries.TimeArray(DayAhead, rand(length(DayAhead)))
 
 
