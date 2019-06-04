@@ -3,8 +3,8 @@ DayAhead  = collect(DateTime("1/1/2024  0:00:00", "d/m/y  H:M:S"):Hour(1):DateTi
 junctions = [   Junction(number=2,name="J2",elevation=20, head = 20.0, minimum_pressure=1, coordinates = (lat = 0.0,lon = 0.0)),
                 Junction(number=3,name="J3",elevation=18, head = 20.0, minimum_pressure=1, coordinates = (lat = 0.0,lon = 0.0)),
                 Junction(number=4,name="J4",elevation=10, head = 20.0, minimum_pressure=1, coordinates = (lat = 0.0,lon = 0.0)),
-                Junction(number=1,name="T1",elevation=320,head = 20.0, minimum_pressure=1, coordinates = (lat = 0.0,lon = 0.0)),
-                Junction(number=5,name="R1",elevation=0,  head = 50.0, minimum_pressure=1, coordinates = (lat = 0.0,lon = 0.0))
+                Junction(number=1,name="TJ1",elevation=320,head = 20.0, minimum_pressure=1, coordinates = (lat = 0.0,lon = 0.0)),
+                Junction(number=5,name="RJ1",elevation=0,  head = 50.0, minimum_pressure=1, coordinates = (lat = 0.0,lon = 0.0))
             ];
 
 tanks = [ RoundTank("T1", junctions[4], (min = 0.0, max = 2500.0), 10.0, 500.0, pi*25, 200/(10*pi), (min=0.0, max=1000/(10*pi)))];
@@ -33,8 +33,6 @@ demands = [ WaterDemand("D1", 1, junctions[3],true, 10.0, TimeSeries.TimeArray(D
 simulations = Simulation(24, 1.0, 24, DateTime(2013,7,10), DateTime(2013,7,11))
 links = vcat(pipes,valves, pumps)
 link_classes = LinkClasses(links, pipes, pumps, valves)
-nodes =  vcat(junctions, [tank.node for tank in tanks])
-nodes = vcat(nodes, [res.node for res in reservoirs])
-node_classes = NodeClasses(nodes, junctions, tanks, reservoirs)
-net = Network(nodes,links)
+node_classes = NodeClasses(junctions, junctions[1:3], tanks, reservoirs)
+net = Network(junctions,links)
 system = WaterSystem(node_classes, link_classes, demands)
