@@ -13,13 +13,12 @@ struct RoundTank <: Tank
     area::Union{Nothing,Float64} #m^2
     level::Union{Nothing,Float64} #m initial level
     levellimits::Union{NamedTuple{(:min, :max), Tuple{Float64, Float64}},Nothing} #m
-    internal:: WaterSystemInternal
     #vol_curve::Union{Nothing,NamedTuple}
 end
 
 # RoundTank with diameter and levels
 function RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
-    RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits, WaterSystemInternal())
+    RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
 end
 
 function RoundTank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
@@ -34,13 +33,5 @@ struct StorageReservoir <: Storage
     name::String
     node::Junction
     elevation::Float64
-    internal:: WaterSystemInternal
     #head_timeseries::TimeSeries.TimeArray
 end
-
-function StorageReservoir(name, node, elevation)
-    StorageReservoir(name, node, elevation, WaterSystemInternal())
-end 
-
-StorageReservoir(;name::String, node::Junction, elevation::Float64) = StorageReservoir(name, node, elevation)
-

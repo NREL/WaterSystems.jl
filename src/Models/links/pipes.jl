@@ -14,7 +14,6 @@ struct StandardPositiveFlowPipe <: PositiveFlowPipe
     initial_status:: Int64
     flow_limits:: NamedTuple{(:Qmin, :Qmax), Tuple{Float64, Float64}}
     headloss_parameters:: Array{NamedTuple{(:flow, :slope, :intercept), Tuple{Float64, Float64, Float64}}} #Q, a, b
-    internal:: WaterSystemInternal
 end
 
 struct NegativeFlowPipe <: RegularPipe
@@ -29,7 +28,6 @@ struct NegativeFlowPipe <: RegularPipe
     initial_status:: Int64
     flow_limits:: NamedTuple{(:Qmin, :Qmax), Tuple{Float64, Float64}}
     headloss_parameters:: Array{NamedTuple{(:flow, :slope, :intercept), Tuple{Float64, Float64, Float64}}}
-    internal:: WaterSystemInternal
 end
 
 struct ReversibleFlowPipe <: RegularPipe
@@ -44,7 +42,6 @@ struct ReversibleFlowPipe <: RegularPipe
     initial_status:: Int64
     flow_limits:: NamedTuple{(:Qmin, :Qmax), Tuple{Float64, Float64}}
     headloss_parameters:: Array{NamedTuple{(:flow, :slope, :intercept), Tuple{Float64, Float64, Float64}}}
-    internal:: WaterSystemInternal
 end
 struct CheckValvePipe <: PositiveFlowPipe
     number::Int64
@@ -58,13 +55,11 @@ struct CheckValvePipe <: PositiveFlowPipe
     initial_status:: Int64
     flow_limits:: NamedTuple{(:Qmin, :Qmax), Tuple{Float64, Float64}}
     headloss_parameters:: Array{NamedTuple{(:flow, :slope, :intercept), Tuple{Float64, Float64, Float64}}}
-    internal:: WaterSystemInternal
 end
 
 struct ControlPipe{T} <:Pipe where T<:Array{<:RegularPipe}
     pipe::T
     valve:: GateValve
-    internal:: WaterSystemInternal
 end
 
 StandardPositiveFlowPipe(;
@@ -132,24 +127,24 @@ ControlPipe(;
 function StandardPositiveFlowPipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     flow_limits = (Qmin = 0.0, Qmax =0.0)
     headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return PositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters, WaterSystemInternal())
+    return PositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
 end
 
 function NegativeFlowPipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     flow_limits = (Qmin = 0.0, Qmax =0.0)
     headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return NegativeFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters, WaterSystemInternal())
+    return NegativeFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
 end
 
 function ReversibleFlowPipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     flow_limits = (Qmin = 0.0, Qmax =0.0)
     headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return ReversibleFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters, WaterSystemInternal())
+    return ReversibleFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
 end
 
 function CheckValvePipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64,
                     roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     flow_limits = (Qmin = 0.0, Qmax =0.0)
     headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return CheckValvePipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters, WaterSystemInternal())
+    return CheckValvePipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
 end

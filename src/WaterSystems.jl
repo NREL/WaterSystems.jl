@@ -4,12 +4,7 @@ module WaterSystems
 # Exports
 
 # water system
-export System
-export Component
-export WaterSystemType
-export WaterSystemDevice
-export Component
-
+export WaterSystem
 
 # network
 export Network
@@ -56,12 +51,9 @@ export dict_to_struct
 export make_dict
 export wntr_dict
 
-##Internal 
-export WaterSystemsInternal
-
 #################################################################################
 # Imports
-using UUIDs
+
 using TimeSeries
 using DataFrames
 # This packages will be removed with Julia v0.7
@@ -75,15 +67,7 @@ using LinearAlgebra
 metric = pyimport("wntr.metrics.economic")
 model = pyimport("wntr.network.model") #import wntr network model
 sim = pyimport("wntr.sim.epanet")
-""" Supertype for all WaterSystems tupes. All subtypes must include a 
-WaterSystemsInternal member. Subtypes should call WaterSystemsInternal() by default, but also must provide a constructor
-that allows existing values to be deserialized. """
-
-abstract type WaterSystemType end 
-abstract type Component <: WaterSystemType end
-abstract type WaterSystemDevice <: Component end
-#Internal
-include("Internal.jl")
+abstract type WaterSystemDevice end
 #Models
 include("Models/topological_elements.jl")
 include("Models/storage.jl")

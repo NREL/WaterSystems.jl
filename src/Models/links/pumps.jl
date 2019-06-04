@@ -7,7 +7,6 @@ struct ConstSpeedPump<:Pump
     efficiency::Union{Nothing,Float64, Array{Tuple{Float64,Float64}}} #% or curve Q: m^3/sec eff: %*100
     energyprice::TimeSeries.TimeArray #$/kW hrs
     power_parameters::Array{NamedTuple{(:flow, :power, :slope, :intercept), Tuple{Float64, Float64, Float64, Float64}}}
-    internal:: WaterSystemInternal
 end
 
 # function pump curves
@@ -20,7 +19,7 @@ ConstSpeedPump(
     efficiency::Union{Nothing,Float64},
     energyprice::TimeSeries.TimeArray,
     power_parameters::Array{NamedTuple{(:flow, :power, :slope, :intercept), Tuple{Float64, Float64, Float64, Float64}}}
-    ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, power_parameters, WaterSystemInternal())
+    ) = ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, power_parameters)
 
 #aPWL pump curves
 # ConstSpeedPump(
@@ -48,5 +47,5 @@ ConstSpeedPump(
 
 function ConstSpeedPump(number::Int64, name::String, connectionpoints::NamedTuple{(:from, :to), Tuple{Junction, Junction}}, status::Int64, pumpcurve::Union{Function,Array{Tuple{Float64,Float64}}}, efficiency::Union{Nothing,Float64, Array{Tuple{Float64,Float64}}}, energyprice::TimeSeries.TimeArray)
     power_parameters = [(flow = 0.0, power = 0.0, slope = 0.0, intercept = 0.0)]
-    return ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, power_parameters, WaterSystemInternal())
+    return ConstSpeedPump(number, name, connectionpoints, status, pumpcurve, efficiency, energyprice, power_parameters)
 end
