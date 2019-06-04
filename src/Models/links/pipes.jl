@@ -127,7 +127,7 @@ ControlPipe(;
 function StandardPositiveFlowPipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     flow_limits = (Qmin = 0.0, Qmax =0.0)
     headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return PositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
+    return StandardPositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
 end
 
 function NegativeFlowPipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
