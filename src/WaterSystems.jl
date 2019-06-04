@@ -1,3 +1,4 @@
+
 module WaterSystems
 
 #################################################################################
@@ -110,40 +111,40 @@ include("Parsers/dict_to_struct.jl")
 
 # __precompile__() # this module is NOT safe to precompile
 
-# try
-#     pyimport("wntr")
-# catch
+try
+    pyimport("wntr")
+catch
 
-#     PACKAGES = ["wntr"]
+    PACKAGES = ["wntr"]
 
-#     # Import pip
-#     try
-#         pyimport("pip")
-#     catch
-#         # If it is not found, install it
-#         get_pip = joinpath(dirname(@__FILE__), "get-pip.py")
-#         download("https://bootstrap.pypa.io/get-pip.py", get_pip)
-#         run(`$(PyCall.python) $get_pip --user`)
-#     end
+    # Import pip
+    try
+        pyimport("pip")
+    catch
+        # If it is not found, install it
+        get_pip = joinpath(dirname(@__FILE__), "get-pip.py")
+        download("https://bootstrap.pypa.io/get-pip.py", get_pip)
+        run(`$(PyCall.python) $get_pip --user`)
+    end
 
-#     pyimport("pip")
+    pyimport("pip")
 
-#     args = []
-#     if haskey(ENV, "http_proxy")
-#         push!(args, "--proxy")
-#         push!(args, ENV["http_proxy"])
-#     end
-#     push!(args, "install")
-#     push!(args, "--user")
-#     append!(args, PACKAGES)
+    args = []
+    if haskey(ENV, "http_proxy")
+        push!(args, "--proxy")
+        push!(args, ENV["http_proxy"])
+    end
+    push!(args, "install")
+    push!(args, "--user")
+    append!(args, PACKAGES)
 
-#     pip.main(args)
+    pip.main(args)
 
 
-# end
-# wntr = PyNULL()
-# function __init__()
-#     copy!(wntr, pyimport("wntr"))
-# end
+end
+wntr = PyNULL()
+function __init__()
+    copy!(wntr, pyimport("wntr"))
+end
 
 end # module

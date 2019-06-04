@@ -1,13 +1,10 @@
 include("../src/WaterSystems.jl")
-#using WaterSystems
-include("../src/WaterSystems.jl")
-using Base.Test
+using Test
 using TimeSeries
 using DataFrames
-using NamedTuples
 
 # write your own tests here
-tic()
+
 println("Read data from WNTR networks 1, 2, and 3.")
 @time @test include("readnetworkdata.jl")
 println("Test all constructors.")
@@ -19,4 +16,4 @@ println("Test WaterSystem struct.")
 println("Test wntr parser.")
 @time @test include("test_dict_parser.jl")
 @test true
-toc()
+
