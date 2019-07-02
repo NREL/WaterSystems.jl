@@ -1,5 +1,5 @@
-folder = readdir("test/data/epanetfiles")
-files = [joinpath("test/data/epanetfiles", folder[i]) for i =1:length(folder)]
+folder = readdir(joinpath(DATA_DIR, "epanetfiles"))
+files = [joinpath(DATA_DIR, "epanetfiles", folder[i]) for i =1:length(folder)]
 for f in files
     try
         @time data = wntr_dict(f)

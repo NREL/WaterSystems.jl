@@ -1,3 +1,6 @@
+using Dates
+using TimeSeries
+
 DayAhead  = collect(DateTime("1/1/2024  0:00:00", "d/m/y  H:M:S"):Hour(1):DateTime("1/1/2024  23:00:00", "d/m/y  H:M:S"))
 
 junctions = [   Junction(number=2,name="J2",elevation=20, head = 20.0, minimum_pressure=1, coordinates = (lat = 0.0,lon = 0.0)),

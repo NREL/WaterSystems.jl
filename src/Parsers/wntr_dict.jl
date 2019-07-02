@@ -15,6 +15,7 @@ function wntr_dict(inp_file::String)
     wntr_dict["wn"] = wn
 
     curves_dict(wntr_dict)
+    wntr_dict = convert(Dict{String,Any}, wntr_dict) # TODO: this is hacky and shouldn't be required, fix this by creating the correct dict from the wntr call
     return wntr_dict
 end
 

@@ -1,7 +1,7 @@
 
 pump  = WaterSystems.ConstSpeedPump
 tank = WaterSystems.RoundTank
-reservoir = WaterSystems.Reservoir
+reservoir = WaterSystems.SourceReservoir
 junction = WaterSystems.Junction
 pipes = WaterSystems.RegularPipe
 valves = WaterSystems.PressureReducingValve
