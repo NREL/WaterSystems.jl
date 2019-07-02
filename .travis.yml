@@ -1,21 +1,21 @@
-## Documentation: http://docs.travis-ci.com/user/languages/julia/
+## Documentation: http://docs.travis-ci.org/user/languages/julia/
 language: julia
 os:
   - linux
   - osx
 julia:
-  - 0.6
+  - 1.1
   - nightly
+
 notifications:
   email: false
-git:
-  depth: 99999999
 
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
-#matrix:
-#  allow_failures:
-#  - julia: nightly
+matrix:
+  allow_failures:
+  - julia: nightly
+  - os: osx
 
 ## uncomment and modify the following lines to manually install system packages
 #addons:
@@ -26,10 +26,21 @@ git:
 #  - if [ $TRAVIS_OS_NAME = osx ]; then brew install gcc; fi
 
 ## uncomment the following lines to override the default test script
-#script:
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("WaterSystems"); Pkg.test("WaterSystems"; coverage=true)'
+script:
+  - julia .continuous-integration/check_generated_structs.jl
+  - julia --project --color=yes -e "import Pkg; Pkg.instantiate(); Pkg.build();"
+  - julia --check-bounds=yes --depwarn=no --color=yes --project -e "import Pkg; Pkg.test(coverage=true);"
+
 after_success:
-  # push coverage results to Coveralls
-  - julia -e 'cd(Pkg.dir("WaterSystems")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
-  # push coverage results to Codecov
-  - julia -e 'cd(Pkg.dir("WaterSystems")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'using Pkg; cd(Pkg.dir("PowerSystems")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+
+jobs:
+  include:
+    - stage: "Documentation"
+      julia: 1.0
+      os: linux
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.build("PowerSystems"); Pkg.instantiate()'
+        - DOCUMENTER_DEBUG=true julia --project=docs/ docs/make.jl
+      after_success: skip
+
