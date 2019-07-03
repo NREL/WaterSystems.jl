@@ -51,12 +51,11 @@ end
 
 function node_dicts(nodes::Array{Dict{Any, Any},1}, wntr_dict::Dict{Any,Any})
     junction_dict= Dict{Int64, Any}()
-    tank_dict = Dict{String, Any}()
+    tank_dict = Dict{Int64, Any}() # can this be 
     reservoir_dict = Dict{Int64, Any}()
-    nodes_name = Dict{String,Any}()
-    for node in nodes
-        name = node["name"]
-        nodes_name[name] = node
+    nodes_name = Dict{Int64,Any}()
+    for (n,node) in enumerate(nodes)
+        nodes_name[n] = node
         if node["node_type"] == "Junction"
             i = length(junction_dict) + 1
             junction_dict[i] = node

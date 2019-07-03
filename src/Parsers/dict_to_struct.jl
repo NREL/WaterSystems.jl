@@ -1,37 +1,39 @@
 function dict_to_struct(data::Dict{String,Any})
-    haskey(data, "Junction") ? junctions = junction_to_struct(data["Junction"]) : warn("Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array")
-    haskey(data, "Node") ? nodes = node_to_struct(data["Node"]) : warn("Key Error : key 'Node' not found in WaterSystems dictionary, this will result in an empty Node array")
-    haskey(data, "Tank") ? tanks = tank_to_struct(data["Tank"]) : warn("Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array")
-    haskey(data, "Reservoir") ? res = res_to_struct(data["Reservoir"]) : warn("Key Error : key 'Reservoir' not found in WaterSystems dictionary, this will result in an empty Reservoir array")
-    haskey(data, "Pipe") ? pipes = pipe_to_struct(data["Pipe"]) : warn("Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array")
-    haskey(data, "Valve") ? valves = valve_to_struct(data["Valve"]) : warn("Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array")
-    haskey(data, "Pump") ? pumps = pump_to_struct(data["Pump"]) : warn("Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pump array")
-    haskey(data, "demand") ? demands = demand_to_struct(data["demand"]) : warn("Key Error : key 'demand' not found in WaterSystems dictionary, this will result in an empty demand array")
-    d = data["wntr"]
-    simulations = Simulation(d["duration"], d["timeperiods"], d["num_timeperiods"], d["start"], d["end"])
+    haskey(data, "junctions") ? junctions = junction_to_struct(data["junctions"]) : @warn "Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array"
+    # TODO: is the nodes parsing required? It's not working because it's trying to make Junctions out of elements that are not junctions
+    #haskey(data, "nodes") ? nodes = node_to_struct(data["nodes"]) : @warn "Key Error : key 'Node' not found in WaterSystems dictionary, this will result in an empty Node array"
+    haskey(data, "tanks") ? tanks = tank_to_struct(data["tanks"]) : @warn "Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array"
+    haskey(data, "reservoirs") ? res = res_to_struct(data["reservoirs"]) : @warn "Key Error : key 'Reservoir' not found in WaterSystems dictionary, this will result in an empty Reservoir array"
+    haskey(data, "pipes") ? pipes = pipe_to_struct(data["pipes"]) : @warn "Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array"
+    haskey(data, "valves") ? valves = valve_to_struct(data["valves"]) : @warn "Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array"
+    haskey(data, "pumps") ? pumps = pump_to_struct(data["pumps"]) : @warn "Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pump array"
+    haskey(data, "demand") ? demands = demand_to_struct(data["demand"]) : @warn "Key Error : key 'demand' not found in WaterSystems dictionary, this will result in an empty demand array"
+    #d = data["wntr"] #TODO : I don't know what this is
+    simulations = nothing #Simulation(data["duration"], data["timeperiods"], data["num_timeperiods"], data["start"], data["end"])
     return junctions, tanks, res, pipes, valves, pumps, demands, simulations
 end
 function dict_to_struct(data::Dict{String,Any}, n::Int64, Q_lb::Float64, logspace_ratio::Float64, dH_critical::Float64, dense_coef::Float64, tight_coef::Float64)
     Parameters = Parameterize(data["wntr_dict"], n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
-    haskey(data, "Junction") ? junctions = junction_to_struct(data["Junction"]) : warn("Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array")
-    haskey(data, "Node") ? nodes = node_to_struct(data["Node"]) : warn("Key Error : key 'Node' not found in WaterSystems dictionary, this will result in an empty Node array")
-    haskey(data, "Tank") ? tanks = tank_to_struct(data["Tank"]) : warn("Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array")
-    haskey(data, "Reservoir") ? res = res_to_struct(data["Reservoir"]) : warn("Key Error : key 'Reservoir' not found in WaterSystems dictionary, this will result in an empty Reservoir array")
-    haskey(data, "Pipe") ? pipes = pipe_to_struct(data["Pipe"], Parameters) : warn("Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array")
-    haskey(data, "Valve") ? valves = valve_to_struct(data["Valve"]) : warn("Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array")
-    haskey(data, "Pump") ? pumps = pump_to_struct(data["Pump"], Parameters) : warn("Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pump array")
-    haskey(data, "demand") ? demands = demand_to_struct(data["demand"]) : warn("Key Error : key 'demand' not found in WaterSystems dictionary, this will result in an empty demand array")
-    d = data["wntr"]
+    haskey(data, "Junction") ? junctions = junction_to_struct(data["Junction"]) : @warn "Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array"
+    haskey(data, "Node") ? nodes = node_to_struct(data["Node"]) : @warn "Key Error : key 'Node' not found in WaterSystems dictionary, this will result in an empty Node array"
+    haskey(data, "Tank") ? tanks = tank_to_struct(data["Tank"]) : @warn "Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array"
+    haskey(data, "Reservoir") ? res = res_to_struct(data["Reservoir"]) : @warn "Key Error : key 'Reservoir' not found in WaterSystems dictionary, this will result in an empty Reservoir array"
+    haskey(data, "Pipe") ? pipes = pipe_to_struct(data["Pipe"], Parameters) : @warn "Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array"
+    haskey(data, "Valve") ? valves = valve_to_struct(data["Valve"]) : @warn "Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array"
+    haskey(data, "Pump") ? pumps = pump_to_struct(data["Pump"], Parameters) : @warn "Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pump array"
+    haskey(data, "demand") ? demands = demand_to_struct(data["demand"]) : @warn "Key Error : key 'demand' not found in WaterSystems dictionary, this will result in an empty demand array"
+    #d = data["wntr"] #TODO : I don't know what this is
     simulations = Simulation(d["duration"], d["timeperiods"], d["num_timeperiods"], d["start"], d["end"])
     return junctions, tanks, res, pipes, valves, pumps, demands, simulations
 end
 
 function junction_to_struct(data::Dict{Int64,Any})
-    junctions = [Junction(j["number"], j["name"], j["elevation"], j["head"], j["minimum_pressure"], j["coordinates"]) for (key,j) in data]
+    junctions = [Junction(key, j["name"], j["elevation"], j["head"], j["minimum_pressure"], (lat = j["coordinates"][1], lon = j["coordinates"][2])) for (key,j) in data]
     return junctions
 end
-function node_to_struct(data::Dict{String, Any})
-    nodes = [Junction(j["number"], j["name"], j["elevation"], j["head"], j["minimum_pressure"], j["coordinates"]) for (key,j) in data]
+
+function node_to_struct(data::Dict{Int64, Any}) # TODO: Is this required?
+    nodes = [Junction(key, j["name"], j["elevation"], j["head"], j["minimum_pressure"], (lat = j["coordinates"][1], lon = j["coordinates"][2])) for (key,j) in data]
     return nodes
 end
 
