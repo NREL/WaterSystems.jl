@@ -33,19 +33,6 @@ struct WaterSystem
     links::LinkClasses
     demands::Array{WaterDemand,1}
 end
-#TODO: Do we need all the simulation information? ASM 
-# struct WaterSystem 
-#     nodes::Vector{Junction}
-#     links::Vector{<:Link}
-#     storage::Union{Nothing, Vector{<:Storage}}
-#     demand:: Vector{WaterDemand}
-#     simulation:: Simulation 
-# end
-
-# function WaterSystem(nodes, links, storage, demand, simulation)
-#     sys = new(nodes, links, storage, demand, simulation)
-#     return sys
-# end
 
 struct Network
     incidence::Incidence
@@ -61,23 +48,11 @@ end
 
 function WaterSystem(inp_file::String)
     data = make_dict(inp_file)
-    junctions, tanks, reservoirs, pipes, valves, pumps, demands, simulations = dict_to_struct(data)
+    nodes, tanks, reservoirs, pipes, valves, pumps, demands, simulations = dict_to_struct(data)
     links = vcat(pipes,valves,pumps)
     link_classes = LinkClasses(links, pipes, pumps, valves)
-    nodes =  vcat(junctions, [tank.node for tank in tanks])
-    nodes = vcat(nodes, [res.node for res in reservoirs])
-    node_classes = NodeClasses(nodes, junctions, tanks, reservoirs)
-    net = Network(nodes,links)
-    return WaterSystem(node_classes, link_classes, demands), simulations, net
-end
-
-function WaterSystem(inp_file::String, n::Int64, Q_lb::Float64, logspace_ratio::Float64, dH_critical::Float64, dense_coef::Float64, tight_coef::Float64)
-    data = make_dict(inp_file)
-    junctions, tanks, reservoirs, pipes, valves, pumps, demands, simulations = dict_to_struct(data, n, Q_lb, logspace_ratio, dH_critical, dense_coef, tight_coef)
-    links = vcat(pipes, valves, pumps)
-    link_classes = LinkClasses(links, pipes, pumps, valves)
-    nodes =  vcat(junctions, [tank.node for tank in tanks])
-    nodes = vcat(nodes, [res.node for res in reservoirs])
+    junctions_index = length(nodes) - length(tanks) - length(reservoirs) # junctions that aren't tanks/reservoirs
+    junctions = nodes[1:junctions_index]
     node_classes = NodeClasses(nodes, junctions, tanks, reservoirs)
     net = Network(nodes,links)
     return WaterSystem(node_classes, link_classes, demands), simulations, net

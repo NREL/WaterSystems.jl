@@ -2,7 +2,6 @@
 
 # WNTR valve = PRValve
 struct PressureReducingValve<:Valve
-    number::Int64 #for incidence matrix
     name::String
     connectionpoints::NamedTuple{(:from, :to), Tuple{Junction, Junction}} # for topology of network and knowing what connects to what
     status::String #open/closed/active
@@ -11,13 +10,12 @@ struct PressureReducingValve<:Valve
 end
 
 PressureReducingValve(;
-                    number = 1,
                     name="init",
                     connectionpoints= (from = Junction(), to = Junction()),
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
-                    ) = PressureReducingValve(number, name, connectionpoints, status, diameter, pressure_drop)
+                    ) = PressureReducingValve(name, connectionpoints, status, diameter, pressure_drop)
 
 struct GateValve <: Valve
     status::Int64
@@ -32,7 +30,6 @@ GateValve(;
 
 # WNTR valve = PSValve
 struct PressureSustainingValve<:Valve
-    number::Int64
     name::String
     connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     status::String
@@ -41,17 +38,15 @@ struct PressureSustainingValve<:Valve
 end
 
 PressureSustainingValve(;
-                    number = 1,
                     name="init",
                     connectionpoints= (from = Junction(), to = Junction()),
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
-                    ) = PressureSustainingValve(number, name, connectionpoints, status, diameter, pressure_drop)
+                    ) = PressureSustainingValve(name, connectionpoints, status, diameter, pressure_drop)
 
 # WNTR valve = PBValve
 struct PressureBreakerValve<:Valve
-    number::Int64
     name::String
     connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     status::String
@@ -60,17 +55,15 @@ struct PressureBreakerValve<:Valve
 end
 
 PressureBreakerValve(;
-                    number = 1,
                     name="init",
                     connectionpoints= (from = Junction(), to = Junction()),
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
-                    ) = PressureBreakerValve(number, name, connectionpoints, status, diameter, pressure_drop)
+                    ) = PressureBreakerValve(name, connectionpoints, status, diameter, pressure_drop)
 
 # WNTR valve = FCValve
 struct FlowControlValve<:Valve
-    number::Int64
     name::String
     connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     status::String
@@ -79,17 +72,15 @@ struct FlowControlValve<:Valve
 end
 
 FlowControlValve(;
-                    number = 1,
                     name="init",
                     connectionpoints= (from = Junction(), to = Junction()),
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
-                    ) = FlowControlValve(number, name, connectionpoints, status, diameter, pressure_drop)
+                    ) = FlowControlValve(name, connectionpoints, status, diameter, pressure_drop)
 
 # WNTR valve = TCValve
 struct ThrottleControlValve<:Valve
-    number::Int64
     name::String
     connectionpoints::NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     status::String
@@ -98,17 +89,15 @@ struct ThrottleControlValve<:Valve
 end
 
 ThrottleControlValve(;
-                    number = 1,
                     name="init",
                     connectionpoints= (from = Junction(), to = Junction()),
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
-                    ) = ThrottleControlValve(number, name, connectionpoints, status, diameter, pressure_drop)
+                    ) = ThrottleControlValve(name, connectionpoints, status, diameter, pressure_drop)
 
 # WNTR valve = GPValve
 struct GeneralPurposeValve<:Valve
-    number::Int64
     name::String
     connectionpoints::NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     status::String
@@ -117,10 +106,9 @@ struct GeneralPurposeValve<:Valve
 end
 
 GeneralPurposeValve(;
-                    number = 1,
                     name="init",
                     connectionpoints= (from = Junction(), to = Junction()),
                     status="Closed",
                     diameter=1.0,
                     pressure_drop=nothing
-                    ) = GeneralPurposeValve(number, name, connectionpoints, status, diameter, pressure_drop)
+                    ) = GeneralPurposeValve(name, connectionpoints, status, diameter, pressure_drop)

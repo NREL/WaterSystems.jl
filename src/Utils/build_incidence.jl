@@ -2,10 +2,10 @@ function build_incidence(nodes::Array{Junction}, links::Array{T}) where T<:Link
 
     linkcount = length(links)
     nodecount = length(nodes)
-    num_junc = Dict{Int,Int}() #maps the junction number to row in incidence matrix
+    num_junc = Dict{String,Int}() #maps the junction number to row in incidence matrix
     link_axis = Array{String,1}()
     for (ix, junction) in enumerate(nodes)
-        num_junc[junction.number] = ix
+        num_junc[junction.name] = ix
     end 
 
     A = zeros(Int64,nodecount,linkcount)
@@ -14,14 +14,14 @@ function build_incidence(nodes::Array{Junction}, links::Array{T}) where T<:Link
    #incidence_matrix = A
     for (ix,b) in enumerate(links)
         if typeof(b) <: ControlPipe
-            A[num_junc[b.pipe.connectionpoints.from.number], ix] =  1;
+            A[num_junc[b.pipe.connectionpoints.from.name], ix] =  1;
 
-            A[num_junc[b.pipe.connectionpoints.to.number], ix] = -1;
+            A[num_junc[b.pipe.connectionpoints.to.name], ix] = -1;
             push!(link_axis, b.pipe.name)
         else 
-            A[num_junc[b.connectionpoints.from.number], ix] =  1;
+            A[num_junc[b.connectionpoints.from.name], ix] =  1;
 
-            A[num_junc[b.connectionpoints.to.number], ix] = -1;
+            A[num_junc[b.connectionpoints.to.name], ix] = -1;
             push!(link_axis, b.name)
         end 
 

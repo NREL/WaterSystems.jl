@@ -1,6 +1,5 @@
 
 struct Junction <: WaterSystemDevice
-    number::Int
     name::String
     elevation::Float64 #m
     head::Union{Nothing,Float64} #Meters Total Head/Hydraulic Head = Pressure Head + Elevation
@@ -8,13 +7,13 @@ struct Junction <: WaterSystemDevice
     coordinates::Union{NamedTuple{(:lat, :lon), Tuple{Float64, Float64}},Nothing}
 end
 
-Junction(;  number = 0,
+Junction(; 
             name="init",
             elevation=0,
             head = nothing,
             minimum_pressure = 0.0,
             coordinates = nothing
-            ) = Junction(number, name, elevation, head, minimum_pressure, coordinates)
+            ) = Junction(name, elevation, head, minimum_pressure, coordinates)
 
 struct PressureZone
     name::String

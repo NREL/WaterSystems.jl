@@ -3,7 +3,6 @@ abstract type RegularPipe <: Pipe end
 abstract type PositiveFlowPipe <: RegularPipe end
 
 struct StandardPositiveFlowPipe <: PositiveFlowPipe
-    number::Int64
     name::String
     connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     diameter::Float64 #m
@@ -13,11 +12,9 @@ struct StandardPositiveFlowPipe <: PositiveFlowPipe
     flow::Union{Nothing,Float64} #m^3/s
     initial_status:: Int64
     flow_limits:: NamedTuple{(:Qmin, :Qmax), Tuple{Float64, Float64}}
-    headloss_parameters:: Array{NamedTuple{(:flow, :slope, :intercept), Tuple{Float64, Float64, Float64}}} #Q, a, b
 end
 
 struct NegativeFlowPipe <: RegularPipe
-    number::Int64
     name::String
     connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     diameter::Float64 #m
@@ -27,11 +24,9 @@ struct NegativeFlowPipe <: RegularPipe
     flow::Union{Nothing,Float64} #m^3/s
     initial_status:: Int64
     flow_limits:: NamedTuple{(:Qmin, :Qmax), Tuple{Float64, Float64}}
-    headloss_parameters:: Array{NamedTuple{(:flow, :slope, :intercept), Tuple{Float64, Float64, Float64}}}
 end
 
-struct ReversibleFlowPipe <: RegularPipe
-    number::Int64
+struct ReversibleFlowPipe <: RegularPipe 
     name::String
     connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     diameter::Float64 #m
@@ -41,10 +36,8 @@ struct ReversibleFlowPipe <: RegularPipe
     flow::Union{Nothing,Float64} #m^3/s
     initial_status:: Int64
     flow_limits:: NamedTuple{(:Qmin, :Qmax), Tuple{Float64, Float64}}
-    headloss_parameters:: Array{NamedTuple{(:flow, :slope, :intercept), Tuple{Float64, Float64, Float64}}}
 end
 struct CheckValvePipe <: PositiveFlowPipe
-    number::Int64
     name::String
     connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}
     diameter::Float64 #m
@@ -54,7 +47,6 @@ struct CheckValvePipe <: PositiveFlowPipe
     flow::Union{Nothing,Float64} #m^3/s
     initial_status:: Int64
     flow_limits:: NamedTuple{(:Qmin, :Qmax), Tuple{Float64, Float64}}
-    headloss_parameters:: Array{NamedTuple{(:flow, :slope, :intercept), Tuple{Float64, Float64, Float64}}}
 end
 
 struct ControlPipe{T} <:Pipe where T<:Array{<:RegularPipe}
@@ -63,7 +55,6 @@ struct ControlPipe{T} <:Pipe where T<:Array{<:RegularPipe}
 end
 
 StandardPositiveFlowPipe(;
-            number = 1,
             name="init",
             connectionpoints= (from = Junction(), to = Junction()),
             diameter = 0,
@@ -73,11 +64,9 @@ StandardPositiveFlowPipe(;
             flow = nothing,
             initial_status = 0,
             flow_limits = (Qmin = 0.0, Qmax =0.0),
-            headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-            ) = StandardPositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, control_pipe, flow_direction, flow_limits, headloss_parameters)
+            ) = StandardPositiveFlowPipe(name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status,flow_limits)
 
 NegativeFlowPipe(;
-            number = 1,
             name="init",
             connectionpoints=(from = Junction(), to = Junction()),
             diameter = 0,
@@ -86,12 +75,10 @@ NegativeFlowPipe(;
             headloss = nothing,
             flow = nothing,
             initial_status = 0,
-            flow_limits = (Qmin = 0.0, Qmax =0.0),
-            headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-            ) = NegativeFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, control_pipe, flow_direction, flow_limits, headloss_parameters)
+            flow_limits = (Qmin = 0.0, Qmax =0.0)
+            ) = NegativeFlowPipe(name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits)
 
 ReversibleFlowPipe(;
-            number = 1,
             name="init",
             connectionpoints=(from = Junction(), to = Junction()),
             diameter = 0,
@@ -101,12 +88,10 @@ ReversibleFlowPipe(;
             flow = nothing,
             initial_status = 0,
             flow_limits = (Qmin = 0.0, Qmax =0.0),
-            headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-            ) = ReversibleFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, control_pipe, flow_direction, flow_limits, headloss_parameters)
+            ) = ReversibleFlowPipe(name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits)
 
 
-CheckValvePipe(;
-            number = 1,
+CheckValvePipe(; 
             name="init",
             connectionpoints=(from = Junction(), to = Junction()),
             diameter = 0,
@@ -115,36 +100,31 @@ CheckValvePipe(;
             headloss = nothing,
             flow = nothing,
             initial_status = 0,
-            flow_limits = (Qmin = 0.0, Qmax =0.0),
-            headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-            ) = RegularPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
+            flow_limits = (Qmin = 0.0, Qmax =0.0)
+            ) = RegularPipe(name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits)
 
 ControlPipe(;
             pipe = ReversibleFlowPipe(),
             valve = CheckValve()
             ) = ControlPipe(pipe, valve)
 
-function StandardPositiveFlowPipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
+function StandardPositiveFlowPipe(name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     flow_limits = (Qmin = 0.0, Qmax =0.0)
-    headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return StandardPositiveFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
+    return StandardPositiveFlowPipe( name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits)
 end
 
-function NegativeFlowPipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
+function NegativeFlowPipe(name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     flow_limits = (Qmin = 0.0, Qmax =0.0)
-    headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return NegativeFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
+    return NegativeFlowPipe( name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits)
 end
 
-function ReversibleFlowPipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
+function ReversibleFlowPipe(name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64, roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
     flow_limits = (Qmin = 0.0, Qmax =0.0)
-    headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return ReversibleFlowPipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
+    return ReversibleFlowPipe( name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits)
 end
 
-function CheckValvePipe(number::Int64, name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64,
+function CheckValvePipe(name::String, connectionpoints:: NamedTuple{(:from, :to), Tuple{Junction, Junction}}, diameter::Float64, length::Float64,
                     roughness::Float64, headloss::Float64, flow::Union{Nothing,Float64}, initial_status:: Int64)
-    flow_limits = (Qmin = 0.0, Qmax =0.0)
-    headloss_parameters = [(flow = 0.0, slope = 0.0, intercept = 0.0)]
-    return CheckValvePipe(number, name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits, headloss_parameters)
+    flow_limits = (Qmin = 0.0, Qmax =0.0)ß
+    return CheckValvePipe(name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status, flow_limits)
 end

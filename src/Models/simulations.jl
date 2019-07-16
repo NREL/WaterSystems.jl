@@ -11,4 +11,4 @@ Simulation(;   duration = 0,
                 num_timesteps = 0,
                 start_day = "0:0:0",
                 end_day = "0:0:0"
-                ) = Simulations(duration, timestep, num_timesteps, start_day, end_day)
+                ) = Simulation(duration, timestep, num_timesteps, start_day, end_day)
