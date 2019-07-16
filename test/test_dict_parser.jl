@@ -13,8 +13,7 @@ for f in files
         @time WaterSystems.WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation)
         println("Successfully parsed $f to WaterSystems struct")
     catch
-        warn("Error while parsing $f")
-        catch_stacktrace()
+        @warn("Error while parsing $f")
     end
 end
 true
