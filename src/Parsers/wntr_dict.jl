@@ -11,6 +11,13 @@ function wntr_dict(inp_file::String)
     curves_dict(wntr_dict)
     wntr_dict["node_results"] = node_results
     wntr_dict["link_results"] = link_results
+<<<<<<< HEAD
+=======
+    wntr_dict["wn"] = wn
+
+    curves_dict(wntr_dict)
+    wntr_dict = convert(Dict{String,Any}, wntr_dict) # TODO: this is hacky and shouldn't be required, fix this by creating the correct dict from the wntr call
+>>>>>>> update-build
     return wntr_dict
 end
 
@@ -48,6 +55,7 @@ end
 function node_dicts(wntr_dict::Dict{Any,Any})
     nodes = wntr_dict["nodes"]
     junction_dict= Dict{Int64, Any}()
+<<<<<<< HEAD
     tank_dict = Dict{Int64, Any}()
     reservoir_dict = Dict{Int64, Any}()
     i = 0
@@ -55,6 +63,13 @@ function node_dicts(wntr_dict::Dict{Any,Any})
     k = 0
     for node in nodes
         name = node["name"]
+=======
+    tank_dict = Dict{Int64, Any}() # can this be 
+    reservoir_dict = Dict{Int64, Any}()
+    nodes_name = Dict{Int64,Any}()
+    for (n,node) in enumerate(nodes)
+        nodes_name[n] = node
+>>>>>>> update-build
         if node["node_type"] == "Junction"
             i = i + 1
             junction_dict[i] = node

@@ -1,5 +1,5 @@
-include("data/test_system.jl")
+include(joinpath(DATA_DIR, "test_system.jl"))
 
-Network(links, nodes)
+Network(junctions, links)
 
 true

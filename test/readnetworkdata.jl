@@ -1,13 +1,11 @@
-if Sys.islinux() || Sys.isapple()
-    folder = readdir("test/data/epanetfiles")
-    files = [joinpath("data/epanetfiles", folder[i]) for i =1:length(folder)]
-    include("data/test_system.jl")
-end
+folder = readdir(joinpath(DATA_DIR, "epanetfiles"))
+files = [joinpath(DATA_DIR, "epanetfiles", folder[i]) for i =1:length(folder)]
+include(joinpath(DATA_DIR, "test_system.jl"))
 
-if Sys.iswindows()
-    folder = readdir("test\\data\\epanetfiles")
-    files = [joinpath("test\\data\\epanetfiles", folder[i]) for i =1:length(folder)]
-    include("data\\test_system.jl")
+for f in files
+    @show f
+    wd = wntr_dict(f)
+    ws = dict_to_struct(wd)
 end
 
 true
