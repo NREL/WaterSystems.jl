@@ -16,60 +16,48 @@ end
 
 function link_dicts(wntr_dict::Dict{Any, Any})
     links = wntr_dict["links"]
-    pipe_dict = Dict{Int64, Any}()
-    valve_dict = Dict{Int64, Any}()
-    pump_dict = Dict{Int64, Any}()
+    pipe_dict = Dict{Int64,Any}()
+    valves = Vector{Any}()
+    pumps = Vector{Any}()
     control_pipe = Array{Union{Nothing,String}}(nothing,0)
     for (i, (name,control)) in enumerate(wntr_dict["controls"])
         target = control._then_actions[1]._target_obj
         target.link_type == "Pipe" ? push!(control_pipe, target.name) : nothing
     end
     l = 0
-    m = 0
-    n = 0
     for link in links
         if link["link_type"] == "Pipe"
             l = l + 1
             pipe_dict[l] = link
             pipe_dict[l]["control_pipe"] = link["name"] in control_pipe
         elseif link["link_type"] == "Pump"
-            m = m + 1
-            pump_dict[m] = link
+            push!(pumps, link)
         else
-            n = n + 1
-            valve_dict[n] = link
+            push!(valves,link)
         end
     end
     wntr_dict["pipes"] = pipe_dict
-    wntr_dict["valves"] = valve_dict
-    wntr_dict["pumps"] = pump_dict
+    wntr_dict["valves"] = valves
+    wntr_dict["pumps"] = pumps
 end
 
 function node_dicts(wntr_dict::Dict{Any,Any})
     nodes = wntr_dict["nodes"]
-    junction_dict= Dict{Int64, Any}()
-    tank_dict = Dict{Int64, Any}() # TODO: Does this need to be a dict?
-    reservoir_dict = Dict{Int64, Any}() # TODO: Does this need to be a dict?
-    i = 0
-    j = 0
-    k = 0
+    junctions= Vector{Any}()
+    tanks =  Vector{Any}() # TODO: Does this need to be a dict?
+    reservoirs= Vector{Any}() # TODO: Does this need to be a dict?
     for node in nodes
-        name = node["name"]
         if node["node_type"] == "Junction"
-            i = i + 1
-            junction_dict[i] = node
+            push!(junctions, node)
         elseif node["node_type"] == "Tank"
-            j = j + 1
-            tank_dict[j] = node
+            push!(tanks, node)
         else
-            k = k + 1
-            reservoir_dict[k] = node
-            #reservoir_dict[k]["elevation"] = reservoir_dict[k]["base_head"]
+            push!(reservoirs, node)
         end
     end
-    wntr_dict["junctions"] = junction_dict
-    wntr_dict["tanks"] = tank_dict
-    wntr_dict["reservoirs"] = reservoir_dict
+    wntr_dict["junctions"] = junctions
+    wntr_dict["tanks"] = tanks
+    wntr_dict["reservoirs"] = reservoirs
 end
 
 function curves_dict(wntr_dict::Dict{Any,Any})

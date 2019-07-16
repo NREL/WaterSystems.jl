@@ -12,31 +12,31 @@ function dict_to_struct(data::Dict{String,Any})
 end
 
 function junction_to_struct(data::Dict{String, Any})
-    junctions = [Junction(j["name"], j["elevation"], j["head"], j["minimum_pressure"], j["coordinates"]) for (key,j) in data]
+    junctions = [Junction(name, j["elevation"], j["head"], j["minimum_pressure"], j["coordinates"]) for (name,j) in data]
     return junctions
 end
 
-function tank_to_struct(data::Dict{Int64,Any}, junctions::Array{Junction,1})
+function tank_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     tanks = Array{R where {R<:RoundTank},1}(undef, length(data))
-    for (ix,(key, t)) in enumerate(data)
+    for (ix, t) in enumerate(data)
         junction = [junc for junc in junctions if junc.name == t["name"]]
         tanks[ix] = RoundTank(t["name"], junction[1], t["volumelimits"], t["diameter"], t["volume"], t["area"], t["level"], t["levellimits"])
     end
     return tanks
 end
 
-function res_to_struct(data::Dict{Int64, Any}, junctions::Array{Junction,1})
+function res_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     res = Array{S where {S<:StorageReservoir},1}(undef,length(data))
-    for (ix, (key, r)) in enumerate(data)
+    for (ix, r) in enumerate(data)
         junction = [junc for junc in junctions if junc.name == r["name"]]
         res[ix] = StorageReservoir(r["name"], junction[1], r["elevation"])
     end
     return res
 end
 
-function pipe_to_struct(data::Dict{Int64,Any}, junctions::Array{Junction,1})
+function pipe_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     pipes = Array{P where {P<:Pipe}, 1}(undef, length(data))
-    for (ix, (key, p)) in enumerate(data)
+    for (ix, p) in enumerate(data)
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
         junction_to = [junc for junc in junctions if junc.name == j_to["name"]][1]
@@ -55,9 +55,9 @@ function pipe_to_struct(data::Dict{Int64,Any}, junctions::Array{Junction,1})
     return pipes
 end
 
-function valve_to_struct(data::Dict{Int64, Any}, junctions::Array{Junction,1})
+function valve_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     valves = Array{PR where {PR <: PressureReducingValve},1}(undef, length(data))
-    for (ix,(key, v)) in enumerate(data)
+    for (ix, v) in enumerate(data)
         #push!(valves, PressureReducingValve(...))
         j_from = v["connectionpoints"].from
         j_to = v["connectionpoints"].to
@@ -80,9 +80,9 @@ function valve_to_struct(data::Dict{Int64, Any}, junctions::Array{Junction,1})
     return valves
 end
 
-function pump_to_struct(data::Dict{Int64,Any}, junctions::Array{Junction,1})
+function pump_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     pumps = Array{C where {C <:ConstSpeedPump},1}(undef, length(data))
-    for (ix, (key, p)) in enumerate(data)
+    for (ix, p) in enumerate(data)
         j_from = p["connectionpoints"].from
         j_to = p["connectionpoints"].to
         junction_to = [junc for junc in junctions if junc.name == j_to["name"]][1]
@@ -91,9 +91,9 @@ function pump_to_struct(data::Dict{Int64,Any}, junctions::Array{Junction,1})
     end
     return pumps
 end
-function demand_to_struct(data::Dict{Int64,Any}, junctions::Array{Junction,1})
+function demand_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     demands = Array{W where {W <:WaterDemand},1}(undef, length(data))
-    for (ix, (key, d)) in enumerate(data)
+    for (ix,  d) in enumerate(data)
         junction = [junc for junc in junctions if junc.name == d["node"]["name"]]
         demands[ix] = WaterDemand(d["name"], junction[1] , d["status"], d["max_demand"], d["demand"], d["demandforecast"])
     end

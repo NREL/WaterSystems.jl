@@ -1,12 +1,12 @@
 include("wntr_dict.jl")
 function make_dict(inp_file::String)
     junctions = Dict{String,Any}()
-    tanks = Dict{Int64,Any}()
-    reservoirs = Dict{Int64,Any}()
-    pipes = Dict{Int64,Any}()
-    valves = Dict{Int64,Any}()
-    pumps = Dict{Int64,Any}()
-    demands = Dict{Int64, Any}()
+    tanks = Vector{Any}()
+    reservoirs = Vector{Any}()
+    pipes = Vector{Any}()
+    valves = Vector{Any}()
+    pumps = Vector{Any}()
+    demands = Vector{Any}()
     wn = wntr_dict(inp_file)
     duration = wn["options"]["time"]["duration"]
     duration != 0 ? duration_hours = from_seconds(duration)[1] : error("Duration is set to 0. Simulation will not run. Modify .inp file.")
@@ -43,7 +43,7 @@ end
 
 function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, junctions::Dict{String,Any})
 
-    for (key,junc) in wn["junctions"]
+    for junc in wn["junctions"]
         name = junc["name"]
         #head and demand are current at each node
         head = get(node_results["head"],name).values[1] #Meters Total Head/ Hydraulic Head = Pressure Head + Elevation
@@ -52,11 +52,11 @@ function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, junctions
     end
 end
 
-function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, tanks::Dict{Int64,Any}, junctions::Dict{String,Any}, num_timeperiods::Int64, time_ahead::Vector{DateTime})
+function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, tanks::Vector{Any}, junctions::Dict{String,Any}, num_timeperiods::Int64, time_ahead::Vector{DateTime})
     #assign minimum pressure to the stardard for nodes
     junc = wn["junctions"][1]
     min_pressure = junc["minimum_pressure"] #m assumes fliud density of 1000 kg/m^3
-    for (key,tank) in wn["tanks"]
+    for tank in wn["tanks"]
         #head  and demand are initial values
         name = tank["name"]
         head = get(node_results["head"],name).values[1] #m Total Head/Hydraulc Head
@@ -68,13 +68,13 @@ function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, tanks::Dict{I
         volumelimits = [x * area for x in [tank["min_level"],tank["max_level"]]];
         haskey(junctions, name) ? junc_name = "Junction- " * name : junc_name = name
         junctions[name] = Dict{String,Any}("name" => junc_name, "elevation" => tank["elevation"], "head" => convert(Float64,head), "minimum_pressure" => min_pressure, "coordinates" => (lat = tank["coordinates"][2], lon = tank["coordinates"][1]))
-        tanks[key] = Dict{String, Any}("name" => name, "volumelimits" => (min = volumelimits[1],max = volumelimits[2]), "diameter" => tank["diameter"], "volume" => volume, "area" => area, "level" => tank["init_level"], "levellimits" => (min = tank["min_level"], max = tank["max_level"]))
+        push!(tanks, Dict{String, Any}("name" => name, "volumelimits" => (min = volumelimits[1],max = volumelimits[2]), "diameter" => tank["diameter"], "volume" => volume, "area" => area, "level" => tank["init_level"], "levellimits" => (min = tank["min_level"], max = tank["max_level"])))
 
     end
 end
 
-function res_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, reservoirs::Dict{Int64,Any}, junctions::Dict{String,Any}, num_timeperiods::Int64, time_ahead::Vector{DateTime})
-    for (key,res) in wn["reservoirs"]
+function res_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, reservoirs::Vector{Any}, junctions::Dict{String,Any}, num_timeperiods::Int64, time_ahead::Vector{DateTime})
+    for res in wn["reservoirs"]
         name = res["name"]
         head = get(node_results["head"],name).values[1] #m Total head/ Hydraulic head note: base_head = elevation
         demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
@@ -82,24 +82,24 @@ function res_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, reservoirs::Di
         haskey(junctions, name) ? junc_name = "Junction- " * name : junc_name = name
         demand_forecast = demand_timeseries #will possibly add perturbation later
         junctions[name] = Dict{String,Any}("name" => junc_name, "elevation" => res["base_head"], "head" => convert(Float64,head), "minimum_pressure" => 0, "coordinates" => (lat = res["coordinates"][2], lon = res["coordinates"][1])) #array of pseudo nodes @ res
-        reservoirs[key] = Dict{String,Any}("name" => name, "elevation" => res["base_head"]) #base_head = elevation
+        push!(reservoirs, Dict{String,Any}("name" => name, "elevation" => res["base_head"])) #base_head = elevation
 
     end
 end
 
-function pipe_dict(wn::Dict{Any,Any}, link_results::Dict{Any, Any}, pipes::Dict{Int64, Any}, junctions::Dict{String,Any})
+function pipe_dict(wn::Dict{Any,Any}, link_results::Dict{Any, Any}, pipes::Vector{Any}, junctions::Dict{String,Any})
     for (key,pipe) in wn["pipes"]
         name = pipe["name"]
         headloss = get(link_results["headloss"],name).values[1] #m
         flowrate = get(link_results["flowrate"],name).values[1] #m^3/sec
         junction_start = junctions[pipe["start_node_name"]]
         junction_end = junctions[pipe["end_node_name"]]
-        pipes[key] = Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "diameter" => pipe["diameter"], "length" => pipe["length"],"roughness" => pipe["roughness"], "headloss" => convert(Float64,headloss), "flow" => convert(Float64,flowrate), "initial_status" => pipe["initial_status"], "control_pipe" => pipe["control_pipe"], "cv" => pipe["cv"])
+        push!(pipes, Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "diameter" => pipe["diameter"], "length" => pipe["length"],"roughness" => pipe["roughness"], "headloss" => convert(Float64,headloss), "flow" => convert(Float64,flowrate), "initial_status" => pipe["initial_status"], "control_pipe" => pipe["control_pipe"], "cv" => pipe["cv"]))
     end
 end
 
-function valve_dict(wn::Dict{Any,Any}, valves::Dict{Int64,Any})
-    for (key,valve) in wn["valves"]
+function valve_dict(wn::Dict{Any,Any}, valves::Vector{Any})
+    for valve in wn["valves"]
         name = valve["name"]
         if typeof(valve["valve_type"]) == String
             valve_type = valve["valve_type"]
@@ -110,12 +110,12 @@ function valve_dict(wn::Dict{Any,Any}, valves::Dict{Int64,Any})
         junction_end = data["Node"][valve["end_node_name"]]
         status_index = valve["initial_status"] + 1  # 1=Closed, 2=Open, 3 = Active, 4 = CheckValve
         status_string = ["Closed", "Open", "Active","Check Valve"][status_index] #Active = partially open
-        valves[key] = Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => status_string , "diameter" => valve["diameter"], "pressure_drop" => valve["setting"], "valvetype"=>valve_type)
+        push!(valves, Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => status_string , "diameter" => valve["diameter"], "pressure_drop" => valve["setting"], "valvetype"=>valve_type))
     end
 end
 
-function pump_dict(wn::Dict{Any, Any}, junctions::Dict{String,Any}, pumps::Dict{Int64,Any}, node_results::Dict{Any, Any}, link_results::Dict{Any, Any})
-    for (key,pump) in wn["pumps"]
+function pump_dict(wn::Dict{Any, Any}, junctions::Dict{String,Any}, pumps::Vector{Any}, node_results::Dict{Any, Any}, link_results::Dict{Any, Any})
+    for pump in wn["pumps"]
         energy = 0
         efficiency = nothing
         name = pump["name"]
@@ -171,11 +171,11 @@ function pump_dict(wn::Dict{Any, Any}, junctions::Dict{String,Any}, pumps::Dict{
         catch
             wn["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn["options"]["energy"]["global_efficiency"] : efficiency = 0.65
         end
-        pumps[key] =Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => pump["status"], "pumpcurve" => pump_curve, "efficiency" => efficiency, "energyprice" => energyprice)
+        push!(pumps, Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => pump["status"], "pumpcurve" => pump_curve, "efficiency" => efficiency, "energyprice" => energyprice))
     end
 end
 
-function demands_dict(demands::Dict{Int64,Any}, junctions::Dict{String,Any}, node_results::Dict{Any,Any}, time_ahead::Vector{DateTime}, num_timeperiods::Int64)
+function demands_dict(demands::Vector{Any}, junctions::Dict{String,Any}, node_results::Dict{Any,Any}, time_ahead::Vector{DateTime}, num_timeperiods::Int64)
     max_demand = 20 #placeholder
     for (index, (key, junc)) in enumerate(junctions)
         name = junc["name"]
@@ -183,7 +183,7 @@ function demands_dict(demands::Dict{Int64,Any}, junctions::Dict{String,Any}, nod
         demand = convert(Array{Float64,1}, demand)
         demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
         demand_forecast = demand_timeseries #will possibly add perturbation later
-       demands[index] = Dict{String, Any}("name" =>name, "node" =>junc, "status" =>true, "max_demand" => max_demand, "demand" => demand_timeseries, "demandforecast" => demand_forecast)
+       push!(demands, Dict{String, Any}("name" =>name, "node" =>junc, "status" =>true, "max_demand" => max_demand, "demand" => demand_timeseries, "demandforecast" => demand_forecast))
     end
 end
 
