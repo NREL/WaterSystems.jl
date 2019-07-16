@@ -2,11 +2,9 @@ folder = readdir(joinpath(DATA_DIR, "epanetfiles"))
 files = [joinpath(DATA_DIR, "epanetfiles", folder[i]) for i =1:length(folder)]
 for f in files
     try
-        @time nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation = WaterSystems.wn_to_struct(f)
+        @time nodes, tanks, reservoirs, pipes, valves, pumps, demands, simulations = dict_to_struct(data)
         println("Successfully parsed $f to WaterSystems devices.")
-        @time WaterSystems.Network(links, nodes)
-        println("Successfully created Network struct from")
-        @time WaterSystems.WaterSystem(nodes, junctions, tanks, reservoirs, links, pipes, valves, pumps, demands, simulation)
+        @time WaterSystems.WaterSystem(f)
         println("Successfully parsed $f to WaterSystems struct")
     catch
         warn("Error while parsing $f")

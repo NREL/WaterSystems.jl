@@ -21,13 +21,16 @@ function RoundTank(name::String, node::Junction, volumelimits::Union{NamedTuple{
     return RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
 end
 
-function RoundTank(; name="init", node=Junction(), diameter = 0.0, levellimits=(min = 0.0, max = 0.0), level=0.0)
-
-    area = π * (diameter/2)^2 ;
-    volume = area * level;
+RoundTank(; 
+    name= "init",
+    node= Junction(),
+    diameter = 0.0,
+    levellimits= (min = 0.0, max = 0.0),
+    level= 0.0,
+    area = π * (diameter/2)^2,
+    volume = area * level,
     volumelimits = map(x->area*x,levellimits)
-    return RoundTank(name, node, volumelimits, volume, area, level, levellimits)
-end
+    ) = RoundTank(name, node, volumelimits, diameter, volume, area, level, levellimits)
 
 struct StorageReservoir <: Storage
     name::String
@@ -35,3 +38,9 @@ struct StorageReservoir <: Storage
     elevation::Float64
     #head_timeseries::TimeSeries.TimeArray
 end
+
+StorageReservoir(; 
+name = "init",
+node = Junction(),
+elevation = 0.0
+) = StorageReservoir(name, node, elevation)

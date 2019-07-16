@@ -60,8 +60,8 @@ StandardPositiveFlowPipe(;
             diameter = 0,
             length = 0,
             roughness = 0,
-            headloss = nothing,
-            flow = nothing,
+            headloss = 0.0,
+            flow = 0.0,
             initial_status = 0,
             flow_limits = (Qmin = 0.0, Qmax =0.0),
             ) = StandardPositiveFlowPipe(name, connectionpoints, diameter, length, roughness, headloss, flow, initial_status,flow_limits)

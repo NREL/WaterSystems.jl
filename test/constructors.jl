@@ -1,11 +1,10 @@
 
 pump  = WaterSystems.ConstSpeedPump()
 tank = WaterSystems.RoundTank()
-reservoir = WaterSystems.Reservoir()
+reservoir = WaterSystems.StorageReservoir()
 junction = WaterSystems.Junction()
-pipes = WaterSystems.RegularPipe()
+pipes = WaterSystems.StandardPositiveFlowPipe()
 valves = WaterSystems.PressureReducingValve()
 demand = WaterSystems.WaterDemand()
-network = WaterSystems.Network()
 
 true
