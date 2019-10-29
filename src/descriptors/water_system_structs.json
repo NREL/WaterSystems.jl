@@ -1,0 +1,159 @@
+[
+  {
+    "struct_name": "Junction",
+    "docstring": "A water-system Junction.",
+    "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "comment": "the name of the junction",
+        "data_type": "String"
+      },
+      {
+        "name": "elevation",
+        "comment": "elevation of bus",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "head",
+        "comment": "pressure head at junction",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing, Float64}",
+        "validation_action": "error"
+      },
+      {
+        "name": "minimum_pressure",
+        "comment": "minimum pressure head at the junction",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "coordinates",
+        "comment": "latitude and longitude coordinates of junction",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing, Float64}",
+        "validation_action": "error"
+
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ],
+    "supertype": "Topology"
+  },
+  {
+    "struct_name": "Arc",
+    "docstring": "A topological Arc.",
+    "fields": [
+      {
+        "name": "from",
+        "null_vale": "Junction(nothing)",
+        "data_type": "Junction"
+      },
+      {
+        "name": "to",
+        "null_vale": "Junction(nothing)",
+        "data_type": "Junction"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ],
+    "supertype": "Topology"
+  },
+  {
+    "struct_name": "ReversibleFlowPipe",
+    "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "name": "flow",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
+      },
+      {
+        "name": "headloss",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "available",
+        "null_value": "true",
+        "data_type": "Bool"
+      },
+      {
+        "null_value": "Arc(Junction(nothing), Junction(nothing))",
+        "name": "arc",
+        "data_type": "Arc"
+      },
+      {
+        "null_value": "0.0",
+        "name": "diameter",
+        "data_type": "Float64"
+      },
+      {
+        "null_value": "0.0",
+        "name": "length",
+        "data_type": "Float64"
+      },
+      {
+        "null_value": "0.0",
+        "name": "roughness",
+        "data_type": "Float64"
+      },
+      {
+        "name": "flowlimits",
+        "null_value": "(min=-10.0, max=10.0)",
+        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ],
+    "supertype": "RegularPipe"
+  },
+  {
+    "struct_name": "StaticDemand",
+    "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "null_value": "false",
+        "name": "available",
+        "data_type": "Bool"
+      },
+      {
+        "name": "junction",
+        "null_value": "Junction(nothing)",
+        "data_type": "Junction"
+      },
+      {
+        "name": "maxdemand",
+        "comment": "peak demand in m^3/second",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "_forecasts",
+        "null_value": "InfrastructureSystems.Forecasts()",
+        "data_type": "InfrastructureSystems.Forecasts",
+        "default": "InfrastructureSystems.Forecasts()"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ],
+    "supertype": "WaterDemand"
+  }
+]
