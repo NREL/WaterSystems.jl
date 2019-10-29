@@ -30,7 +30,7 @@ end
 function {{struct_name}}({{#parameters}}{{^internal}}{{name}}, {{/internal}}{{/parameters}})
     {{#parameters}}
     {{/parameters}}
-    {{struct_name}}({{#parameters}}{{^internal}}{{name}}, {{/internal}}{{/parameters}}PowerSystemInternal())
+    {{struct_name}}({{#parameters}}{{^internal}}{{name}}, {{/internal}}{{/parameters}}WaterSystemInternal())
 end
 
 function {{struct_name}}(; {{#parameters}}{{^internal}}{{name}}, {{/internal}}{{/parameters}})

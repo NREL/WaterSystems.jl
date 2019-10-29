@@ -3,7 +3,7 @@ This file is auto-generated. Do not edit.
 =#
 
 
-mutable struct ReversibleFlowPipe <: RegularPipe
+mutable struct ReversibleFlowPipe <: Pipe
     name::String
     flow::Union{Nothing,Float64}
     headloss::Float64
@@ -17,7 +17,7 @@ mutable struct ReversibleFlowPipe <: RegularPipe
 end
 
 function ReversibleFlowPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, )
-    ReversibleFlowPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, PowerSystemInternal())
+    ReversibleFlowPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, WaterSystemInternal())
 end
 
 function ReversibleFlowPipe(; name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, )

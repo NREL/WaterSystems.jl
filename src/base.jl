@@ -94,7 +94,7 @@ Adds forecasts from a metadata file or metadata descriptors.
 - `metadata_file::AbstractString`: metadata file for timeseries
   that includes an array of IS.TimeseriesFileMetadata instances or a vector.
 - `label_mapping::Dict{Tuple{String, String}, String}`: maps customized component field names to
-  PowerSystem field names
+  WaterSystem field names
 - `resolution::DateTime.Period=nothing`: skip forecast that don't match this resolution.
 """
 function add_forecasts!(
@@ -137,7 +137,7 @@ function IS.add_forecast!(
                           metadata::IS.TimeseriesFileMetadata;
                           resolution=nothing,
                          )
-    IS.set_component!(metadata, data, PowerSystems)
+    IS.set_component!(metadata, data, WaterSystems)
     component = metadata.component
     if isnothing(component)
         return
@@ -261,10 +261,10 @@ Call collect on the result if an array is desired.
 
 # Examples
 ```julia
-iter = PowerSystems.get_components(ThermalStandard, sys)
-iter = PowerSystems.get_components(Generator, sys)
-generators = PowerSystems.get_components(Generator, sys) |> collect
-generators = collect(PowerSystems.get_components(Generator, sys))
+iter = WaterSystems.get_components(ThermalStandard, sys)
+iter = WaterSystems.get_components(Generator, sys)
+generators = WaterSystems.get_components(Generator, sys) |> collect
+generators = collect(WaterSystems.get_components(Generator, sys))
 ```
 
 See also: [`iterate_components`](@ref)
@@ -283,7 +283,7 @@ end
                            name::AbstractString
                           )::Vector{T} where {T <: Component}
 
-Get the components of abstract type T with name. Note that PowerSystems enforces unique
+Get the components of abstract type T with name. Note that WaterSystems enforces unique
 names on each concrete type but not across concrete types.
 
 See [`get_component`](@ref) if the concrete type is known.
@@ -396,7 +396,7 @@ See [`InfrastructureSystems.TimeseriesFileMetadata`](@ref) for description of wh
 should contain.
 """
 function make_forecasts(sys::System, metadata_file::AbstractString; resolution=nothing)
-    return IS.make_forecasts(sys.data, metadata_file, PowerSystems; resolution=resolution)
+    return IS.make_forecasts(sys.data, metadata_file, WaterSystems; resolution=resolution)
 end
 
 """
@@ -412,7 +412,7 @@ Return a vector of forecasts from a vector of TimeseriesFileMetadata values.
 """
 function make_forecasts(sys::System, metadata::Vector{IS.TimeseriesFileMetadata};
                         resolution=nothing)
-    return IS.make_forecasts(sys.data, metadata, PowerSystems; resolution=resolution)
+    return IS.make_forecasts(sys.data, metadata, WaterSystems; resolution=resolution)
 end
 
 """
@@ -622,16 +622,16 @@ function remove_forecast!(
 end
 
 """
-    validate_struct(sys::System, value::PowerSystemType)
+    validate_struct(sys::System, value::WaterSystemType)
 
-Validates an instance of a PowerSystemType against System data.
+Validates an instance of a WaterSystemType against System data.
 Returns true if the instance is valid.
 
 Users implementing this function for custom types should consider implementing
 InfrastructureSystems.validate_struct instead if the validation logic only requires data
 contained within the instance.
 """
-function validate_struct(sys::System, value::PowerSystemType)::Bool
+function validate_struct(sys::System, value::WaterSystemType)::Bool
     return true
 end
 
@@ -644,7 +644,7 @@ end
 function JSON2.read(io::IO, ::Type{System})
     raw = JSON2.read(io, NamedTuple)
     data = IS.deserialize(IS.SystemData, Component, raw.data)
-    sys = System(data, float(raw.basepower); runchecks=raw.runchecks)
+    sys = System(data, float(raw.elevation); runchecks=raw.runchecks)
     return sys
 end
 
@@ -669,7 +669,7 @@ function IS.deserialize_components(
 
     # Skip Services this round because they have Devices.
     for c_type_sym in IS.get_component_types_raw(IS.SystemData, raw)
-        c_type = getfield(PowerSystems, Symbol(IS.strip_module_name(string(c_type_sym))))
+        c_type = getfield(WaterSystems, Symbol(IS.strip_module_name(string(c_type_sym))))
         (c_type in composite_components || c_type <: Service) && continue
         for component in IS.get_components_raw(IS.SystemData, c_type, raw)
             comp = IS.convert_type(c_type, component, component_cache)
@@ -680,7 +680,7 @@ function IS.deserialize_components(
 
     # Now get the Services.
     for c_type_sym in IS.get_component_types_raw(IS.SystemData, raw)
-        c_type = getfield(PowerSystems, Symbol(IS.strip_module_name(string(c_type_sym))))
+        c_type = getfield(WaterSystems, Symbol(IS.strip_module_name(string(c_type_sym))))
         if c_type <: Service
             for component in IS.get_components_raw(IS.SystemData, c_type, raw)
                 comp = IS.convert_type(c_type, component, component_cache)
@@ -750,8 +750,8 @@ function IS.compare_values(x::System, y::System)::Bool
         match = false
     end
 
-    if x.basepower != y.basepower
-        @debug "basepower does not match" x.basepower y.basepower
+    if x.elevation != y.elevation
+        @debug "elevation does not match" x.elevation y.elevation
         match = false
     end
 
@@ -763,7 +763,7 @@ function _create_system_data_from_kwargs(; kwargs...)
     runchecks = get(kwargs, :runchecks, true)
     if runchecks
         validation_descriptor_file = get(kwargs, :configpath,
-                                         POWER_SYSTEM_STRUCT_DESCRIPTOR_FILE)
+                                         WATER_SYSTEM_STRUCT_DESCRIPTOR_FILE)
     end
 
     return IS.SystemData(; validation_descriptor_file=validation_descriptor_file)

@@ -10,7 +10,7 @@ mutable struct Arc <: Topology
 end
 
 function Arc(from, to, )
-    Arc(from, to, PowerSystemInternal())
+    Arc(from, to, WaterSystemInternal())
 end
 
 function Arc(; from, to, )

@@ -12,7 +12,7 @@ from collections import OrderedDict
 
 #import yaml
 
-POWER_SYSTEM_DESCRIPTOR_FILE = sys.argv[2]
+WATER_SYSTEM_DESCRIPTOR_FILE = sys.argv[2]
 
 def read_json_data(filename):
     """Return the JSON data from a file."""
@@ -21,7 +21,7 @@ def read_json_data(filename):
 
 
 def generate_config(input_file):
-    """Generate validation descriptors from the PowerSystems struct data file."""
+    """Generate validation descriptors from the WaterSystems struct data file."""
     config = {}
     data = read_json_data(input_file)
     items = []
@@ -43,8 +43,8 @@ def generate_config(input_file):
         items.append(new_struct)
     return items
 
-def generate_file(output_file, input_file=POWER_SYSTEM_DESCRIPTOR_FILE):
-    """Generate validation descriptors from the PowerSystems struct data file."""
+def generate_file(output_file, input_file=WATER_SYSTEM_DESCRIPTOR_FILE):
+    """Generate validation descriptors from the WaterSystems struct data file."""
     config = generate_config(input_file)
     with open(output_file, "w") as fp_out:
         #yaml.dump(config, fp_out, vspacing=True)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Generates a user descriptor file for parsing power system raw data."""
+"""Generates a user descriptor file for parsing WATER system raw data."""
 
 # Note:  This is written in Python instead of Julia because the Julia YAML
 # package does not support writing (only reading).
@@ -12,9 +12,9 @@ import sys
 import yaml
 
 
-POWER_SYSTEM_DESCRIPTOR_FILE = os.path.join(
+WATER_SYSTEM_DESCRIPTOR_FILE = os.path.join(
     "descriptors",
-    "power_system_inputs.json"
+    "water_system_inputs.json"
 )
 
 
@@ -25,7 +25,7 @@ def read_json_data(filename):
 
 
 def generate_config(input_file):
-    """Generate user descriptors from the PowerSystems descriptor file."""
+    """Generate user descriptors from the WaterSystems descriptor file."""
     config = {}
     data = read_json_data(input_file)
     for key, value in data.items():
@@ -42,8 +42,8 @@ def generate_config(input_file):
     return config
 
 
-def generate_file(output_file, input_file=POWER_SYSTEM_DESCRIPTOR_FILE):
-    """Generate user file from the PowerSystems descriptor file."""
+def generate_file(output_file, input_file=WATER_SYSTEM_DESCRIPTOR_FILE):
+    """Generate user file from the WaterSystems descriptor file."""
     config = generate_config(input_file)
     with open(output_file, "w") as fp_out:
         yaml.dump(config, fp_out)

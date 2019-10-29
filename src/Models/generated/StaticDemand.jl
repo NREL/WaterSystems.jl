@@ -13,7 +13,7 @@ mutable struct StaticDemand <: WaterDemand
 end
 
 function StaticDemand(name, available, junction, maxdemand, _forecasts, )
-    StaticDemand(name, available, junction, maxdemand, _forecasts, PowerSystemInternal())
+    StaticDemand(name, available, junction, maxdemand, _forecasts, WaterSystemInternal())
 end
 
 function StaticDemand(; name, available, junction, maxdemand, _forecasts, )

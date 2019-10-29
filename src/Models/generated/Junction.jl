@@ -13,7 +13,7 @@ mutable struct Junction <: Topology
 end
 
 function Junction(name, elevation, head, minimum_pressure, coordinates, )
-    Junction(name, elevation, head, minimum_pressure, coordinates, PowerSystemInternal())
+    Junction(name, elevation, head, minimum_pressure, coordinates, WaterSystemInternal())
 end
 
 function Junction(; name, elevation, head, minimum_pressure, coordinates, )

@@ -7,7 +7,7 @@
 [![codecov.io](http://codecov.io/github/jdlara-berkeley/WaterSystems.jl/coverage.svg?branch=master)](http://codecov.io/github/jdlara-berkeley/WaterSystems.jl?branch=master)
 
 
-The code in this repository is the base data management code for the global power system analysis tools repository.
+The code in this repository is the base data management code for the global water system analysis tools repository.
 
 ## Installation
 

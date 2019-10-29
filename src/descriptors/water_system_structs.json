@@ -117,7 +117,7 @@
         "data_type": "InfrastructureSystemsInternal"
       }
     ],
-    "supertype": "RegularPipe"
+    "supertype": "Pipe"
   },
   {
     "struct_name": "StaticDemand",
