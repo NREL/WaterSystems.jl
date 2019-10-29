@@ -1,27 +1,36 @@
 name = "WaterSystems"
-uuid = "e4420880-8667-583a-9f59-1d7726c3dc57"
-version = "0.0.1"
+uuid = "bcd98974-b02a-5e2f-9ee0-a103f5c450dd"
+version = "0.1.0"
 
 [deps]
-Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CurveFit = "5a033b19-8c74-5913-a970-47c3779ef25c"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+InfrastructureSystems = "2cd47ed4-ca9b-11e9-27f2-ab636a7671f1"
+InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+JSON2 = "2535ab7d-5cd8-5a07-80ac-9b1792aadce3"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 TimeSeries = "9e3dc215-6440-5c97-bce1-76c03772f85e"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
-AxisArrays = ">= 0.3.0"
-DataFrames = ">= 0.4.3"
-TimeSeries = ">= 0.14.1"
-YAML = ">= 0.3.2"
-julia = ">= 1.1.0"
+CSV = "~0.5"
+DataFrames = "~0.19"
+InfrastructureSystems = "~0.2"
+JSON = "~0.21"
+JSON2 = "~0.3"
+TimeSeries = "~0.16"
+YAML = "~0.3"
+julia = "^1.2"
 
 [extras]
-SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "SparseArrays"]
+test = ["Test"]
