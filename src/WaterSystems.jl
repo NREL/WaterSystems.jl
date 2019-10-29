@@ -1,59 +1,35 @@
-__precompile__(false)
+isdefined(Base, :__precompile__) && __precompile__()
+
+"""
+Module for constructing self-contained water system objects.
+"""
 module WaterSystems
 
 #################################################################################
 # Exports
 
 # water system
-export WaterSystem
+export System
 
-# network
-export Network
-
-#Classes
-export NodeClasses
-export LinkClasses
-
-# pumps
-export ConstSpeedPump
-
-# storages
-export Storage
-export Tank
-export RoundTank
-export StorageReservoir
+export WaterSystemType
+export Component
+export Device
 
 # topological elements
 export Junction
-export PressureZone
+export Arc
 
 # transport elements
 export Link
 export Pipe
-export Valve
 export RegularPipe
-export StandardPositiveFlowPipe
-export NegativeFlowPipe
 export ReversibleFlowPipe
-export CheckValvePipe
-export ControlPipe
-export PressureReducingValve
-export GateValve
-#sources 
-export SourceReservoir
+
 # demands
 export WaterDemand
+export StaticDemand
 
-#simulation
-export Simulation
-#Utils 
-export Incidence
-export build_incidence
-export build_incidence_null
-#parameterize
-#export Parameters
 # parser
-# export wn_to_struct
 export dict_to_struct
 export make_dict
 export wntr_dict
@@ -61,52 +37,60 @@ export wntr_dict
 #################################################################################
 # Imports
 
-using TimeSeries
-using DataFrames
-# This packages will be removed with Julia v0.7
-using Compat
 using PyCall
-#using NamedTuples
 using CurveFit
 using SparseArrays
 using LinearAlgebra
+
+import Dates
+import TimeSeries
+import DataFrames
+import JSON
+import JSON2
+import CSV
+import YAML
+import UUIDs
+import Base.to_index
+
+import InfrastructureSystems
+import InfrastructureSystems: Components, Deterministic, Probabilistic, Forecast,
+    ScenarioBased, InfrastructureSystemsType, InfrastructureSystemsInternal,
+    FlattenIteratorWrapper, LazyDictFromIterator, DataFormatError, InvalidRange,
+    InvalidValue
+
+const IS = InfrastructureSystems
 
 metric = pyimport("wntr.metrics.economic")
 model = pyimport("wntr.network.model") #import wntr network model
 sim = pyimport("wntr.sim.epanet")
 
-abstract type WaterSystemDevice end
+#################################################################################
+# Includes
+
+"""
+Supertype for all WaterSystems types.
+All subtypes must include a InfrastructureSystemsInternal member.
+Subtypes should call InfrastructureSystemsInternal() by default, but also must
+provide a constructor that allows existing values to be deserialized.
+"""
+abstract type WaterSystemType <: IS.InfrastructureSystemsType end
+
+abstract type Component <: WaterSystemType end
+# supertype for "devices" (bus, line, etc.)
+abstract type Device <: Component end
+abstract type Injection <: Device end
+# supertype for generation technologies (thermal, renewable, etc.)
+abstract type TechnicalParams <: WaterSystemType end
+
 #Models
 include("Models/topological_elements.jl")
-include("Models/storage.jl")
-include("Models/sources.jl")
-include("Models/simulations.jl")
 include("Models/water_demand.jl")
 include("Models/links.jl")
-include("Models/links/pipes.jl")
-include("Models/links/pumps.jl")
-include("Models/links/valves.jl")
 
-#Utils
-include("Utils/build_incidence.jl")
-# include("Utils/CheckValveCoefs.jl")
-# include("Utils/ManipulatePumps.jl")
-# include("Utils/ManipulateTanks.jl")
-# include("Utils/UpdateExtrema.jl")
-# include("Utils/MaxMinLevels.jl")
-# include("Utils/FlowDirections.jl")
-include("Utils/PipeCoefs.jl")
-# include("Utils/PumpCoefs.jl")
-# include("Utils/Parameterization.jl")
+# Include all auto-generated structs.
+include("models/generated/includes.jl")
+#include("models/supplemental_constructors.jl")
 
 include("base.jl")
-
-#Parser
-# include("Parsers/LeastSquaresAvg.jl")
-# include("Parsers/epa_net_parser.jl")
-# include("Parsers/FastParser.jl")
-include("Parsers/wntr_dict.jl")
-include("Parsers/wntr_dict_parser.jl")
-include("Parsers/dict_to_struct.jl")
 
 end # module
