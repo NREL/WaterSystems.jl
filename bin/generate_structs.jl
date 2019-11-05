@@ -1,4 +1,5 @@
 import Pkg
+Pkg.add(Pkg.PackageSpec(name="JSON2", version="0.3.1"))
 Pkg.add(Pkg.PackageSpec(name="Mustache", version="0.5.12"))
 
 import JSON2
