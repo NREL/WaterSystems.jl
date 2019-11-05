@@ -83,9 +83,9 @@ abstract type Injection <: Device end
 abstract type TechnicalParams <: WaterSystemType end
 
 #Models
-include("Models/topological_elements.jl")
-include("Models/water_demand.jl")
-include("Models/links.jl")
+include("models/topological_elements.jl")
+include("models/water_demand.jl")
+include("models/links.jl")
 
 # Include all auto-generated structs.
 include("models/generated/includes.jl")
