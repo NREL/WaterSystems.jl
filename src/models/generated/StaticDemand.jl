@@ -2,7 +2,7 @@
 This file is auto-generated. Do not edit.
 =#
 
-
+"""A constant demand."""
 mutable struct StaticDemand <: WaterDemand
     name::String
     available::Bool
@@ -12,11 +12,11 @@ mutable struct StaticDemand <: WaterDemand
     internal::InfrastructureSystemsInternal
 end
 
-function StaticDemand(name, available, junction, maxdemand, _forecasts, )
-    StaticDemand(name, available, junction, maxdemand, _forecasts, WaterSystemInternal())
+function StaticDemand(name, available, junction, maxdemand, _forecasts=InfrastructureSystems.Forecasts(), )
+    StaticDemand(name, available, junction, maxdemand, _forecasts, InfrastructureSystemsInternal())
 end
 
-function StaticDemand(; name, available, junction, maxdemand, _forecasts, )
+function StaticDemand(; name, available, junction, maxdemand, _forecasts=InfrastructureSystems.Forecasts(), )
     StaticDemand(name, available, junction, maxdemand, _forecasts, )
 end
 

@@ -5,7 +5,7 @@ This file is auto-generated. Do not edit.
 """A water-system Junction."""
 mutable struct Junction <: Topology
     name::String  # the name of the junction
-    elevation::Float64  # elevation of bus
+    elevation::Float64  # elevation of junction
     head::Union{Nothing, Float64}  # pressure head at junction
     minimum_pressure::Float64  # minimum pressure head at the junction
     coordinates::Union{Nothing, Float64}  # latitude and longitude coordinates of junction
@@ -13,7 +13,7 @@ mutable struct Junction <: Topology
 end
 
 function Junction(name, elevation, head, minimum_pressure, coordinates, )
-    Junction(name, elevation, head, minimum_pressure, coordinates, WaterSystemInternal())
+    Junction(name, elevation, head, minimum_pressure, coordinates, InfrastructureSystemsInternal())
 end
 
 function Junction(; name, elevation, head, minimum_pressure, coordinates, )

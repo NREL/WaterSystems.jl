@@ -11,7 +11,7 @@
       },
       {
         "name": "elevation",
-        "comment": "elevation of bus",
+        "comment": "elevation of junction",
         "null_value": "0.0",
         "data_type": "Float64"
       },
@@ -65,7 +65,8 @@
     "supertype": "Topology"
   },
   {
-    "struct_name": "ReversibleFlowPipe",
+    "struct_name": "OpenPipe",
+	"docstring": "An always open, bidirectional-flow pipe.",
     "fields": [
       {
         "null_value": "init",
@@ -120,7 +121,125 @@
     "supertype": "Pipe"
   },
   {
+    "struct_name": "GatePipe",
+	"docstring": "A bidirectional-flow pipe with a gate (shutoff) valve.",
+    "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "name": "flow",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
+      },
+      {
+        "name": "headloss",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "available",
+        "null_value": "true",
+        "data_type": "Bool"
+      },
+      {
+        "null_value": "Arc(Junction(nothing), Junction(nothing))",
+        "name": "arc",
+        "data_type": "Arc"
+      },
+      {
+        "null_value": "0.0",
+        "name": "diameter",
+        "data_type": "Float64"
+      },
+      {
+        "null_value": "0.0",
+        "name": "length",
+        "data_type": "Float64"
+      },
+      {
+        "null_value": "0.0",
+        "name": "roughness",
+        "data_type": "Float64"
+      },
+      {
+        "name": "flowlimits",
+        "null_value": "(min=-10.0, max=10.0)",
+        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+      },
+	  {
+		"name": "open_status",
+		"null_value": "true",
+		"data_type": "Bool"
+	  },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ],
+    "supertype": "Pipe"
+  },
+  {
+    "struct_name": "CVPipe",
+	"docstring": "A unidirectional-flow pipe that contains a check valve (CV).",
+    "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "name": "flow",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
+      },
+      {
+        "name": "headloss",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "available",
+        "null_value": "true",
+        "data_type": "Bool"
+      },
+      {
+        "null_value": "Arc(Junction(nothing), Junction(nothing))",
+        "name": "arc",
+        "data_type": "Arc"
+      },
+      {
+        "null_value": "0.0",
+        "name": "diameter",
+        "data_type": "Float64"
+      },
+      {
+        "null_value": "0.0",
+        "name": "length",
+        "data_type": "Float64"
+      },
+      {
+        "null_value": "0.0",
+        "name": "roughness",
+        "data_type": "Float64"
+      },
+      {
+        "name": "flowlimits",
+        "null_value": "(min=0.0, max=10.0)",
+        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ],
+    "supertype": "Pipe"
+  },
+  {
     "struct_name": "StaticDemand",
+	"docstring": "A constant demand.",
     "fields": [
       {
         "null_value": "init",
@@ -155,5 +274,74 @@
       }
     ],
     "supertype": "WaterDemand"
+  },
+  {
+	"struct_name": "Tank",
+	"docstring": "A water tank. Currently cylindrical only.",
+	"supertype": "Injection",
+	"fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "null_value": "false",
+        "name": "available",
+        "data_type": "Bool"
+      },
+      {
+        "name": "junction",
+        "null_value": "Junction(nothing)",
+        "data_type": "Junction"
+      },
+	  {
+		"name": "diameter",
+		"comment": "constant diameter in m",
+		"null_value": "0",
+		"data_type": "Float64"
+	  },
+	  {
+		"name": "level",
+		"comment": "water level in m",
+		"null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
+	  },
+      {
+        "name": "level_limits",
+        "null_value": "(min=0.0, max=1000.0)",
+        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+	  },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ]
+  },
+  {
+	"struct_name": "Reservoir",
+	"docstring": "An infinite reservoir-type water source.",
+	"supertype": "Injection",
+	"fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "null_value": "false",
+        "name": "available",
+        "data_type": "Bool"
+      },
+      {
+        "name": "junction",
+        "null_value": "Junction(nothing)",
+        "data_type": "Junction"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ]
   }
 ]

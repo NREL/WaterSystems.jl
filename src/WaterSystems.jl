@@ -19,11 +19,15 @@ export Device
 export Junction
 export Arc
 
-# transport elements
+# transport elements  #### need to add and fix these, JJS 11/5/19
 export Link
-export Pipe
-export RegularPipe
-export ReversibleFlowPipe
+export Pipe  # why is this prepended by WaterSystems in the type tree?? JJS 11/5/19
+export Valve
+export OpenPipe
+export GatePipe
+export CVPipe
+export Reservoir
+export Tank 
 
 # demands
 export WaterDemand
@@ -76,10 +80,9 @@ provide a constructor that allows existing values to be deserialized.
 abstract type WaterSystemType <: IS.InfrastructureSystemsType end
 
 abstract type Component <: WaterSystemType end
-# supertype for "devices" (bus, line, etc.)
+# supertype for "devices" (pipe, pump, valve, etc.)
 abstract type Device <: Component end
-abstract type Injection <: Device end
-# supertype for generation technologies (thermal, renewable, etc.)
+# supertype for technical parameters, data, etc.
 abstract type TechnicalParams <: WaterSystemType end
 
 #Models
