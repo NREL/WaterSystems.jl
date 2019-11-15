@@ -1,8 +1,20 @@
 #=
 This file is auto-generated. Do not edit.
 =#
+"""
+    mutable struct Arc <: Topology
+        from::Junction
+        to::Junction
+        internal::InfrastructureSystemsInternal
+    end
 
-"""A topological Arc."""
+A topological Arc.
+
+# Arguments
+- `from::Junction`
+- `to::Junction`
+- `internal::InfrastructureSystemsInternal`
+"""
 mutable struct Arc <: Topology
     from::Junction
     to::Junction

@@ -1,11 +1,38 @@
 #=
 This file is auto-generated. Do not edit.
 =#
+"""
+    mutable struct CVPipe <: Pipe
+        name::String
+        flow::Union{Nothing,Float64}
+        headloss::Float64
+        available::Bool
+        arc::Arc
+        diameter::Float64
+        length::Float64
+        roughness::Float64
+        flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
+        internal::InfrastructureSystemsInternal
+    end
 
-"""A unidirectional-flow pipe that contains a check valve (CV)."""
+A unidirectional-flow pipe that contains a check valve (CV).
+
+# Arguments
+- `name::String`
+- `flow::Union{Nothing,Float64}`
+- `headloss::Float64`: Not sure about decoupled headloss when flow is zero.
+- `available::Bool`
+- `arc::Arc`
+- `diameter::Float64`
+- `length::Float64`
+- `roughness::Float64`
+- `flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
+- `internal::InfrastructureSystemsInternal`
+"""
 mutable struct CVPipe <: Pipe
     name::String
     flow::Union{Nothing,Float64}
+    "Not sure about decoupled headloss when flow is zero."
     headloss::Float64
     available::Bool
     arc::Arc

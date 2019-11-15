@@ -1,8 +1,34 @@
 #=
 This file is auto-generated. Do not edit.
 =#
+"""
+    mutable struct OpenPipe <: Pipe
+        name::String
+        flow::Union{Nothing,Float64}
+        headloss::Float64
+        available::Bool
+        arc::Arc
+        diameter::Float64
+        length::Float64
+        roughness::Float64
+        flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
+        internal::InfrastructureSystemsInternal
+    end
 
-"""An always open, bidirectional-flow pipe."""
+An always open, bidirectional-flow pipe.
+
+# Arguments
+- `name::String`
+- `flow::Union{Nothing,Float64}`
+- `headloss::Float64`
+- `available::Bool`
+- `arc::Arc`
+- `diameter::Float64`
+- `length::Float64`
+- `roughness::Float64`
+- `flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
+- `internal::InfrastructureSystemsInternal`
+"""
 mutable struct OpenPipe <: Pipe
     name::String
     flow::Union{Nothing,Float64}

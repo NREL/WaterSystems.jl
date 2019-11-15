@@ -1,14 +1,36 @@
 #=
 This file is auto-generated. Do not edit.
 =#
+"""
+    mutable struct Tank <: Injection
+        name::String
+        available::Bool
+        junction::Junction
+        diameter::Float64
+        level::Union{Nothing,Float64}
+        level_limits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
+        internal::InfrastructureSystemsInternal
+    end
 
-"""A water tank. Currently cylindrical only."""
+A water tank. Currently cylindrical only.
+
+# Arguments
+- `name::String`
+- `available::Bool`
+- `junction::Junction`
+- `diameter::Float64`: constant diameter in m
+- `level::Union{Nothing,Float64}`: water level in m
+- `level_limits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
+- `internal::InfrastructureSystemsInternal`
+"""
 mutable struct Tank <: Injection
     name::String
     available::Bool
     junction::Junction
-    diameter::Float64  # constant diameter in m
-    level::Union{Nothing,Float64}  # water level in m
+    "constant diameter in m"
+    diameter::Float64
+    "water level in m"
+    level::Union{Nothing,Float64}
     level_limits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
     internal::InfrastructureSystemsInternal
 end

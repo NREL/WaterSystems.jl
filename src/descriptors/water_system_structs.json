@@ -65,8 +65,133 @@
     "supertype": "Topology"
   },
   {
+    "struct_name": "PumpParams",
+    "docstring": "Pump characteristics, containing both inp-file data and normalized representation for head, efficiency, and power curves. Currently, only single-speed",
+    "supertype": "TechnicalParams",
+    "fields": [
+      {
+        "name": "epnt_type",
+        "comment": "epanet categorizes pump specs as HEAD or POWER",
+        "data_type": "Union{Nothing, String}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "epnt_power",
+        "comment": "specified constant power if type POWER",
+        "data_type": "Union{Nothing, Float64}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "epnt_head",
+        "comment": "provided head curve if type HEAD",
+        "data_type": "Union{Nothing, Array{Tuple{Float64,Float64},1}}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "epnt_efficiency",
+        "comment": "provided efficiency curve (or single value) if type HEAD",
+        "data_type": "Union{Nothing, Float64, Array{Tuple{Float64,Float64},1}}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "flowBEP",
+        "comment": "flow rate at the best efficiency point",
+        "data_type": "Float64",
+        "null_value": "0.0"
+      },
+      {
+        "name": "effncyBEP",
+        "comment": "efficiency at the best efficiency point",
+        "data_type": "Float64",
+        "null_value": "0.0"
+      },
+      {
+        "name": "headBEP",
+        "comment": "head at the best efficiency point",
+        "data_type": "Float64",
+        "null_value": "0.0"
+      },
+      {
+        "name": "head0",
+        "comment": "head ratio G0/GBEP",
+        "data_type": "Float64",
+        "null_value": "1.25"
+      },
+      {
+        "name": "powerslope",
+        "comment": "slope of the linear power curve",
+        "data_type": "Float64",
+        "null_value": "0.0"
+      },
+      {
+        "name": "powerintcpt",
+        "comment": "inetercept of the linear power curve",
+        "data_type": "Float64",
+        "null_value": "0.0"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ]
+  },   
+  {
+    "struct_name": "Pump",
+    "docstring": "Pump, nominally centrifugal and single-speed.",
+    "supertype": "Link",
+    "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "name": "operating",
+        "null_value": "true",
+        "data_type": "Bool"
+      },
+      {
+        "name": "flow",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
+      },
+      {
+        "name": "headgain",
+        "comment": "Not sure about decoupled headgain when pump is off.",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "available",
+        "null_value": "true",
+        "data_type": "Bool"
+      },
+      {
+        "null_value": "Arc(Junction(nothing), Junction(nothing))",
+        "name": "arc",
+        "data_type": "Arc"
+      },
+      {
+        "name": "pumpparams",
+        "comment": "Pump parameters object, including pump curves",
+        "data_type": "PumpParams",
+        "null_value": "PumpParams(nothing)"
+
+      },
+      {
+        "name": "flowlimits",
+        "null_value": "(min=0.0, max=10.0)",
+        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ]
+  },
+  {
     "struct_name": "OpenPipe",
-	"docstring": "An always open, bidirectional-flow pipe.",
+    "docstring": "An always open, bidirectional-flow pipe.",
     "fields": [
       {
         "null_value": "init",
@@ -122,7 +247,7 @@
   },
   {
     "struct_name": "GatePipe",
-	"docstring": "A bidirectional-flow pipe with a gate (shutoff) valve.",
+    "docstring": "A bidirectional-flow pipe with a gate (shutoff) valve.",
     "fields": [
       {
         "null_value": "init",
@@ -136,6 +261,7 @@
       },
       {
         "name": "headloss",
+        "comment": "Not sure about decoupled headloss when pipe is closed.",
         "null_value": "0.0",
         "data_type": "Float64"
       },
@@ -169,11 +295,11 @@
         "null_value": "(min=-10.0, max=10.0)",
         "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
       },
-	  {
-		"name": "open_status",
-		"null_value": "true",
-		"data_type": "Bool"
-	  },
+      {
+        "name": "open_status",
+        "null_value": "true",
+        "data_type": "Bool"
+      },
       {
         "name": "internal",
         "data_type": "InfrastructureSystemsInternal"
@@ -183,7 +309,7 @@
   },
   {
     "struct_name": "CVPipe",
-	"docstring": "A unidirectional-flow pipe that contains a check valve (CV).",
+    "docstring": "A unidirectional-flow pipe that contains a check valve (CV).",
     "fields": [
       {
         "null_value": "init",
@@ -197,6 +323,7 @@
       },
       {
         "name": "headloss",
+        "comment": "Not sure about decoupled headloss when flow is zero.",
         "null_value": "0.0",
         "data_type": "Float64"
       },
@@ -239,7 +366,7 @@
   },
   {
     "struct_name": "StaticDemand",
-	"docstring": "A constant demand.",
+    "docstring": "A constant demand.",
     "fields": [
       {
         "null_value": "init",
@@ -276,10 +403,10 @@
     "supertype": "WaterDemand"
   },
   {
-	"struct_name": "Tank",
-	"docstring": "A water tank. Currently cylindrical only.",
-	"supertype": "Injection",
-	"fields": [
+    "struct_name": "Tank",
+    "docstring": "A water tank. Currently cylindrical only.",
+    "supertype": "Injection",
+    "fields": [
       {
         "null_value": "init",
         "name": "name",
@@ -295,23 +422,23 @@
         "null_value": "Junction(nothing)",
         "data_type": "Junction"
       },
-	  {
-		"name": "diameter",
-		"comment": "constant diameter in m",
-		"null_value": "0",
-		"data_type": "Float64"
-	  },
-	  {
-		"name": "level",
-		"comment": "water level in m",
-		"null_value": "nothing",
+      {
+        "name": "diameter",
+        "comment": "constant diameter in m",
+        "null_value": "0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "level",
+        "comment": "water level in m",
+        "null_value": "nothing",
         "data_type": "Union{Nothing,Float64}"
-	  },
+      },
       {
         "name": "level_limits",
         "null_value": "(min=0.0, max=1000.0)",
         "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
-	  },
+      },
       {
         "name": "internal",
         "data_type": "InfrastructureSystemsInternal"
@@ -319,10 +446,10 @@
     ]
   },
   {
-	"struct_name": "Reservoir",
-	"docstring": "An infinite reservoir-type water source.",
-	"supertype": "Injection",
-	"fields": [
+    "struct_name": "Reservoir",
+    "docstring": "An infinite reservoir-type water source.",
+    "supertype": "Injection",
+    "fields": [
       {
         "null_value": "init",
         "name": "name",

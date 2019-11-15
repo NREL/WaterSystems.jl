@@ -1,11 +1,40 @@
 #=
 This file is auto-generated. Do not edit.
 =#
+"""
+    mutable struct GatePipe <: Pipe
+        name::String
+        flow::Union{Nothing,Float64}
+        headloss::Float64
+        available::Bool
+        arc::Arc
+        diameter::Float64
+        length::Float64
+        roughness::Float64
+        flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
+        open_status::Bool
+        internal::InfrastructureSystemsInternal
+    end
 
-"""A bidirectional-flow pipe with a gate (shutoff) valve."""
+A bidirectional-flow pipe with a gate (shutoff) valve.
+
+# Arguments
+- `name::String`
+- `flow::Union{Nothing,Float64}`
+- `headloss::Float64`: Not sure about decoupled headloss when pipe is closed.
+- `available::Bool`
+- `arc::Arc`
+- `diameter::Float64`
+- `length::Float64`
+- `roughness::Float64`
+- `flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
+- `open_status::Bool`
+- `internal::InfrastructureSystemsInternal`
+"""
 mutable struct GatePipe <: Pipe
     name::String
     flow::Union{Nothing,Float64}
+    "Not sure about decoupled headloss when pipe is closed."
     headloss::Float64
     available::Bool
     arc::Arc

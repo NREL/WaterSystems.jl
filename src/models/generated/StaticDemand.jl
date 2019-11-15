@@ -1,13 +1,32 @@
 #=
 This file is auto-generated. Do not edit.
 =#
+"""
+    mutable struct StaticDemand <: WaterDemand
+        name::String
+        available::Bool
+        junction::Junction
+        maxdemand::Float64
+        _forecasts::InfrastructureSystems.Forecasts
+        internal::InfrastructureSystemsInternal
+    end
 
-"""A constant demand."""
+A constant demand.
+
+# Arguments
+- `name::String`
+- `available::Bool`
+- `junction::Junction`
+- `maxdemand::Float64`: peak demand in m^3/second
+- `_forecasts::InfrastructureSystems.Forecasts`
+- `internal::InfrastructureSystemsInternal`
+"""
 mutable struct StaticDemand <: WaterDemand
     name::String
     available::Bool
     junction::Junction
-    maxdemand::Float64  # peak demand in m^3/second
+    "peak demand in m^3/second"
+    maxdemand::Float64
     _forecasts::InfrastructureSystems.Forecasts
     internal::InfrastructureSystemsInternal
 end

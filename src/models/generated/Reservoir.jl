@@ -1,8 +1,22 @@
 #=
 This file is auto-generated. Do not edit.
 =#
+"""
+    mutable struct Reservoir <: Injection
+        name::String
+        available::Bool
+        junction::Junction
+        internal::InfrastructureSystemsInternal
+    end
 
-"""An infinite reservoir-type water source."""
+An infinite reservoir-type water source.
+
+# Arguments
+- `name::String`
+- `available::Bool`
+- `junction::Junction`
+- `internal::InfrastructureSystemsInternal`
+"""
 mutable struct Reservoir <: Injection
     name::String
     available::Bool
