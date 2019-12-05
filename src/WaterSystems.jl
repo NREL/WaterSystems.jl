@@ -19,9 +19,15 @@ export Device
 export Junction
 export Arc
 
+# technical parameters
+export EPANETPumpParams
+export NormPumpParams
+export PumpParams
+
 # transport elements  #### need to add and fix these, JJS 11/5/19
 export Link
 export Pipe  # why is this prepended by WaterSystems in the type tree?? JJS 11/5/19
+export Pump
 export Valve
 export OpenPipe
 export GatePipe

@@ -2,7 +2,6 @@ filepath = Base.source_path()
 
 using Pkg
 Pkg.activate( joinpath(dirname(filepath),"..") )
-Pkg.activate
 
 import InfrastructureSystems
 const IS = InfrastructureSystems

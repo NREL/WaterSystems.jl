@@ -65,8 +65,8 @@
     "supertype": "Topology"
   },
   {
-    "struct_name": "PumpParams",
-    "docstring": "Pump characteristics, containing both inp-file data and normalized representation for head, efficiency, and power curves. Currently, only single-speed",
+    "struct_name": "EPANETPumpParams",
+    "docstring": "Pump specifications from inp-file",
     "supertype": "TechnicalParams",
     "fields": [
       {
@@ -94,19 +94,30 @@
         "null_value": "nothing"
       },
       {
-        "name": "flowBEP",
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ]
+  },   
+  {
+    "struct_name": "NormPumpParams",
+    "docstring": "Coefficients that characterize pumps with a normalized representation of head, efficiency, and power. Currently only single-speed",
+    "supertype": "TechnicalParams",
+    "fields": [
+      {
+        "name": "flow_bep",
         "comment": "flow rate at the best efficiency point",
         "data_type": "Float64",
         "null_value": "0.0"
       },
       {
-        "name": "effncyBEP",
+        "name": "effncy_bep",
         "comment": "efficiency at the best efficiency point",
         "data_type": "Float64",
         "null_value": "0.0"
       },
       {
-        "name": "headBEP",
+        "name": "head_bep",
         "comment": "head at the best efficiency point",
         "data_type": "Float64",
         "null_value": "0.0"
@@ -118,16 +129,39 @@
         "null_value": "1.25"
       },
       {
-        "name": "powerslope",
+        "name": "power_slope",
         "comment": "slope of the linear power curve",
         "data_type": "Float64",
         "null_value": "0.0"
       },
       {
-        "name": "powerintcpt",
+        "name": "power_intcpt",
         "comment": "inetercept of the linear power curve",
         "data_type": "Float64",
         "null_value": "0.0"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ]
+  },   
+  {
+    "struct_name": "PumpParams",
+    "docstring": "Pump characteristics, containing both inp-file data and coefficients for a normalized representation. Currently, only single-speed",
+    "supertype": "TechnicalParams",
+    "fields": [
+      {
+        "name": "epnt_data",
+        "comment": "Pump specifications from inp-file",
+        "data_type": "Union{Nothing, EPANETPumpParams}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "norm_coefs",
+        "comment": "Coefficients that characterize pumps with a normalized representation of head, efficiency, and power. Currently only single-speed",
+        "data_type": "Union{Nothing, NormPumpParams}",
+        "null_value": "nothing"
       },
       {
         "name": "internal",
