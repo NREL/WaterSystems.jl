@@ -1,4 +1,8 @@
-include("wntr_dict.jl")
+## much of this is modified from legacy Amanda Mason code, JJS, 12/5/19
+
+"""
+Create a dictionary of the network using wntr to parse the inp file
+"""
 function make_dict(inp_file::String)
     junctions = Dict{String,Any}()
     tanks = Vector{Any}()
@@ -7,7 +11,9 @@ function make_dict(inp_file::String)
     valves = Vector{Any}()
     pumps = Vector{Any}()
     demands = Vector{Any}()
+
     wn = wntr_dict(inp_file)
+    
     duration = wn["options"]["time"]["duration"]
     duration != 0 ? duration_hours = from_seconds(duration)[1] : error("Duration is set to 0. Simulation will not run. Modify .inp file.")
     time_periods = wn["options"]["time"]["report_timestep"]
@@ -26,6 +32,7 @@ function make_dict(inp_file::String)
     time_ahead = collect(start_day:Second(time_periods):end_day)
     node_results = wn["node_results"]
     link_results = wn["link_results"]
+    
     junction_dict(wn, node_results, junctions)
     tank_dict(wn, node_results, tanks, junctions, num_timeperiods, time_ahead)
     res_dict(wn, node_results, reservoirs, junctions, num_timeperiods, time_ahead)
@@ -33,14 +40,21 @@ function make_dict(inp_file::String)
     valve_dict(wn, valves)
     pump_dict(wn, junctions,pumps, node_results, link_results)
     demands_dict(demands, junctions, node_results, time_ahead, num_timeperiods)
-    data = Dict{String,Any}( "Junction" => junctions, "Tank" => tanks, "Reservoir" =>reservoirs, "Pipe" => pipes, "Valve" => valves, "Pump" => pumps, "Demand" => demands)
 
-    data["wntr"] = Dict{String,Any}("duration"=> duration_hours, "timeperiods" => timeperiods_hours, "num_timeperiods" => num_timeperiods, "start" => start_day, "end" => end_day)
+    data = Dict{String,Any}( "Junction" => junctions, "Tank" => tanks,
+                             "Reservoir" =>reservoirs, "Pipe" => pipes,
+                             "Valve" => valves, "Pump" => pumps, "Demand" => demands)
+
+    data["wntr"] = Dict{String,Any}("duration"=> duration_hours,
+                                    "timeperiods" => timeperiods_hours,
+                                    "num_timeperiods" => num_timeperiods,
+                                    "start" => start_day, "end" => end_day)
     # data["wntr_dict"] = wn
     return data
 end
 
 
+# these functions should all have '!' appended to their names
 function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, junctions::Dict{String,Any})
 
     for junc in wn["junctions"]
@@ -51,6 +65,7 @@ function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, junctions
         junctions[name] = Dict{String,Any}("name" => name, "elevation" => junc["elevation"], "head" => head, "minimum_pressure" => junc["minimum_pressure"], "coordinates" => (lat = junc["coordinates"][2], lon = junc["coordinates"][1]))
     end
 end
+
 
 function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, tanks::Vector{Any}, junctions::Dict{String,Any}, num_timeperiods::Int64, time_ahead::Vector{DateTime})
     #assign minimum pressure to the stardard for nodes

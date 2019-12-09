@@ -24,7 +24,7 @@ export EPANETPumpParams
 export NormPumpParams
 export PumpParams
 
-# transport elements  #### need to add and fix these, JJS 11/5/19
+# transport elements 
 export Link
 export Pipe  # why is this prepended by WaterSystems in the type tree?? JJS 11/5/19
 export Pump
@@ -40,6 +40,7 @@ export WaterDemand
 export StaticDemand
 
 # parser
+export parse_inp_file
 export dict_to_struct
 export make_dict
 export wntr_dict
@@ -47,12 +48,15 @@ export wntr_dict
 #################################################################################
 # Imports
 
-using PyCall
-using CurveFit
-using SparseArrays
-using LinearAlgebra
+using PyCall # keeping this as "using" for now, but probably should change to import, JJS
+             # 12/6/19
+# coverted these to imports -- not sure what calls refer to them, JJS 12/6/19
+import CurveFit
+import SparseArrays
+import LinearAlgebra
 
 import Dates
+import Dates: DateTime
 import TimeSeries
 import DataFrames
 import JSON
@@ -70,8 +74,10 @@ import InfrastructureSystems: Components, Deterministic, Probabilistic, Forecast
 
 const IS = InfrastructureSystems
 
-metric = pyimport("wntr.metrics.economic")
-model = pyimport("wntr.network.model") #import wntr network model
+# python imports, needed to use wntr for parsing epanet files
+#!!!!!!!!!!!!!!!!! these are all returning "PyObject NULL" !!!!!!!!!!!!! JJS 12/6/19
+metric = pyimport("wntr.metrics.economic") # what is this for? JJS 12/5/19
+model = pyimport("wntr.network.model") #import wntr network model 
 sim = pyimport("wntr.sim.epanet")
 
 #################################################################################
@@ -91,15 +97,24 @@ abstract type Device <: Component end
 # supertype for technical parameters, data, etc.
 abstract type TechnicalParams <: WaterSystemType end
 
-#Models
+# Models
 include("models/topological_elements.jl")
 include("models/water_demand.jl")
 include("models/links.jl")
 
 # Include all auto-generated structs.
 include("models/generated/includes.jl")
-#include("models/supplemental_constructors.jl")
 
+# Definitions of (Water) System
 include("base.jl")
+
+# parsing files
+include("parsers/epanet_file_parser.jl")
+include("parsers/dict_to_struct.jl")
+include("parsers/wntr_dict.jl")
+include("parsers/wntr_dict_parser.jl")
+
+# utils... not sure what of the legacy code will be needed, JJS 12/5/19
+#include("Utils/build_incidence.jl")
 
 end # module

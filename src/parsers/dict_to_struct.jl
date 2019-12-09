@@ -1,11 +1,46 @@
+# modifying from Amanda's legacy parsing code, JJS 12/5/19
+
+"""
+Convert dictionary of water network to WaterSystems structure
+"""
 function dict_to_struct(data::Dict{String,Any})
-    haskey(data, "Junction") ? junctions = junction_to_struct(data["Junction"]) : @warn("Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array")
-    haskey(data, "Tank") ? tanks = tank_to_struct(data["Tank"], junctions) : @warn("Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array")
-    haskey(data, "Reservoir") ? res = res_to_struct(data["Reservoir"], junctions) : @warn("Key Error : key 'Reservoir' not found in WaterSystems dictionary, this will result in an empty Reservoir array")
-    haskey(data, "Pipe") ? pipes = pipe_to_struct(data["Pipe"], junctions) : @warn("Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array")
-    haskey(data, "Valve") ? valves = valve_to_struct(data["Valve"], junctions) : @warn("Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array")
-    haskey(data, "Pump") ? pumps = pump_to_struct(data["Pump"], junctions) : @warn("Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pump array")
-    haskey(data, "Demand") ? demands = demand_to_struct(data["Demand"], junctions) : @warn("Key Error : key 'demand' not found in WaterSystems dictionary, this will result in an empty demand array")
+    if haskey(data, "Junction")
+        junctions = junction_to_struct(data["Junction"])
+    else
+        @warn("Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array")
+    end
+    if haskey(data, "Reservoir")
+        res = res_to_struct(data["Reservoir"], junctions)
+    else
+        @warn("Key Error : key 'Reservoir' not found in WaterSystems dictionary, this will result in an empty Reservoir array")
+    end
+    if haskey(data, "Pipe")
+        pipes = pipe_to_struct(data["Pipe"], junctions)
+    else
+        @warn("Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array")
+    end
+    ## ignoring valves for the moment, JJS 12/5/19
+    # if haskey(data, "Valve")
+    #     valves = valve_to_struct(data["Valve"], junctions)
+    # else
+    #     @warn("Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array")
+    # end
+    if haskey(data, "Pump")
+        pumps = pump_to_struct(data["Pump"], junctions)
+    else
+        @warn("Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pump array")
+    end
+    if haskey(data, "Demand")
+        demands = demand_to_struct(data["Demand"], junctions)
+    else
+        @warn("Key Error : key 'demand' not found in WaterSystems dictionary, this will result in an empty demand array")
+    end
+    if haskey(data, "Tank")
+        tanks = tank_to_struct(data["Tank"], junctions)
+    else
+        @warn("Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array")
+    end
+
     d = data["wntr"]
     simulations = Simulation(d["duration"], d["timeperiods"], d["num_timeperiods"], d["start"], d["end"])
     return junctions, tanks, res, pipes, valves, pumps, demands, simulations
@@ -55,30 +90,30 @@ function pipe_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     return pipes
 end
 
-function valve_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
-    valves = Array{PR where {PR <: PressureReducingValve},1}(undef, length(data))
-    for (ix, v) in enumerate(data)
-        #push!(valves, PressureReducingValve(...))
-        j_from = v["connectionpoints"].from
-        j_to = v["connectionpoints"].to
-        junction_to = [junc for junc in junctions if junc.name == j_to["name"]][1]
-        junction_from = [junc for junc in junctions if junc.name == j_from["name"]][1]
-        if v["valvetype"] == "PRV"
-            valves[ix] = PressureReducingValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
-        elseif v["valvetype"] == "PSV"
-            valves[ix] = PressureSustainingValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
-        elseif v["valvetype"] == "PBV"
-            valves[ix] = PressureBreakerValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
-        elseif v["valvetype"] == "FCV"
-            valves[ix] = FlowControlValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
-        elseif v["valvetype"] == "TCV"
-            valves[ix] = ThrottleControlValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
-        else
-            valves[ix] = GeneralPurposeValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
-        end
-    end
-    return valves
-end
+# function valve_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
+#     valves = Array{PR where {PR <: PressureReducingValve},1}(undef, length(data))
+#     for (ix, v) in enumerate(data)
+#         #push!(valves, PressureReducingValve(...))
+#         j_from = v["connectionpoints"].from
+#         j_to = v["connectionpoints"].to
+#         junction_to = [junc for junc in junctions if junc.name == j_to["name"]][1]
+#         junction_from = [junc for junc in junctions if junc.name == j_from["name"]][1]
+#         if v["valvetype"] == "PRV"
+#             valves[ix] = PressureReducingValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+#         elseif v["valvetype"] == "PSV"
+#             valves[ix] = PressureSustainingValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+#         elseif v["valvetype"] == "PBV"
+#             valves[ix] = PressureBreakerValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+#         elseif v["valvetype"] == "FCV"
+#             valves[ix] = FlowControlValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+#         elseif v["valvetype"] == "TCV"
+#             valves[ix] = ThrottleControlValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+#         else
+#             valves[ix] = GeneralPurposeValve(v["name"], (from = junction_from, to = junction_to) ,v["status"], v["diameter"], v["pressure_drop"])
+#         end
+#     end
+#     return valves
+# end
 
 function pump_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     pumps = Array{C where {C <:ConstSpeedPump},1}(undef, length(data))

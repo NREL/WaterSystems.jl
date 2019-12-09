@@ -1,18 +1,132 @@
+### more documentation needed; see base.jl in PowerSystems.jl, JJS 11/19/19
+"""
+System
 
+A water system (municipal network).
+"""
 struct System <: WaterSystemType
     data::IS.SystemData
-    elevation::Float64             
+    runchecks::Bool
     internal::InfrastructureSystemsInternal
+
+    function System(data, internal; kwargs...)
+        runchecks = get(kwargs, :runchecks, true)
+        sys = new(data, runchecks, internal)
+        return sys
+    end
 end
 
 """Construct an empty System. Useful for building a System while parsing raw data."""
-function System(elevation; kwargs...)
-    return System(_create_system_data_from_kwargs(; kwargs...), elevation)
+function System(kwargs...)
+    return System(_create_system_data_from_kwargs(; kwargs...))
 end
 
-function System(data, elevation; kwargs...)
-    return System(data, elevation, InfrastructureSystemsInternal(); kwargs...)
+"""Construct a `System` from `InfrastructureSystems.SystemData`"""
+function System(data; kwargs...)
+    internal = get(kwargs, :internal, IS.InfrastructureSystemsInternal())
+    return System(data, internal; kwargs...)
 end
+
+"""System constructor when components are constructed externally."""
+function System(
+    junctions::Vector{Junction},
+    reservoirs::Vector{Reservoir},
+    pipes::Vector{<:Pipe},    
+    pumps::Union{Nothing,Vector{Pump}},
+    demands::Union{Nothing,Vector{<:WaterDemand}},
+    tanks::Union{Nothing,Vector{Tank}},
+    ;
+    kwargs...,
+)
+
+    data = _create_system_data_from_kwargs(; kwargs...)
+    sys = System(data; kwargs...)
+
+    arrays = [junctions, reservoirs, pipes]
+    if !isnothing(pumps)
+        push!(arrays, pumps)
+    end
+    if !isnothing(demands)
+        push!(arrays, demands)
+    end
+    if !isnothing(tanks)
+        push!(arrays, tanks)
+    end
+
+    error_detected = false
+    for component in Iterators.flatten(arrays)
+        try
+            add_component!(sys, component)
+        catch e
+            if isa(e, IS.InvalidRange)
+                error_detected = true
+            else
+                rethrow()
+            end
+        end
+    end
+
+    runchecks = get(kwargs, :runchecks, true)
+
+    if error_detected
+        throw(IS.InvalidRange("Invalid value(s) detected"))
+    end
+
+    if runchecks
+        check!(sys)
+    end
+
+    return sys
+end
+
+
+"""System constructor without nothing-able arguments."""
+function System(
+    junctions::Vector{Junction},
+    reservoirs::Vector{Reservoir},
+    pipes::Vector{<:Pipe},    
+    ;
+    kwargs...,
+)
+    return System(
+        junctions,
+        reservoirs,
+        pipes,
+        nothing,
+        nothing,
+        nothing,
+        ;
+        kwargs...,
+    )
+end
+
+"""System constructor with keyword arguments."""
+function System(
+    ;
+    junctions,
+    reservoirs,
+    pipes,
+    pumps,
+    demands,
+    tanks,
+    kwargs...,
+)
+    return System(
+        junctions,
+        reservoirs,
+        pipes,
+        pumps,
+        demands,
+        tanks,
+        ;
+        kwargs...,
+    )
+end
+
+
+### below was copied from PowerSystems.jl and has not yet been checked or modified, JJS,
+### 12/5/19
+
 
 """
     to_json(sys::System, filename::AbstractString)

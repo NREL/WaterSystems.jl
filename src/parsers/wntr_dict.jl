@@ -1,19 +1,29 @@
-#This splits the wntr dictionary (links, nodes) into its sub compononents 
+## much of this is modified from legacy Amanda Mason code, JJS, 12/5/19
+
+"""
+This splits the wntr dictionary (links, nodes) into its sub compononents 
+"""
 function wntr_dict(inp_file::String)
     wn = model.WaterNetworkModel(inp_file)
     wns =  sim.EpanetSimulator(wn)
-    results = wns.run_sim()
-    node_results = results.node #dictionary of head, pressure, demand, quality
-    link_results = results.link #dictionary of status, flowrate, velocity, {headloss, setting, friciton factor, reaction rate, link quality} = epanet simulator only
+    results = wns.run_sim()  # why run a wntr simulation? JJS 12/5/19
+    # dictionary of head, pressure, demand, quality
+    node_results = results.node
+    # dictionary of status, flowrate, velocity, {headloss, setting, friciton factor,
+    # reaction rate, link quality} = epanet simulator only
+    link_results = results.link 
     wntr_dict = wn.todict()
     node_dicts(wntr_dict)
     link_dicts(wntr_dict)
     curves_dict(wntr_dict)
+    # why have these results? are they useful for constructing the julia-version of a
+    # WaterSystem? JJS 12/5/19
     wntr_dict["node_results"] = node_results
     wntr_dict["link_results"] = link_results
     return wntr_dict
 end
 
+# these functions should all have '!' appended to their names
 function link_dicts(wntr_dict::Dict{Any, Any})
     links = wntr_dict["links"]
     pipe_dict = Dict{Int64,Any}()
