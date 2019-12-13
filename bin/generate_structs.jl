@@ -9,7 +9,7 @@ const IS = InfrastructureSystems
 function main(args)
     if length(args) != 2
         println("CLI usage: julia generate_structs.jl INPUT_FILE OUTPUT_DIRECTORY")
-        println("REPL usage: IS.generate_structs(INPUT_FILE OUTPUT_DIRECTORY)")
+        println("REPL usage: IS.generate_structs(INPUT_FILE, OUTPUT_DIRECTORY)")
         return
     end
 

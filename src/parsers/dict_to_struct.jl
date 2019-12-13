@@ -4,70 +4,95 @@
 Convert dictionary of water network to WaterSystems structure
 """
 function dict_to_struct(data::Dict{String,Any})
-    if haskey(data, "Junction")
-        junctions = junction_to_struct(data["Junction"])
-    else
-        @warn("Key Error : key 'Junction' not found in WaterSystems dictionary, this will result in an empty Junction array")
-    end
-    if haskey(data, "Reservoir")
-        res = res_to_struct(data["Reservoir"], junctions)
-    else
-        @warn("Key Error : key 'Reservoir' not found in WaterSystems dictionary, this will result in an empty Reservoir array")
-    end
-    if haskey(data, "Pipe")
-        pipes = pipe_to_struct(data["Pipe"], junctions)
-    else
-        @warn("Key Error : key 'Pipe' not found in WaterSystems dictionary, this will result in an empty Pipe array")
-    end
-    ## ignoring valves for the moment, JJS 12/5/19
-    # if haskey(data, "Valve")
-    #     valves = valve_to_struct(data["Valve"], junctions)
-    # else
-    #     @warn("Key Error : key 'Valve' not found in WaterSystems dictionary, this will result in an empty Valve array")
-    # end
-    if haskey(data, "Pump")
-        pumps = pump_to_struct(data["Pump"], junctions)
-    else
-        @warn("Key Error : key 'Pump' not found in WaterSystems dictionary, this will result in an empty Pump array")
-    end
-    if haskey(data, "Demand")
-        demands = demand_to_struct(data["Demand"], junctions)
-    else
-        @warn("Key Error : key 'demand' not found in WaterSystems dictionary, this will result in an empty demand array")
-    end
-    if haskey(data, "Tank")
-        tanks = tank_to_struct(data["Tank"], junctions)
-    else
-        @warn("Key Error : key 'Tank' not found in WaterSystems dictionary, this will result in an empty Tank array")
-    end
+    # I stripped away the checks for the existence of each of these -- may need them for not
+    # required features, e.g., tanks, JJS 12/11/19
+    junctions = junction_to_struct(data["Junction"])
+    j_dict = Dict{String, Junction}(junction.name => junction for junction in junctions)
+    arcs = link_to_struct(data["Link"], j_dict)
+    res = res_to_struct(data["Reservoir"], j_dict)
+    tanks = tank_to_struct(data["Tank"], j_dict)
+
+    demands = demand_to_struct(data["Demand"], j_dict)
+    
+    pipes = pipe_to_struct(data["Pipe"], junctions)
+    pumps = pump_to_struct(data["Pump"], junctions)
+    valves = valve_to_struct(data["Valve"], junctions)
 
     d = data["wntr"]
     simulations = Simulation(d["duration"], d["timeperiods"], d["num_timeperiods"], d["start"], d["end"])
     return junctions, tanks, res, pipes, valves, pumps, demands, simulations
 end
 
-function junction_to_struct(data::Dict{String, Any})
-    junctions = [Junction(name, j["elevation"], j["head"], j["minimum_pressure"], j["coordinates"]) for (name,j) in data]
+"""
+Create array of junctions using WaterSystems.Junction type
+"""
+function junction_to_struct(j_dict::Dict{String, Any})
+    junctions = [Junction(name, junction["elevation"], junction["head"],
+                          junction["minimum_pressure"], junction["coordinates"])
+                 for (name, junction) in j_dict]
     return junctions
 end
 
-function tank_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
-    tanks = Array{R where {R<:RoundTank},1}(undef, length(data))
-    for (ix, t) in enumerate(data)
-        junction = [junc for junc in junctions if junc.name == t["name"]]
-        tanks[ix] = RoundTank(t["name"], junction[1], t["volumelimits"], t["diameter"], t["volume"], t["area"], t["level"], t["levellimits"])
+"""
+Create array of arcs using WaterSystems.Arc type
+"""
+function link_to_struct(l_dict::Dict{String, Any}, j_dict::Dict{String,Junction})
+    arcs = Vector{Arc}(undef, length(l_dict))
+    for (i, (name,link)) in enumerate(l_dict)
+        from_name = link["connectionpoints"][:from]["name"]
+        to_name = link["connectionpoints"][:to]["name"]
+        arcs[i] = Arc(name, j_dict[from_name], j_dict[to_name])
+    end
+    return arcs
+end
+
+"""
+Create array of reservoirs using WaterSystems.Reservoir type.
+"""
+function res_to_struct(r_vec::Vector{Any}, j_dict::Dict{String,Junction})
+    reservoirs = Vector{Reservoir}(undef,length(r_vec))
+    for (i, reservoir) in enumerate(r_vec)
+        name = reservoir["name"]
+        reservoirs[i] = Reservoir(name, true, j_dict[name])
+    end
+    return reservoirs
+end
+
+""" 
+Create array of tanks using WaterSystems.Tank subtypes. Only cylindrical tanks are
+currently supported.
+"""
+
+function tank_to_struct(t_vec::Vector{Any}, j_dict::Dict{String,Junction})
+    tanks = Vector{Tank}(undef, length(t_vec))
+    for (i, tank) in enumerate(t_vec)
+        name = tank["name"]
+        tanks[i] = CylindricalTank(name, true, j_dict[name], tank["diameter"], tank["level"],
+                                   tank["levellimits"])
     end
     return tanks
 end
 
-function res_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
-    res = Array{S where {S<:StorageReservoir},1}(undef,length(data))
-    for (ix, r) in enumerate(data)
-        junction = [junc for junc in junctions if junc.name == r["name"]]
-        res[ix] = StorageReservoir(r["name"], junction[1], r["elevation"])
+"""
+Create array of demands using WaterSystems.WaterDemand subtypes. Only static demands are
+currently supported.
+"""
+function demand_to_struct(d_vec::Vector{Any}, j_dict::Dict{String,Junction})
+    # FIXME:  remove "maxdemand" from type??? JJS 11/12/19
+    demands = Vector{WaterDemand}(undef, length(d_vec))
+    for (i,  demand) in enumerate(d_vec)
+        name = demand["name"]
+        demand_forecast = demand["demand"]
+        maxdemand = maximum(values(demand_forecast))
+        # constructor: currently not working because cannot convert TimeArray to
+        # IS.Forecasts, JJS 12/12/19
+        demands[i] = StaticDemand(name, true, j_dict[name], maxdemand, demand_forecast)
+        #demands[ix] = WaterDemand(d["name"], junction[1] , d["status"], d["max_demand"], d["demand"], d["demandforecast"])
     end
-    return res
+    return demands
 end
+
+
 
 function pipe_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     pipes = Array{P where {P<:Pipe}, 1}(undef, length(data))
@@ -90,6 +115,13 @@ function pipe_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     return pipes
 end
 
+#ignoring valves for now, JJS 12/5/19
+function valve_to_struct(data::Vector{Any})
+    if size(data["Valve"])[1] != 0
+        @warn("There appears to be pressure/flow control valves in this network, but these valves are not currently handled by WaterSystems.jl")
+    end
+    return Nothing()
+end
 # function valve_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
 #     valves = Array{PR where {PR <: PressureReducingValve},1}(undef, length(data))
 #     for (ix, v) in enumerate(data)
@@ -126,13 +158,3 @@ function pump_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     end
     return pumps
 end
-function demand_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
-    demands = Array{W where {W <:WaterDemand},1}(undef, length(data))
-    for (ix,  d) in enumerate(data)
-        junction = [junc for junc in junctions if junc.name == d["node"]["name"]]
-        demands[ix] = WaterDemand(d["name"], junction[1] , d["status"], d["max_demand"], d["demand"], d["demandforecast"])
-    end
-    return demands
-end
-
-

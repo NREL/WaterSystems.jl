@@ -37,7 +37,7 @@ end
 function Reservoir(::Nothing)
     Reservoir(;
         name="init",
-        available=false,
+        available=true,
         junction=Junction(nothing),
     )
 end

@@ -44,7 +44,7 @@ end
 function StaticDemand(::Nothing)
     StaticDemand(;
         name="init",
-        available=false,
+        available=true,
         junction=Junction(nothing),
         maxdemand=0.0,
         _forecasts=InfrastructureSystems.Forecasts(),

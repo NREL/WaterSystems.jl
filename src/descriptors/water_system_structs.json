@@ -32,9 +32,8 @@
         "name": "coordinates",
         "comment": "latitude and longitude coordinates of junction",
         "null_value": "nothing",
-        "data_type": "Union{Nothing, Float64}",
+        "data_type": "Union{Nothing, NamedTuple{(:lat, :lon),Tuple{Float64,Float64}}}",
         "validation_action": "error"
-
       },
       {
         "name": "internal",
@@ -47,6 +46,12 @@
     "struct_name": "Arc",
     "docstring": "A topological Arc.",
     "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "comment": "the name of the arc",
+        "data_type": "String"
+      },
       {
         "name": "from",
         "null_vale": "Junction(nothing)",
@@ -400,7 +405,7 @@
   },
   {
     "struct_name": "StaticDemand",
-    "docstring": "A constant demand.",
+    "docstring": "Temporal demand at a junction that is fixed.",
     "fields": [
       {
         "null_value": "init",
@@ -408,7 +413,7 @@
         "data_type": "String"
       },
       {
-        "null_value": "false",
+        "null_value": "true",
         "name": "available",
         "data_type": "Bool"
       },
@@ -437,9 +442,9 @@
     "supertype": "WaterDemand"
   },
   {
-    "struct_name": "Tank",
-    "docstring": "A water tank. Currently cylindrical only.",
-    "supertype": "Injection",
+    "struct_name": "CylindricalTank",
+    "docstring": "A cylindrical water tank. Currently the only supproted tank type.",
+    "supertype": "Tank",
     "fields": [
       {
         "null_value": "init",
@@ -447,7 +452,7 @@
         "data_type": "String"
       },
       {
-        "null_value": "false",
+        "null_value": "true",
         "name": "available",
         "data_type": "Bool"
       },
@@ -490,7 +495,7 @@
         "data_type": "String"
       },
       {
-        "null_value": "false",
+        "null_value": "true",
         "name": "available",
         "data_type": "Bool"
       },

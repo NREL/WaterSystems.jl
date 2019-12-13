@@ -16,7 +16,8 @@
 Create a System from an epanet ".inp" file.
 """
 function parse_inp_file(inp_file::String)
-    data = make_dict(inp_file) # data is a dictionary
+    data = make_dict(inp_file) # data is a dictionary -- this works again! JJS 12/9/19
+    # now the real work begins... I think most of this method needs to be rewritten
     nodes, tanks, reservoirs, pipes, valves, pumps, demands, simulations = dict_to_struct(data)
     links = vcat(pipes,valves,pumps)
     link_classes = LinkClasses(links, pipes, pumps, valves)

@@ -3,6 +3,7 @@ This file is auto-generated. Do not edit.
 =#
 """
     mutable struct Arc <: Topology
+        name::String
         from::Junction
         to::Junction
         internal::InfrastructureSystemsInternal
@@ -11,25 +12,30 @@ This file is auto-generated. Do not edit.
 A topological Arc.
 
 # Arguments
+- `name::String`: the name of the arc
 - `from::Junction`
 - `to::Junction`
 - `internal::InfrastructureSystemsInternal`
 """
 mutable struct Arc <: Topology
+    "the name of the arc"
+    name::String
     from::Junction
     to::Junction
     internal::InfrastructureSystemsInternal
 end
 
-function Arc(from, to, )
-    Arc(from, to, InfrastructureSystemsInternal())
+function Arc(name, from, to, )
+    Arc(name, from, to, InfrastructureSystemsInternal())
 end
 
-function Arc(; from, to, )
-    Arc(from, to, )
+function Arc(; name, from, to, )
+    Arc(name, from, to, )
 end
 
 
+"""Get Arc name."""
+get_name(value::Arc) = value.name
 """Get Arc from."""
 get_from(value::Arc) = value.from
 """Get Arc to."""

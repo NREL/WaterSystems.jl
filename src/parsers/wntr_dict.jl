@@ -1,4 +1,5 @@
-## much of this is modified from legacy Amanda Mason code, JJS, 12/5/19
+## much of this is modified from legacy Amanda Mason code and appears to have a lot of
+## unnecessary and/or redundant code, JJS, 12/5/19
 
 """
 This splits the wntr dictionary (links, nodes) into its sub compononents 
@@ -23,9 +24,11 @@ function wntr_dict(inp_file::String)
     return wntr_dict
 end
 
-# these functions should all have '!' appended to their names
+# these functions should all have '!' appended to their names, JJS 12/9/19
 function link_dicts(wntr_dict::Dict{Any, Any})
     links = wntr_dict["links"]
+    # why a dict for pipes, but a vector for pumps? JJS 12/11/19
+    links_vec = Vector{Any}()
     pipe_dict = Dict{Int64,Any}()
     valves = Vector{Any}()
     pumps = Vector{Any}()
@@ -36,6 +39,7 @@ function link_dicts(wntr_dict::Dict{Any, Any})
     end
     l = 0
     for link in links
+        push!(links_vec, link) 
         if link["link_type"] == "Pipe"
             l = l + 1
             pipe_dict[l] = link
@@ -49,6 +53,7 @@ function link_dicts(wntr_dict::Dict{Any, Any})
     wntr_dict["pipes"] = pipe_dict
     wntr_dict["valves"] = valves
     wntr_dict["pumps"] = pumps
+    wntr_dict["links_vec"] = links_vec # container for all links, JJS 12/11/19
 end
 
 function node_dicts(wntr_dict::Dict{Any,Any})

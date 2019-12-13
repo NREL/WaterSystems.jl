@@ -8,7 +8,7 @@ include("OpenPipe.jl")
 include("GatePipe.jl")
 include("CVPipe.jl")
 include("StaticDemand.jl")
-include("Tank.jl")
+include("CylindricalTank.jl")
 include("Reservoir.jl")
 
 export get__forecasts

@@ -1,4 +1,5 @@
-## much of this is modified from legacy Amanda Mason code, JJS, 12/5/19
+## much of this is modified from legacy Amanda Mason code and appears to have a lot of
+## unnecessary and/or redundant code, JJS, 12/5/19
 
 """
 Create a dictionary of the network using wntr to parse the inp file
@@ -7,10 +8,11 @@ function make_dict(inp_file::String)
     junctions = Dict{String,Any}()
     tanks = Vector{Any}()
     reservoirs = Vector{Any}()
-    pipes = Vector{Any}()
-    valves = Vector{Any}()
-    pumps = Vector{Any}()
     demands = Vector{Any}()
+    links = Dict{String,Any}()
+    pipes = Vector{Any}()
+    pumps = Vector{Any}()
+    valves = Vector{Any}()
 
     wn = wntr_dict(inp_file)
     
@@ -36,13 +38,14 @@ function make_dict(inp_file::String)
     junction_dict(wn, node_results, junctions)
     tank_dict(wn, node_results, tanks, junctions, num_timeperiods, time_ahead)
     res_dict(wn, node_results, reservoirs, junctions, num_timeperiods, time_ahead)
+    demands_dict!(wn, demands, time_ahead, num_timeperiods)
+    link_dict!(wn, link_results, links, junctions)
     pipe_dict(wn, link_results, pipes,junctions)
-    valve_dict(wn, valves)
     pump_dict(wn, junctions,pumps, node_results, link_results)
-    demands_dict(demands, junctions, node_results, time_ahead, num_timeperiods)
+    valve_dict(wn, valves)
 
     data = Dict{String,Any}( "Junction" => junctions, "Tank" => tanks,
-                             "Reservoir" =>reservoirs, "Pipe" => pipes,
+                             "Reservoir" =>reservoirs, "Link" => links, "Pipe" => pipes,
                              "Valve" => valves, "Pump" => pumps, "Demand" => demands)
 
     data["wntr"] = Dict{String,Any}("duration"=> duration_hours,
@@ -66,6 +69,27 @@ function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, junctions
     end
 end
 
+function demands_dict!(wn::Dict{Any,Any}, demands::Vector{Any}, time_ahead::Vector{DateTime}, num_timeperiods::Int64)
+    ## this had been redone, not using simulation results, JJS 12/12/19
+    #max_demand = 20 #placeholder # removed max_demand, JJS 12/12/19
+    for junction in wn["junctions"]
+        name = junction["name"]
+        base_demand = junction["base_demand"]
+        if base_demand != 0 # or nothing???? need to test with inp files with blank demands
+            demand_list = junction["demand_timeseries_list"]
+            if length(demand_list) != 1
+                @warn("Only one demand series is supported at a junction. The first will be used")
+            end
+            # `demand_list[0]` gives a warning, not sure why; so using get(demand_list, 0)
+            # for now, JJS 12/12/19
+            demand = base_demand*get(demand_list, 0).pattern.multipliers
+            #demand = convert(Array{Float64,1}, demand) # not needed?
+            demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
+            push!(demands, Dict{String, Any}("name" =>name, "node" =>junction,
+                                             "demand" => demand_timeseries))
+        end
+    end
+end
 
 function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, tanks::Vector{Any}, junctions::Dict{String,Any}, num_timeperiods::Int64, time_ahead::Vector{DateTime})
     #assign minimum pressure to the stardard for nodes
@@ -75,9 +99,14 @@ function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, tanks::Vector
         #head  and demand are initial values
         name = tank["name"]
         head = get(node_results["head"],name).values[1] #m Total Head/Hydraulc Head
-        demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
-        demand_timeseries = TimeSeries.TimeArray(time_ahead, demand) #demand at first timestep (initial_demand)
-        demand_forecast = demand_timeseries #will possibly add perturbation later
+        # demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
+        # demand_timeseries = TimeSeries.TimeArray(time_ahead, demand) #demand at first timestep (initial_demand)
+        # demand_forecast = demand_timeseries #will possibly add perturbation later
+        if tank["vol_curve_name"] != nothing
+            @warn("A tank in this network is not cylindrical. Only cylindrical tanks are currently supported.")
+        end
+        # area, volume, and volume-limits can be removed as they are not used in the struct;
+        # JJS 12/12/19
         area = π * (tank["diameter"]/2)^2 ; #m^2
         volume = area * tank["init_level"]; #m^3
         volumelimits = [x * area for x in [tank["min_level"],tank["max_level"]]];
@@ -92,13 +121,24 @@ function res_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, reservoirs::Ve
     for res in wn["reservoirs"]
         name = res["name"]
         head = get(node_results["head"],name).values[1] #m Total head/ Hydraulic head note: base_head = elevation
-        demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
-        demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
+        # demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
+        # demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
+        # demand_forecast = demand_timeseries #will possibly add perturbation later
         haskey(junctions, name) ? junc_name = "Junction- " * name : junc_name = name
-        demand_forecast = demand_timeseries #will possibly add perturbation later
         junctions[name] = Dict{String,Any}("name" => junc_name, "elevation" => res["base_head"], "head" => convert(Float64,head), "minimum_pressure" => 0, "coordinates" => (lat = res["coordinates"][2], lon = res["coordinates"][1])) #array of pseudo nodes @ res
         push!(reservoirs, Dict{String,Any}("name" => name, "elevation" => res["base_head"])) #base_head = elevation
 
+    end
+end
+
+# adding this as holdover until all this dict parsing code can be rewritten, JJS 12/11/19
+function link_dict!(wn::Dict{Any,Any}, link_results::Dict{Any, Any}, links::Dict{String,Any},
+                   junctions::Dict{String,Any})
+    for link in wn["links_vec"]
+        name = link["name"]
+        junction_start = junctions[link["start_node_name"]]
+        junction_end = junctions[link["end_node_name"]]
+        links[name] = Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end))
     end
 end
 
@@ -150,7 +190,7 @@ function pump_dict(wn::Dict{Any, Any}, junctions::Dict{String,Any}, pumps::Vecto
         pattern = wn["options"]["energy"]["global_pattern"]# $/kW hrs
         price_array2 = Array{Any}(undef,0)
         price_array = Array{Any}(undef,0)
-        energyprice = TimeSeries.TimeArray(today(), [1.0])
+        energyprice = TimeSeries.TimeArray(TimeSeries.today(), [1.0])
         # if price == 0
         #     pricearray = price
         #     # warn("Price is set to 0. Using randomly generated price array with higher weights during peak hours (4pm-8pm).")
@@ -187,18 +227,6 @@ function pump_dict(wn::Dict{Any, Any}, junctions::Dict{String,Any}, pumps::Vecto
             wn["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn["options"]["energy"]["global_efficiency"] : efficiency = 0.65
         end
         push!(pumps, Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => pump["status"], "pumpcurve" => pump_curve, "efficiency" => efficiency, "energyprice" => energyprice))
-    end
-end
-
-function demands_dict(demands::Vector{Any}, junctions::Dict{String,Any}, node_results::Dict{Any,Any}, time_ahead::Vector{DateTime}, num_timeperiods::Int64)
-    max_demand = 20 #placeholder
-    for (index, (key, junc)) in enumerate(junctions)
-        name = junc["name"]
-        demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
-        demand = convert(Array{Float64,1}, demand)
-        demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
-        demand_forecast = demand_timeseries #will possibly add perturbation later
-       push!(demands, Dict{String, Any}("name" =>name, "node" =>junc, "status" =>true, "max_demand" => max_demand, "demand" => demand_timeseries, "demandforecast" => demand_forecast))
     end
 end
 

@@ -48,15 +48,15 @@ export wntr_dict
 #################################################################################
 # Imports
 
-using PyCall # keeping this as "using" for now, but probably should change to import, JJS
-             # 12/6/19
+using PyCall # keeping this as "using" for now, but probably could/should change to import,
+             # JJS 12/6/19
 # coverted these to imports -- not sure what calls refer to them, JJS 12/6/19
 import CurveFit
 import SparseArrays
 import LinearAlgebra
 
 import Dates
-import Dates: DateTime
+import Dates: DateTime, Second # change instances to "Dates.[object]" instead?
 import TimeSeries
 import DataFrames
 import JSON
@@ -75,10 +75,19 @@ import InfrastructureSystems: Components, Deterministic, Probabilistic, Forecast
 const IS = InfrastructureSystems
 
 # python imports, needed to use wntr for parsing epanet files
-#!!!!!!!!!!!!!!!!! these are all returning "PyObject NULL" !!!!!!!!!!!!! JJS 12/6/19
-metric = pyimport("wntr.metrics.economic") # what is this for? JJS 12/5/19
-model = pyimport("wntr.network.model") #import wntr network model 
-sim = pyimport("wntr.sim.epanet")
+# makes these precompile safe? JJS 12/9/19
+const metric = PyNULL()
+const model = PyNULL()
+const sim = PyNULL()
+function __init__() 
+    copy!(metric, pyimport("wntr.metrics.economic")) # what is this for? JJS 12/5/19
+    copy!(model, pyimport("wntr.network.model")) #import wntr network model -- this is used
+    copy!(sim, pyimport("wntr.sim.epanet")) # not sure if this is needed either
+end
+## old way, resulted in "PyObject NULL"
+# metric = pyimport("wntr.metrics.economic") # what is this for? JJS 12/5/19
+# model = pyimport("wntr.network.model") #import wntr network model 
+# sim = pyimport("wntr.sim.epanet")
 
 #################################################################################
 # Includes
@@ -99,7 +108,7 @@ abstract type TechnicalParams <: WaterSystemType end
 
 # Models
 include("models/topological_elements.jl")
-include("models/water_demand.jl")
+include("models/water_injection.jl")
 include("models/links.jl")
 
 # Include all auto-generated structs.

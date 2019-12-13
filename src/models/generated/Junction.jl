@@ -7,7 +7,7 @@ This file is auto-generated. Do not edit.
         elevation::Float64
         head::Union{Nothing, Float64}
         minimum_pressure::Float64
-        coordinates::Union{Nothing, Float64}
+        coordinates::Union{Nothing, NamedTuple{(:lat, :lon),Tuple{Float64,Float64}}}
         internal::InfrastructureSystemsInternal
     end
 
@@ -18,7 +18,7 @@ A water-system Junction.
 - `elevation::Float64`: elevation of junction
 - `head::Union{Nothing, Float64}`: pressure head at junction
 - `minimum_pressure::Float64`: minimum pressure head at the junction
-- `coordinates::Union{Nothing, Float64}`: latitude and longitude coordinates of junction
+- `coordinates::Union{Nothing, NamedTuple{(:lat, :lon),Tuple{Float64,Float64}}}`: latitude and longitude coordinates of junction
 - `internal::InfrastructureSystemsInternal`
 """
 mutable struct Junction <: Topology
@@ -31,7 +31,7 @@ mutable struct Junction <: Topology
     "minimum pressure head at the junction"
     minimum_pressure::Float64
     "latitude and longitude coordinates of junction"
-    coordinates::Union{Nothing, Float64}
+    coordinates::Union{Nothing, NamedTuple{(:lat, :lon),Tuple{Float64,Float64}}}
     internal::InfrastructureSystemsInternal
 end
 
