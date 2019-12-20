@@ -54,12 +54,12 @@
       },
       {
         "name": "from",
-        "null_vale": "Junction(nothing)",
+        "null_value": "Junction(nothing)",
         "data_type": "Junction"
       },
       {
         "name": "to",
-        "null_vale": "Junction(nothing)",
+        "null_value": "Junction(nothing)",
         "data_type": "Junction"
       },
       {

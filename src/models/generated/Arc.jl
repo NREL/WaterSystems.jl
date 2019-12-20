@@ -34,6 +34,15 @@ function Arc(; name, from, to, )
     Arc(name, from, to, )
 end
 
+# Constructor for demo purposes; non-functional.
+
+function Arc(::Nothing)
+    Arc(;
+        name="init",
+        from=Junction(nothing),
+        to=Junction(nothing),
+    )
+end
 
 """Get Arc name."""
 get_name(value::Arc) = value.name
