@@ -6,18 +6,20 @@ This file is auto-generated. Do not edit.
         name::String
         available::Bool
         junction::Junction
-        maxdemand::Float64
+        base_demand::Float64
+        pattern_name::String
         _forecasts::InfrastructureSystems.Forecasts
         internal::InfrastructureSystemsInternal
     end
 
-A constant demand.
+Temporal demand at a junction that is fixed.
 
 # Arguments
 - `name::String`
 - `available::Bool`
 - `junction::Junction`
-- `maxdemand::Float64`: peak demand in m^3/second
+- `base_demand::Float64`: 'base' demand in m^3/second
+- `pattern_name::String`: name of forecast pattern array
 - `_forecasts::InfrastructureSystems.Forecasts`
 - `internal::InfrastructureSystemsInternal`
 """
@@ -25,18 +27,20 @@ mutable struct StaticDemand <: WaterDemand
     name::String
     available::Bool
     junction::Junction
-    "peak demand in m^3/second"
-    maxdemand::Float64
+    "'base' demand in m^3/second"
+    base_demand::Float64
+    "name of forecast pattern array"
+    pattern_name::String
     _forecasts::InfrastructureSystems.Forecasts
     internal::InfrastructureSystemsInternal
 end
 
-function StaticDemand(name, available, junction, maxdemand, _forecasts=InfrastructureSystems.Forecasts(), )
-    StaticDemand(name, available, junction, maxdemand, _forecasts, InfrastructureSystemsInternal())
+function StaticDemand(name, available, junction, base_demand, pattern_name, _forecasts=InfrastructureSystems.Forecasts(), )
+    StaticDemand(name, available, junction, base_demand, pattern_name, _forecasts, InfrastructureSystemsInternal())
 end
 
-function StaticDemand(; name, available, junction, maxdemand, _forecasts=InfrastructureSystems.Forecasts(), )
-    StaticDemand(name, available, junction, maxdemand, _forecasts, )
+function StaticDemand(; name, available, junction, base_demand, pattern_name, _forecasts=InfrastructureSystems.Forecasts(), )
+    StaticDemand(name, available, junction, base_demand, pattern_name, _forecasts, )
 end
 
 # Constructor for demo purposes; non-functional.
@@ -46,7 +50,8 @@ function StaticDemand(::Nothing)
         name="init",
         available=true,
         junction=Junction(nothing),
-        maxdemand=0.0,
+        base_demand=0.0,
+        pattern_name="init",
         _forecasts=InfrastructureSystems.Forecasts(),
     )
 end
@@ -57,8 +62,10 @@ get_name(value::StaticDemand) = value.name
 get_available(value::StaticDemand) = value.available
 """Get StaticDemand junction."""
 get_junction(value::StaticDemand) = value.junction
-"""Get StaticDemand maxdemand."""
-get_maxdemand(value::StaticDemand) = value.maxdemand
+"""Get StaticDemand base_demand."""
+get_base_demand(value::StaticDemand) = value.base_demand
+"""Get StaticDemand pattern_name."""
+get_pattern_name(value::StaticDemand) = value.pattern_name
 """Get StaticDemand _forecasts."""
 get__forecasts(value::StaticDemand) = value._forecasts
 """Get StaticDemand internal."""

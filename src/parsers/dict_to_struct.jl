@@ -11,13 +11,14 @@ function dict_to_struct(data::Dict{String,Any})
     arcs = link_to_struct(data["Link"], j_dict)
     res = res_to_struct(data["Reservoir"], j_dict)
     tanks = tank_to_struct(data["Tank"], j_dict)
-
     demands = demand_to_struct(data["Demand"], j_dict)
-    
+    # stopped here
     pipes = pipe_to_struct(data["Pipe"], junctions)
     pumps = pump_to_struct(data["Pump"], junctions)
     valves = valve_to_struct(data["Valve"], junctions)
 
+    # create functions to populate pump params, patterns
+    
     d = data["wntr"]
     simulations = Simulation(d["duration"], d["timeperiods"], d["num_timeperiods"], d["start"], d["end"])
     return junctions, tanks, res, pipes, valves, pumps, demands, simulations
@@ -78,16 +79,14 @@ Create array of demands using WaterSystems.WaterDemand subtypes. Only static dem
 currently supported.
 """
 function demand_to_struct(d_vec::Vector{Any}, j_dict::Dict{String,Junction})
-    # FIXME:  remove "maxdemand" from type??? JJS 11/12/19
+    # only populating base_demand and the pattern name; the actual forecast will be created
+    # and added separately, following the paradigm of PowerSystems.jl
     demands = Vector{WaterDemand}(undef, length(d_vec))
     for (i,  demand) in enumerate(d_vec)
         name = demand["name"]
-        demand_forecast = demand["demand"]
-        maxdemand = maximum(values(demand_forecast))
-        # constructor: currently not working because cannot convert TimeArray to
-        # IS.Forecasts, JJS 12/12/19
-        demands[i] = StaticDemand(name, true, j_dict[name], maxdemand, demand_forecast)
-        #demands[ix] = WaterDemand(d["name"], junction[1] , d["status"], d["max_demand"], d["demand"], d["demandforecast"])
+        base_demand = demand["base_demand"]
+        pattern_name = demand["pattern_name"]
+        demands[i] = StaticDemand(name, true, j_dict[name], base_demand, pattern_name)
     end
     return demands
 end

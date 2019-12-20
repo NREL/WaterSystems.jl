@@ -10,10 +10,12 @@ include("CVPipe.jl")
 include("StaticDemand.jl")
 include("CylindricalTank.jl")
 include("Reservoir.jl")
+include("Pattern.jl")
 
 export get__forecasts
 export get_arc
 export get_available
+export get_base_demand
 export get_coordinates
 export get_diameter
 export get_effncy_bep
@@ -37,14 +39,15 @@ export get_junction
 export get_length
 export get_level
 export get_level_limits
-export get_maxdemand
 export get_minimum_pressure
 export get_name
 export get_norm_coefs
 export get_open_status
 export get_operating
+export get_pattern_name
 export get_power_intcpt
 export get_power_slope
 export get_pumpparams
 export get_roughness
 export get_to
+export get_values

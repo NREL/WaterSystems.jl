@@ -5,3 +5,5 @@
 *.ipynb
 *~
 *.bak
+*.log
+Manifest.toml

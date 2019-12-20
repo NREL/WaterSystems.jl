@@ -32,13 +32,16 @@ function make_dict(inp_file::String)
     end_day = start_day + Second(duration-time_periods)
 
     time_ahead = collect(start_day:Second(time_periods):end_day)
+    ## should not use results! JJS 12/19/19
     node_results = wn["node_results"]
     link_results = wn["link_results"]
     
     junction_dict(wn, node_results, junctions)
     tank_dict(wn, node_results, tanks, junctions, num_timeperiods, time_ahead)
     res_dict(wn, node_results, reservoirs, junctions, num_timeperiods, time_ahead)
-    demands_dict!(wn, demands, time_ahead, num_timeperiods)
+    # removing 'time_ahead' info from demands_dict; can remove it from tank_dict and
+    # res_dict also, JJS 12/19/19
+    demands_dict!(wn, demands)
     link_dict!(wn, link_results, links, junctions)
     pipe_dict(wn, link_results, pipes,junctions)
     pump_dict(wn, junctions,pumps, node_results, link_results)
@@ -69,9 +72,9 @@ function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, junctions
     end
 end
 
-function demands_dict!(wn::Dict{Any,Any}, demands::Vector{Any}, time_ahead::Vector{DateTime}, num_timeperiods::Int64)
-    ## this had been redone, not using simulation results, JJS 12/12/19
-    #max_demand = 20 #placeholder # removed max_demand, JJS 12/12/19
+function demands_dict!(wn::Dict{Any,Any}, demands::Vector{Any})
+    ## this has been redone, not using simulation results, and not pulling the actual
+    ## values, only the name of the pattern JJS 12/12/19
     for junction in wn["junctions"]
         name = junction["name"]
         base_demand = junction["base_demand"]
@@ -82,11 +85,13 @@ function demands_dict!(wn::Dict{Any,Any}, demands::Vector{Any}, time_ahead::Vect
             end
             # `demand_list[0]` gives a warning, not sure why; so using get(demand_list, 0)
             # for now, JJS 12/12/19
-            demand = base_demand*get(demand_list, 0).pattern.multipliers
-            #demand = convert(Array{Float64,1}, demand) # not needed?
-            demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
+            pattern_name = get(demand_list, 0).pattern_name
+            # the absolute demand values -- not using now, JJS 12/19/19
+            #demand = base_demand*get(demand_list, 0).pattern.multipliers 
+            #demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
             push!(demands, Dict{String, Any}("name" =>name, "node" =>junction,
-                                             "demand" => demand_timeseries))
+                                             "base_demand" => base_demand,
+                                             "pattern_name" => pattern_name))
         end
     end
 end

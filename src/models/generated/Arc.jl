@@ -15,13 +15,14 @@ A topological Arc.
 - `name::String`: the name of the arc
 - `from::Junction`
 - `to::Junction`
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct Arc <: Topology
     "the name of the arc"
     name::String
     from::Junction
     to::Junction
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 

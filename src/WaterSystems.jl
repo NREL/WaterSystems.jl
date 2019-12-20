@@ -23,6 +23,7 @@ export Arc
 export EPANETPumpParams
 export NormPumpParams
 export PumpParams
+export Pattern
 
 # transport elements 
 export Link

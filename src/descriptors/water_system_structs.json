@@ -64,7 +64,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ],
     "supertype": "Topology"
@@ -423,10 +425,16 @@
         "data_type": "Junction"
       },
       {
-        "name": "maxdemand",
-        "comment": "peak demand in m^3/second",
+        "name": "base_demand",
+        "comment": "'base' demand in m^3/second",
         "null_value": "0.0",
         "data_type": "Float64"
+      },
+      {
+        "name": "pattern_name",
+        "comment": "name of forecast pattern array",
+        "null_value": "init",
+        "data_type": "String"
       },
       {
         "name": "_forecasts",
@@ -509,5 +517,27 @@
         "data_type": "InfrastructureSystemsInternal"
       }
     ]
-  }
+  },
+  {
+    "struct_name": "Pattern",
+    "docstring": "Forecast pattern.",
+    "supertype": "TechnicalParams",
+    "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "name": "values",
+        "comment": "Multiplier values of the pattern.",
+        "data_type": "Union{Nothing, Vector{Float64}}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "internal",
+        "data_type": "InfrastructureSystemsInternal"
+      }
+    ]
+  }  
 ]
