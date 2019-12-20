@@ -27,7 +27,7 @@ mutable struct Arc <: Topology
 end
 
 function Arc(name, from, to, )
-    Arc(name, from, to, InfrastructureSystemsInternal())
+    Arc(name, from, to, InfrastructureSystemsInternal(), )
 end
 
 function Arc(; name, from, to, )
@@ -35,7 +35,6 @@ function Arc(; name, from, to, )
 end
 
 # Constructor for demo purposes; non-functional.
-
 function Arc(::Nothing)
     Arc(;
         name="init",

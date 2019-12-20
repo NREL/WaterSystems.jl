@@ -13,18 +13,19 @@ Pump characteristics, containing both inp-file data and coefficients for a norma
 # Arguments
 - `epnt_data::Union{Nothing, EPANETPumpParams}`: Pump specifications from inp-file
 - `norm_coefs::Union{Nothing, NormPumpParams}`: Coefficients that characterize pumps with a normalized representation of head, efficiency, and power. Currently only single-speed
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct PumpParams <: TechnicalParams
     "Pump specifications from inp-file"
     epnt_data::Union{Nothing, EPANETPumpParams}
     "Coefficients that characterize pumps with a normalized representation of head, efficiency, and power. Currently only single-speed"
     norm_coefs::Union{Nothing, NormPumpParams}
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function PumpParams(epnt_data, norm_coefs, )
-    PumpParams(epnt_data, norm_coefs, InfrastructureSystemsInternal())
+    PumpParams(epnt_data, norm_coefs, InfrastructureSystemsInternal(), )
 end
 
 function PumpParams(; epnt_data, norm_coefs, )
@@ -32,7 +33,6 @@ function PumpParams(; epnt_data, norm_coefs, )
 end
 
 # Constructor for demo purposes; non-functional.
-
 function PumpParams(::Nothing)
     PumpParams(;
         epnt_data=nothing,

@@ -21,7 +21,7 @@ A cylindrical water tank. Currently the only supproted tank type.
 - `diameter::Float64`: constant diameter in m
 - `level::Union{Nothing,Float64}`: water level in m
 - `level_limits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct CylindricalTank <: Tank
     name::String
@@ -32,11 +32,12 @@ mutable struct CylindricalTank <: Tank
     "water level in m"
     level::Union{Nothing,Float64}
     level_limits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function CylindricalTank(name, available, junction, diameter, level, level_limits, )
-    CylindricalTank(name, available, junction, diameter, level, level_limits, InfrastructureSystemsInternal())
+    CylindricalTank(name, available, junction, diameter, level, level_limits, InfrastructureSystemsInternal(), )
 end
 
 function CylindricalTank(; name, available, junction, diameter, level, level_limits, )
@@ -44,7 +45,6 @@ function CylindricalTank(; name, available, junction, diameter, level, level_lim
 end
 
 # Constructor for demo purposes; non-functional.
-
 function CylindricalTank(::Nothing)
     CylindricalTank(;
         name="init",

@@ -7,4 +7,4 @@ TestSetExtensions = "98d24dd4-01ad-11ea-1b02-c9a08f80db04"
 WaterSystems = "bcd98974-b02a-5e2f-9ee0-a103f5c450dd"
 
 [compat]
-InfrastructureSystems = "~0.4"
+InfrastructureSystems = "~0.5"

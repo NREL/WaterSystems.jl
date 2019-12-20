@@ -27,7 +27,7 @@ A unidirectional-flow pipe that contains a check valve (CV).
 - `length::Float64`
 - `roughness::Float64`
 - `flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct CVPipe <: Pipe
     name::String
@@ -40,11 +40,12 @@ mutable struct CVPipe <: Pipe
     length::Float64
     roughness::Float64
     flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function CVPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, )
-    CVPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, InfrastructureSystemsInternal())
+    CVPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, InfrastructureSystemsInternal(), )
 end
 
 function CVPipe(; name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, )
@@ -52,7 +53,6 @@ function CVPipe(; name, flow, headloss, available, arc, diameter, length, roughn
 end
 
 # Constructor for demo purposes; non-functional.
-
 function CVPipe(::Nothing)
     CVPipe(;
         name="init",

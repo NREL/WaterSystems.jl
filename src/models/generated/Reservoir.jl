@@ -15,17 +15,18 @@ An infinite reservoir-type water source.
 - `name::String`
 - `available::Bool`
 - `junction::Junction`
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct Reservoir <: Injection
     name::String
     available::Bool
     junction::Junction
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function Reservoir(name, available, junction, )
-    Reservoir(name, available, junction, InfrastructureSystemsInternal())
+    Reservoir(name, available, junction, InfrastructureSystemsInternal(), )
 end
 
 function Reservoir(; name, available, junction, )
@@ -33,7 +34,6 @@ function Reservoir(; name, available, junction, )
 end
 
 # Constructor for demo purposes; non-functional.
-
 function Reservoir(::Nothing)
     Reservoir(;
         name="init",

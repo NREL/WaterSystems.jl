@@ -17,7 +17,7 @@ Pump specifications from inp-file
 - `epnt_power::Union{Nothing, Float64}`: specified constant power if type POWER
 - `epnt_head::Union{Nothing, Array{Tuple{Float64,Float64},1}}`: provided head curve if type HEAD
 - `epnt_efficiency::Union{Nothing, Float64, Array{Tuple{Float64,Float64},1}}`: provided efficiency curve (or single value) if type HEAD
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct EPANETPumpParams <: TechnicalParams
     "epanet categorizes pump specs as HEAD or POWER"
@@ -28,11 +28,12 @@ mutable struct EPANETPumpParams <: TechnicalParams
     epnt_head::Union{Nothing, Array{Tuple{Float64,Float64},1}}
     "provided efficiency curve (or single value) if type HEAD"
     epnt_efficiency::Union{Nothing, Float64, Array{Tuple{Float64,Float64},1}}
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function EPANETPumpParams(epnt_type, epnt_power, epnt_head, epnt_efficiency, )
-    EPANETPumpParams(epnt_type, epnt_power, epnt_head, epnt_efficiency, InfrastructureSystemsInternal())
+    EPANETPumpParams(epnt_type, epnt_power, epnt_head, epnt_efficiency, InfrastructureSystemsInternal(), )
 end
 
 function EPANETPumpParams(; epnt_type, epnt_power, epnt_head, epnt_efficiency, )
@@ -40,7 +41,6 @@ function EPANETPumpParams(; epnt_type, epnt_power, epnt_head, epnt_efficiency, )
 end
 
 # Constructor for demo purposes; non-functional.
-
 function EPANETPumpParams(::Nothing)
     EPANETPumpParams(;
         epnt_type=nothing,

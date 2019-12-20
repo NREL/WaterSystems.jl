@@ -19,7 +19,7 @@ A water-system Junction.
 - `head::Union{Nothing, Float64}`: pressure head at junction
 - `minimum_pressure::Float64`: minimum pressure head at the junction
 - `coordinates::Union{Nothing, NamedTuple{(:lat, :lon),Tuple{Float64,Float64}}}`: latitude and longitude coordinates of junction
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct Junction <: Topology
     "the name of the junction"
@@ -32,11 +32,12 @@ mutable struct Junction <: Topology
     minimum_pressure::Float64
     "latitude and longitude coordinates of junction"
     coordinates::Union{Nothing, NamedTuple{(:lat, :lon),Tuple{Float64,Float64}}}
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function Junction(name, elevation, head, minimum_pressure, coordinates, )
-    Junction(name, elevation, head, minimum_pressure, coordinates, InfrastructureSystemsInternal())
+    Junction(name, elevation, head, minimum_pressure, coordinates, InfrastructureSystemsInternal(), )
 end
 
 function Junction(; name, elevation, head, minimum_pressure, coordinates, )
@@ -44,7 +45,6 @@ function Junction(; name, elevation, head, minimum_pressure, coordinates, )
 end
 
 # Constructor for demo purposes; non-functional.
-
 function Junction(::Nothing)
     Junction(;
         name="init",

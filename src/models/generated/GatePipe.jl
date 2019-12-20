@@ -29,7 +29,7 @@ A bidirectional-flow pipe with a gate (shutoff) valve.
 - `roughness::Float64`
 - `flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
 - `open_status::Bool`
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct GatePipe <: Pipe
     name::String
@@ -43,11 +43,12 @@ mutable struct GatePipe <: Pipe
     roughness::Float64
     flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
     open_status::Bool
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function GatePipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, open_status, )
-    GatePipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, open_status, InfrastructureSystemsInternal())
+    GatePipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, open_status, InfrastructureSystemsInternal(), )
 end
 
 function GatePipe(; name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, open_status, )
@@ -55,7 +56,6 @@ function GatePipe(; name, flow, headloss, available, arc, diameter, length, roug
 end
 
 # Constructor for demo purposes; non-functional.
-
 function GatePipe(::Nothing)
     GatePipe(;
         name="init",

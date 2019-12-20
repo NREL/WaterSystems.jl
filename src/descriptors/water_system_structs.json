@@ -37,7 +37,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ],
     "supertype": "Topology"
@@ -102,7 +104,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
   },   
@@ -149,7 +153,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
   },   
@@ -172,7 +178,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
   },   
@@ -226,7 +234,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
   },
@@ -281,7 +291,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ],
     "supertype": "Pipe"
@@ -343,7 +355,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ],
     "supertype": "Pipe"
@@ -400,7 +414,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ],
     "supertype": "Pipe"
@@ -444,7 +460,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ],
     "supertype": "WaterDemand"
@@ -488,7 +506,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
   },
@@ -514,7 +534,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
   },
@@ -536,7 +558,9 @@
       },
       {
         "name": "internal",
-        "data_type": "InfrastructureSystemsInternal"
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
   }  

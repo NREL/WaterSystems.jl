@@ -21,7 +21,7 @@ Coefficients that characterize pumps with a normalized representation of head, e
 - `head0::Float64`: head ratio G0/GBEP
 - `power_slope::Float64`: slope of the linear power curve
 - `power_intcpt::Float64`: inetercept of the linear power curve
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct NormPumpParams <: TechnicalParams
     "flow rate at the best efficiency point"
@@ -36,11 +36,12 @@ mutable struct NormPumpParams <: TechnicalParams
     power_slope::Float64
     "inetercept of the linear power curve"
     power_intcpt::Float64
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function NormPumpParams(flow_bep, effncy_bep, head_bep, head0, power_slope, power_intcpt, )
-    NormPumpParams(flow_bep, effncy_bep, head_bep, head0, power_slope, power_intcpt, InfrastructureSystemsInternal())
+    NormPumpParams(flow_bep, effncy_bep, head_bep, head0, power_slope, power_intcpt, InfrastructureSystemsInternal(), )
 end
 
 function NormPumpParams(; flow_bep, effncy_bep, head_bep, head0, power_slope, power_intcpt, )
@@ -48,7 +49,6 @@ function NormPumpParams(; flow_bep, effncy_bep, head_bep, head0, power_slope, po
 end
 
 # Constructor for demo purposes; non-functional.
-
 function NormPumpParams(::Nothing)
     NormPumpParams(;
         flow_bep=0.0,

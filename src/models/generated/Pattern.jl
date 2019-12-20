@@ -13,17 +13,18 @@ Forecast pattern.
 # Arguments
 - `name::String`
 - `values::Union{Nothing, Vector{Float64}}`: Multiplier values of the pattern.
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct Pattern <: TechnicalParams
     name::String
     "Multiplier values of the pattern."
     values::Union{Nothing, Vector{Float64}}
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function Pattern(name, values, )
-    Pattern(name, values, InfrastructureSystemsInternal())
+    Pattern(name, values, InfrastructureSystemsInternal(), )
 end
 
 function Pattern(; name, values, )
@@ -31,7 +32,6 @@ function Pattern(; name, values, )
 end
 
 # Constructor for demo purposes; non-functional.
-
 function Pattern(::Nothing)
     Pattern(;
         name="init",

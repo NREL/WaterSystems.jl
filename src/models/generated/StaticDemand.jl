@@ -21,7 +21,7 @@ Temporal demand at a junction that is fixed.
 - `base_demand::Float64`: 'base' demand in m^3/second
 - `pattern_name::String`: name of forecast pattern array
 - `_forecasts::InfrastructureSystems.Forecasts`
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct StaticDemand <: WaterDemand
     name::String
@@ -32,11 +32,12 @@ mutable struct StaticDemand <: WaterDemand
     "name of forecast pattern array"
     pattern_name::String
     _forecasts::InfrastructureSystems.Forecasts
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function StaticDemand(name, available, junction, base_demand, pattern_name, _forecasts=InfrastructureSystems.Forecasts(), )
-    StaticDemand(name, available, junction, base_demand, pattern_name, _forecasts, InfrastructureSystemsInternal())
+    StaticDemand(name, available, junction, base_demand, pattern_name, _forecasts, InfrastructureSystemsInternal(), )
 end
 
 function StaticDemand(; name, available, junction, base_demand, pattern_name, _forecasts=InfrastructureSystems.Forecasts(), )
@@ -44,7 +45,6 @@ function StaticDemand(; name, available, junction, base_demand, pattern_name, _f
 end
 
 # Constructor for demo purposes; non-functional.
-
 function StaticDemand(::Nothing)
     StaticDemand(;
         name="init",

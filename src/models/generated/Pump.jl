@@ -25,7 +25,7 @@ Pump, nominally centrifugal and single-speed.
 - `arc::Arc`
 - `pumpparams::PumpParams`: Pump parameters object, including pump curves
 - `flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct Pump <: Link
     name::String
@@ -38,11 +38,12 @@ mutable struct Pump <: Link
     "Pump parameters object, including pump curves"
     pumpparams::PumpParams
     flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function Pump(name, operating, flow, headgain, available, arc, pumpparams, flowlimits, )
-    Pump(name, operating, flow, headgain, available, arc, pumpparams, flowlimits, InfrastructureSystemsInternal())
+    Pump(name, operating, flow, headgain, available, arc, pumpparams, flowlimits, InfrastructureSystemsInternal(), )
 end
 
 function Pump(; name, operating, flow, headgain, available, arc, pumpparams, flowlimits, )
@@ -50,7 +51,6 @@ function Pump(; name, operating, flow, headgain, available, arc, pumpparams, flo
 end
 
 # Constructor for demo purposes; non-functional.
-
 function Pump(::Nothing)
     Pump(;
         name="init",

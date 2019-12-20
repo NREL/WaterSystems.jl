@@ -27,7 +27,7 @@ An always open, bidirectional-flow pipe.
 - `length::Float64`
 - `roughness::Float64`
 - `flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}`
-- `internal::InfrastructureSystemsInternal`
+- `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct OpenPipe <: Pipe
     name::String
@@ -39,11 +39,12 @@ mutable struct OpenPipe <: Pipe
     length::Float64
     roughness::Float64
     flowlimits::NamedTuple{(:min, :max), Tuple{Float64, Float64}}
+    "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
 
 function OpenPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, )
-    OpenPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, InfrastructureSystemsInternal())
+    OpenPipe(name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, InfrastructureSystemsInternal(), )
 end
 
 function OpenPipe(; name, flow, headloss, available, arc, diameter, length, roughness, flowlimits, )
@@ -51,7 +52,6 @@ function OpenPipe(; name, flow, headloss, available, arc, diameter, length, roug
 end
 
 # Constructor for demo purposes; non-functional.
-
 function OpenPipe(::Nothing)
     OpenPipe(;
         name="init",

@@ -6,11 +6,11 @@
     @test t_junct isa WSY.Topology
     junction = WSY.Junction("test", 0.0, 0.0, 0.0, (lat=0.0, lon=0.0)) 
 
-    #t_arc = WSY.Arc(nothing) # currently no method allows nothing creation, JJS 12/20/19
+    t_arc = WSY.Arc(nothing) 
+    @test t_arc isa WSY.WaterSystemType
+    @test t_arc isa WSY.Topology    
     arc = WSY.Arc("test", WSY.Junction(nothing), WSY.Junction(nothing))
-    @test arc isa WSY.WaterSystemType
-    @test arc isa WSY.Topology    
-end
+ end
 
 @testset "Injection constructors" begin
     t_res = WSY.Reservoir(nothing)
@@ -22,6 +22,7 @@ end
     @test t_demand isa WSY.Injection
     @test t_demand isa WSY.WaterDemand
 end
+
 
 # @testset "Branch Constructors" begin
 #     tLine = Line(nothing)
