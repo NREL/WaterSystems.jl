@@ -6,4 +6,6 @@
 *~
 *.bak
 *.log
+# epanet files
+temp.*
 Manifest.toml

@@ -23,6 +23,30 @@
     @test t_demand isa WSY.WaterDemand
 end
 
+# intermediate testing of parsing an epanet file and constructing subtypes of WaterSystems
+@testset "Consctructors from epanet data" begin
+    # what comparative tests would be useful here? mainly just making sure no errors are
+    # thrown JJS 12/20/19
+    data = WSY.make_dict(epanet_test_path)
+    # test creation of junction structs
+    junctions = WSY.junction_to_struct(data["Junction"])
+    @test junctions isa Array{WaterSystems.Junction,1}
+    j_dict = Dict{String, WSY.Junction}(junction.name => junction for junction in junctions)
+    # test creation of arc structs
+    arcs = WSY.link_to_struct(data["Link"], j_dict)
+    @test arcs isa Array{WaterSystems.Arc,1}
+    # test creation of reservoir structs
+    reservoirs = WSY.res_to_struct(data["Reservoir"], j_dict)
+    @test reservoirs isa Array{WaterSystems.Reservoir,1}
+    # test creation of tank structs
+    tanks = WSY.tank_to_struct(data["Tank"], j_dict)
+    @test tanks isa Array{WaterSystems.Tank,1}
+    # test creation of demand structs (does not populate the forecast arrays here)
+    demands = WSY.demand_to_struct(data["Demand"], j_dict)
+    @test demands isa Array{WaterSystems.WaterDemand,1}
+
+    # testing constructors for technical parameters and links TBD
+end
 
 # @testset "Branch Constructors" begin
 #     tLine = Line(nothing)
