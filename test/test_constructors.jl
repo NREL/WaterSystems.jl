@@ -52,7 +52,12 @@ end
     # test creation of demand structs (does not populate the forecast arrays here)
     demands = WSY.demand_to_struct(data["Demand"], j_dict)
     @test demands isa Array{WaterSystems.WaterDemand,1}
-
+    # test creation of pattern and curve structs
+    patterns = WSY.pattern_to_struct(data["Pattern"])
+    @test patterns isa Array{WaterSystems.Pattern,1}
+    curves = WSY.curve_to_struct(data["Curve"])
+    @test curves isa Array{WaterSystems.Curve,1}
+    
     # testing constructors for technical parameters and links TBD
 end
 

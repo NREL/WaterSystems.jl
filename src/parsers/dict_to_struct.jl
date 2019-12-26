@@ -12,6 +12,7 @@ function dict_to_struct(data::Dict{String,Any})
     res = res_to_struct(data["Reservoir"], j_dict)
     tanks = tank_to_struct(data["Tank"], j_dict)
     demands = demand_to_struct(data["Demand"], j_dict)
+    patterns = pattern_to_struct(data["Pattern"])
     curves = curve_to_struct(data["Curve"])
     # stopped here
     pipes = pipe_to_struct(data["Pipe"], junctions)
@@ -80,8 +81,11 @@ Create array of demands using WaterSystems.WaterDemand subtypes. Only static dem
 currently supported.
 """
 function demand_to_struct(d_vec::Vector{Any}, j_dict::Dict{String,Junction})
-    # only populating base_demand and the pattern name; the actual forecast will be created
-    # and added separately, following the paradigm of PowerSystems.jl
+    # Only populating base_demand and the pattern name; the actual forecast will be created
+    # and added separately, following the paradigm of PowerSystems.jl. Note that the
+    # base_demand and pattern values can vary wildly with no consistent scaling. Would it be
+    # useful (considering the computational cost) to rescale all of the base demands and the
+    # patterns? See "demand_dict!" in wntr_dict_parser.jl, JJS 12/26/19
     demands = Vector{WaterDemand}(undef, length(d_vec))
     for (i,  demand) in enumerate(d_vec)
         name = demand["name"]
@@ -90,6 +94,17 @@ function demand_to_struct(d_vec::Vector{Any}, j_dict::Dict{String,Junction})
         demands[i] = StaticDemand(name, true, j_dict[name], base_demand, pattern_name)
     end
     return demands
+end
+
+"""
+Create array of patterns using WaterSystems.Pattern subtype.
+"""
+function pattern_to_struct(p_vec::Vector{Any})
+    patterns = Vector{Pattern}(undef, length(p_vec))
+    for (i,curve) in enumerate(p_vec)
+        patterns[i] = Pattern(curve["name"], curve["multipliers"])
+    end
+    return patterns
 end
 
 """
