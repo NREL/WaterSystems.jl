@@ -1,3 +1,6 @@
+## TODO:
+## * add "controls" ????????
+
 isdefined(Base, :__precompile__) && __precompile__()
 
 """
@@ -24,6 +27,7 @@ export EPANETPumpParams
 export NormPumpParams
 export PumpParams
 export Pattern
+export Curve
 
 # transport elements 
 export Link

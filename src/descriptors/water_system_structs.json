@@ -2,6 +2,7 @@
   {
     "struct_name": "Junction",
     "docstring": "A water-system Junction.",
+    "supertype": "Topology",
     "fields": [
       {
         "null_value": "init",
@@ -41,12 +42,12 @@
         "data_type": "InfrastructureSystemsInternal",
         "internal_default": "InfrastructureSystemsInternal()"
       }
-    ],
-    "supertype": "Topology"
+    ]
   },
   {
     "struct_name": "Arc",
     "docstring": "A topological Arc.",
+    "supertype": "Topology",
     "fields": [
       {
         "null_value": "init",
@@ -70,9 +71,62 @@
         "data_type": "InfrastructureSystemsInternal",
         "internal_default": "InfrastructureSystemsInternal()"
       }
-    ],
-    "supertype": "Topology"
+    ]
   },
+  {
+    "struct_name": "Pattern",
+    "docstring": "Forecast pattern.",
+    "supertype": "TechnicalParams",
+    "fields": [
+      {
+        "null_value": "init",
+        "name": "name",
+        "data_type": "String"
+      },
+      {
+        "name": "multipliers",
+        "comment": "Multiplier values of the pattern.",
+        "data_type": "Union{Nothing, Vector{Float64}}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "internal",
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
+      }
+    ]
+  },
+  {
+    "struct_name": "Curve",
+    "docstring": "Pump head or efficiency curve",
+    "supertype": "TechnicalParams",
+    "fields": [
+      {
+        "name": "name",
+        "null_value": "init",
+        "data_type": "String"
+      },
+      {
+        "name": "type",
+        "comment": "type of curve (head or efficiency)",
+        "null_value": "init",
+        "data_type": "String"
+      },
+      {
+        "name": "points",
+        "comment": "tuples of the curve points",
+        "data_type": "Union{Nothing, Array{Tuple{Float64,Float64},1}}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "internal",
+        "comment": "internal reference, do not modify",
+        "data_type": "InfrastructureSystemsInternal",
+        "internal_default": "InfrastructureSystemsInternal()"
+      }
+    ]
+  },  
   {
     "struct_name": "EPANETPumpParams",
     "docstring": "Pump specifications from inp-file",
@@ -93,13 +147,13 @@
       {
         "name": "epnt_head",
         "comment": "provided head curve if type HEAD",
-        "data_type": "Union{Nothing, Array{Tuple{Float64,Float64},1}}",
+        "data_type": "Union{Nothing, Curve}",
         "null_value": "nothing"
       },
       {
         "name": "epnt_efficiency",
         "comment": "provided efficiency curve (or single value) if type HEAD",
-        "data_type": "Union{Nothing, Float64, Array{Tuple{Float64,Float64},1}}",
+        "data_type": "Union{Nothing, Float64, Curve}",
         "null_value": "nothing"
       },
       {
@@ -109,7 +163,7 @@
         "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
-  },   
+  },
   {
     "struct_name": "NormPumpParams",
     "docstring": "Coefficients that characterize pumps with a normalized representation of head, efficiency, and power. Currently only single-speed",
@@ -243,6 +297,7 @@
   {
     "struct_name": "OpenPipe",
     "docstring": "An always open, bidirectional-flow pipe.",
+    "supertype": "Pipe",
     "fields": [
       {
         "null_value": "init",
@@ -295,12 +350,12 @@
         "data_type": "InfrastructureSystemsInternal",
         "internal_default": "InfrastructureSystemsInternal()"
       }
-    ],
-    "supertype": "Pipe"
+    ]
   },
   {
     "struct_name": "GatePipe",
     "docstring": "A bidirectional-flow pipe with a gate (shutoff) valve.",
+    "supertype": "Pipe",
     "fields": [
       {
         "null_value": "init",
@@ -359,12 +414,12 @@
         "data_type": "InfrastructureSystemsInternal",
         "internal_default": "InfrastructureSystemsInternal()"
       }
-    ],
-    "supertype": "Pipe"
+    ]
   },
   {
     "struct_name": "CVPipe",
     "docstring": "A unidirectional-flow pipe that contains a check valve (CV).",
+    "supertype": "Pipe",
     "fields": [
       {
         "null_value": "init",
@@ -418,12 +473,12 @@
         "data_type": "InfrastructureSystemsInternal",
         "internal_default": "InfrastructureSystemsInternal()"
       }
-    ],
-    "supertype": "Pipe"
+    ]
   },
   {
     "struct_name": "StaticDemand",
     "docstring": "Temporal demand at a junction that is fixed.",
+    "supertype": "WaterDemand",
     "fields": [
       {
         "null_value": "init",
@@ -464,8 +519,7 @@
         "data_type": "InfrastructureSystemsInternal",
         "internal_default": "InfrastructureSystemsInternal()"
       }
-    ],
-    "supertype": "WaterDemand"
+    ]
   },
   {
     "struct_name": "CylindricalTank",
@@ -539,29 +593,5 @@
         "internal_default": "InfrastructureSystemsInternal()"
       }
     ]
-  },
-  {
-    "struct_name": "Pattern",
-    "docstring": "Forecast pattern.",
-    "supertype": "TechnicalParams",
-    "fields": [
-      {
-        "null_value": "init",
-        "name": "name",
-        "data_type": "String"
-      },
-      {
-        "name": "values",
-        "comment": "Multiplier values of the pattern.",
-        "data_type": "Union{Nothing, Vector{Float64}}",
-        "null_value": "nothing"
-      },
-      {
-        "name": "internal",
-        "comment": "internal reference, do not modify",
-        "data_type": "InfrastructureSystemsInternal",
-        "internal_default": "InfrastructureSystemsInternal()"
-      }
-    ]
-  }  
+  }
 ]

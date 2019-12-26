@@ -1,5 +1,7 @@
 include("Junction.jl")
 include("Arc.jl")
+include("Pattern.jl")
+include("Curve.jl")
 include("EPANETPumpParams.jl")
 include("NormPumpParams.jl")
 include("PumpParams.jl")
@@ -10,7 +12,6 @@ include("CVPipe.jl")
 include("StaticDemand.jl")
 include("CylindricalTank.jl")
 include("Reservoir.jl")
-include("Pattern.jl")
 
 export get__forecasts
 export get_arc
@@ -40,14 +41,16 @@ export get_length
 export get_level
 export get_level_limits
 export get_minimum_pressure
+export get_multipliers
 export get_name
 export get_norm_coefs
 export get_open_status
 export get_operating
 export get_pattern_name
+export get_points
 export get_power_intcpt
 export get_power_slope
 export get_pumpparams
 export get_roughness
 export get_to
-export get_values
+export get_type

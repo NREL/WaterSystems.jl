@@ -12,6 +12,7 @@ function dict_to_struct(data::Dict{String,Any})
     res = res_to_struct(data["Reservoir"], j_dict)
     tanks = tank_to_struct(data["Tank"], j_dict)
     demands = demand_to_struct(data["Demand"], j_dict)
+    curves = curve_to_struct(data["Curve"])
     # stopped here
     pipes = pipe_to_struct(data["Pipe"], junctions)
     pumps = pump_to_struct(data["Pump"], junctions)
@@ -91,7 +92,16 @@ function demand_to_struct(d_vec::Vector{Any}, j_dict::Dict{String,Junction})
     return demands
 end
 
-
+"""
+Create array of curves using WaterSystems.Curve subtype.
+"""
+function curve_to_struct(c_vec::Vector{Any})
+    curves = Vector{Curve}(undef, length(c_vec))
+    for (i,curve) in enumerate(c_vec)
+        curves[i] = Curve(curve["name"], curve["type"], curve["points"])
+    end
+    return curves
+end
 
 function pipe_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
     pipes = Array{P where {P<:Pipe}, 1}(undef, length(data))

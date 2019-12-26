@@ -13,6 +13,8 @@ function make_dict(inp_file::String)
     pipes = Vector{Any}()
     pumps = Vector{Any}()
     valves = Vector{Any}()
+    patterns = Vector{Any}()
+    curves = Vector{Any}()
 
     wn = wntr_dict(inp_file)
     
@@ -39,17 +41,21 @@ function make_dict(inp_file::String)
     junction_dict(wn, node_results, junctions)
     tank_dict(wn, node_results, tanks, junctions, num_timeperiods, time_ahead)
     res_dict(wn, node_results, reservoirs, junctions, num_timeperiods, time_ahead)
-    # removing 'time_ahead' info from demands_dict; can remove it from tank_dict and
+    # removing 'time_ahead' info from demand_dict; can remove it from tank_dict and
     # res_dict also, JJS 12/19/19
-    demands_dict!(wn, demands)
+    demand_dict!(wn, demands)
+    pattern_dict!(wn, patterns)
+    curve_dict!(wn, curves)
     link_dict!(wn, link_results, links, junctions)
+    
     pipe_dict(wn, link_results, pipes,junctions)
     pump_dict(wn, junctions,pumps, node_results, link_results)
     valve_dict(wn, valves)
 
     data = Dict{String,Any}( "Junction" => junctions, "Tank" => tanks,
                              "Reservoir" =>reservoirs, "Link" => links, "Pipe" => pipes,
-                             "Valve" => valves, "Pump" => pumps, "Demand" => demands)
+                             "Valve" => valves, "Pump" => pumps, "Demand" => demands,
+                             "Pattern" => patterns, "Curve" => curves)
 
     data["wntr"] = Dict{String,Any}("duration"=> duration_hours,
                                     "timeperiods" => timeperiods_hours,
@@ -72,9 +78,11 @@ function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, junctions
     end
 end
 
-function demands_dict!(wn::Dict{Any,Any}, demands::Vector{Any})
+function demand_dict!(wn::Dict{Any,Any}, demands::Vector{Any})
     ## this has been redone, not using simulation results, and not pulling the actual
-    ## values, only the name of the pattern JJS 12/12/19
+    ## values, only the name of the pattern; JJS 12/12/19
+    ### add a field for average or maximum demand? the scaling of base_demand values can
+    ### vary wildly (along with patterns) -- see Net3, for example, JJS 12/24/19
     for junction in wn["junctions"]
         name = junction["name"]
         base_demand = junction["base_demand"]
@@ -133,6 +141,20 @@ function res_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, reservoirs::Ve
         junctions[name] = Dict{String,Any}("name" => junc_name, "elevation" => res["base_head"], "head" => convert(Float64,head), "minimum_pressure" => 0, "coordinates" => (lat = res["coordinates"][2], lon = res["coordinates"][1])) #array of pseudo nodes @ res
         push!(reservoirs, Dict{String,Any}("name" => name, "elevation" => res["base_head"])) #base_head = elevation
 
+    end
+end
+
+function pattern_dict!(wn::Dict{Any,Any}, patterns::Vector{Any})
+    for pattern in wn["patterns"]
+        push!(patterns, Dict{String,Any}("name" => pattern["name"],
+                                         "multipliers" => pattern["multipliers"]))
+    end
+end
+
+function curve_dict!(wn::Dict{Any,Any}, curves::Vector{Any})
+    for (i, (name,curve)) in enumerate(wn["curves"])
+        push!(curves, Dict{String,Any}("name" => name, "type" => curve["curve_type"],
+                                       "points" => curve["points"]))
     end
 end
 

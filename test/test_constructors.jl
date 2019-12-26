@@ -23,6 +23,14 @@
     @test t_demand isa WSY.WaterDemand
 end
 
+@testset "Technical parameters constructors" begin
+    t_pattern = WSY.Pattern(nothing)
+    @test t_pattern isa WSY.TechnicalParams
+    t_curve = WSY.Curve(nothing)
+    @test t_curve isa WSY.TechnicalParams
+    #TODO: checks on pump parameter types
+end
+
 # intermediate testing of parsing an epanet file and constructing subtypes of WaterSystems
 @testset "Consctructors from epanet data" begin
     # what comparative tests would be useful here? mainly just making sure no errors are

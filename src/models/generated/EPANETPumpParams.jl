@@ -5,8 +5,8 @@ This file is auto-generated. Do not edit.
     mutable struct EPANETPumpParams <: TechnicalParams
         epnt_type::Union{Nothing, String}
         epnt_power::Union{Nothing, Float64}
-        epnt_head::Union{Nothing, Array{Tuple{Float64,Float64},1}}
-        epnt_efficiency::Union{Nothing, Float64, Array{Tuple{Float64,Float64},1}}
+        epnt_head::Union{Nothing, Curve}
+        epnt_efficiency::Union{Nothing, Float64, Curve}
         internal::InfrastructureSystemsInternal
     end
 
@@ -15,8 +15,8 @@ Pump specifications from inp-file
 # Arguments
 - `epnt_type::Union{Nothing, String}`: epanet categorizes pump specs as HEAD or POWER
 - `epnt_power::Union{Nothing, Float64}`: specified constant power if type POWER
-- `epnt_head::Union{Nothing, Array{Tuple{Float64,Float64},1}}`: provided head curve if type HEAD
-- `epnt_efficiency::Union{Nothing, Float64, Array{Tuple{Float64,Float64},1}}`: provided efficiency curve (or single value) if type HEAD
+- `epnt_head::Union{Nothing, Curve}`: provided head curve if type HEAD
+- `epnt_efficiency::Union{Nothing, Float64, Curve}`: provided efficiency curve (or single value) if type HEAD
 - `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct EPANETPumpParams <: TechnicalParams
@@ -25,9 +25,9 @@ mutable struct EPANETPumpParams <: TechnicalParams
     "specified constant power if type POWER"
     epnt_power::Union{Nothing, Float64}
     "provided head curve if type HEAD"
-    epnt_head::Union{Nothing, Array{Tuple{Float64,Float64},1}}
+    epnt_head::Union{Nothing, Curve}
     "provided efficiency curve (or single value) if type HEAD"
-    epnt_efficiency::Union{Nothing, Float64, Array{Tuple{Float64,Float64},1}}
+    epnt_efficiency::Union{Nothing, Float64, Curve}
     "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
 end
