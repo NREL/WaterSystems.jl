@@ -56,7 +56,7 @@ export wntr_dict
 using PyCall # keeping this as "using" for now, but probably could/should change to import,
              # JJS 12/6/19
 # coverted these to imports -- not sure what calls refer to them, JJS 12/6/19
-import CurveFit
+#import CurveFit # I don't think this is needed now, JJS 12/30/19
 import SparseArrays
 import LinearAlgebra
 
@@ -79,8 +79,8 @@ import InfrastructureSystems: Components, Deterministic, Probabilistic, Forecast
 
 const IS = InfrastructureSystems
 
-# python imports, needed to use wntr for parsing epanet files
-# makes these precompile safe? JJS 12/9/19
+# python imports, needed to use wntr for parsing epanet files;
+# this import method makes these precompile safe? JJS 12/9/19
 const metric = PyNULL()
 const model = PyNULL()
 const sim = PyNULL()
@@ -130,5 +130,6 @@ include("parsers/wntr_dict_parser.jl")
 
 # utils... not sure what of the legacy code will be needed, JJS 12/5/19
 #include("Utils/build_incidence.jl")
+include("utils/PumpCoefs.jl") # re-purposed, JJS 12/29/19
 
 end # module

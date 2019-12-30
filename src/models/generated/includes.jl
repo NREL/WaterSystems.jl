@@ -17,6 +17,7 @@ export get__forecasts
 export get_arc
 export get_available
 export get_base_demand
+export get_base_price
 export get_coordinates
 export get_diameter
 export get_effncy_bep

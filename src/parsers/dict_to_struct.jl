@@ -9,15 +9,16 @@ function dict_to_struct(data::Dict{String,Any})
     junctions = junction_to_struct(data["Junction"])
     j_dict = Dict{String, Junction}(junction.name => junction for junction in junctions)
     arcs = link_to_struct(data["Link"], j_dict)
+    a_dict = Dict{String, Arc}(arc.name => arc for arc in arcs)
     res = res_to_struct(data["Reservoir"], j_dict)
     tanks = tank_to_struct(data["Tank"], j_dict)
     demands = demand_to_struct(data["Demand"], j_dict)
     patterns = pattern_to_struct(data["Pattern"])
     curves = curve_to_struct(data["Curve"])
+    pipes = pipe_to_struct(data["Pipe"], a_dict)
+    pumps = pump_to_struct(data["Pump"], a_dict, curves, patterns)
     # stopped here
-    pipes = pipe_to_struct(data["Pipe"], junctions)
-    pumps = pump_to_struct(data["Pump"], junctions)
-    valves = valve_to_struct(data["Valve"], junctions)
+    valves = valve_to_struct(data["Valve"], a_dict)
 
     # create functions to populate pump params, patterns
     
@@ -62,7 +63,7 @@ function res_to_struct(r_vec::Vector{Any}, j_dict::Dict{String,Junction})
 end
 
 """ 
-Create array of tanks using WaterSystems.Tank subtypes. Only cylindrical tanks are
+Create array of tanks using WaterSystems.Tank types. Only cylindrical tanks are
 currently supported.
 """
 
@@ -77,7 +78,7 @@ function tank_to_struct(t_vec::Vector{Any}, j_dict::Dict{String,Junction})
 end
 
 """
-Create array of demands using WaterSystems.WaterDemand subtypes. Only static demands are
+Create array of demands using WaterSystems.WaterDemand types. Only static demands are
 currently supported.
 """
 function demand_to_struct(d_vec::Vector{Any}, j_dict::Dict{String,Junction})
@@ -97,7 +98,7 @@ function demand_to_struct(d_vec::Vector{Any}, j_dict::Dict{String,Junction})
 end
 
 """
-Create array of patterns using WaterSystems.Pattern subtype.
+Create array of patterns using WaterSystems.Pattern type.
 """
 function pattern_to_struct(p_vec::Vector{Any})
     patterns = Vector{Pattern}(undef, length(p_vec))
@@ -108,7 +109,7 @@ function pattern_to_struct(p_vec::Vector{Any})
 end
 
 """
-Create array of curves using WaterSystems.Curve subtype.
+Create array of curves using WaterSystems.Curve type.
 """
 function curve_to_struct(c_vec::Vector{Any})
     curves = Vector{Curve}(undef, length(c_vec))
@@ -118,33 +119,59 @@ function curve_to_struct(c_vec::Vector{Any})
     return curves
 end
 
-function pipe_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
-    pipes = Array{P where {P<:Pipe}, 1}(undef, length(data))
-    for (ix, p) in enumerate(data)
-        j_from = p["connectionpoints"].from
-        j_to = p["connectionpoints"].to
-        junction_to = [junc for junc in junctions if junc.name == j_to["name"]][1]
-        junction_from = [junc for junc in junctions if junc.name == j_from["name"]][1]
-        if p["cv"] == false
-            if p["control_pipe"]
-                pipes[ix] = ControlPipe(ReversibleFlowPipe( p["name"], (from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"]), GateValve(p["initial_status"]))
-            else
-                pipes[ix] = ReversibleFlowPipe(p["name"], (from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"])
-
-            end
+"""
+Create array of pipes using WaterSystems.Pipe types.
+"""
+function pipe_to_struct(pi_vec::Vector{Any}, a_dict::Dict{String,Arc})
+    pipes = Vector{Pipe}(undef, length(pi_vec))
+    unid_flowlimits = CVPipe(nothing).flowlimits # get defaults--is this good practice ??
+    bidi_flowlimits = GatePipe(nothing).flowlimits
+    for (i, pipe) in enumerate(pi_vec)
+        name = pipe["name"]
+        if pipe["cv"] == true
+            pipes[i] = CVPipe(name, a_dict[name], true, pipe["diameter"], pipe["length"],
+                              pipe["roughness"], unid_flowlimits, nothing, nothing)
+        elseif pipe["control_pipe"] == true
+            # add initial status (open/closed)? would need to add the field, JJS 12/26/19
+            pipes[i] = GatePipe(name, a_dict[name], true, pipe["diameter"], pipe["length"],
+                               pipe["roughness"], bidi_flowlimits, nothing, nothing, nothing)
         else
-            pipes[ix] = CheckValvePipe(p["name"], (from = junction_from, to = junction_to) ,p["diameter"], p["length"], p["roughness"], p["headloss"], p["flow"], p["initial_status"])
+            pipes[i] = OpenPipe(name, a_dict[name], true, pipe["diameter"], pipe["length"],
+                                pipe["roughness"], bidi_flowlimits, nothing, nothing)
         end
     end
     return pipes
 end
 
+"""
+Create array of pumps using WaterSystem.Pump type.
+"""
+function pump_to_struct(pu_vec::Vector{Any}, a_dict::Dict{String,Arc}, c_vec::Vector{Curve},
+                        pa_vec::Vector{Pattern})
+    pumps = Vector{Pump}(undef, length(pu_vec))
+    c_dict = Dict{String, WSY.Curve}(curve.name => curve for curve in c_vec)
+    for (i, pump) in enumerate(pu_vec)
+        # creat EPANETPumpParams object for the pump
+        epanetparams = EPANETPumpParams(pump["type"], pump["power"],
+                                        c_dict[pump["head_curve_name"]],
+                                        pump["efficiency"])
+        # calculate normalized params and create the object
+        
+#        [params] = norm_pump_params(pump, c_dict) # in utils/PumpCoefs.jl
+
+        # create the pump object, including base price and pattern
+        
+        #pumps[ix] = ConstSpeedPump(p["name"], (from = junction_from, to = junction_to), p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"])
+    end
+    return pumps
+end
+
 #ignoring valves for now, JJS 12/5/19
-function valve_to_struct(data::Vector{Any})
+function valve_to_struct(data::Vector{Any}, a_dict::Dict{String,Arc})
     if size(data["Valve"])[1] != 0
         @warn("There appears to be pressure/flow control valves in this network, but these valves are not currently handled by WaterSystems.jl")
     end
-    return Nothing()
+    return nothing
 end
 # function valve_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
 #     valves = Array{PR where {PR <: PressureReducingValve},1}(undef, length(data))
@@ -170,15 +197,3 @@ end
 #     end
 #     return valves
 # end
-
-function pump_to_struct(data::Vector{Any}, junctions::Array{Junction,1})
-    pumps = Array{C where {C <:ConstSpeedPump},1}(undef, length(data))
-    for (ix, p) in enumerate(data)
-        j_from = p["connectionpoints"].from
-        j_to = p["connectionpoints"].to
-        junction_to = [junc for junc in junctions if junc.name == j_to["name"]][1]
-        junction_from = [junc for junc in junctions if junc.name == j_from["name"]][1]
-        pumps[ix] = ConstSpeedPump(p["name"], (from = junction_from, to = junction_to), p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"])
-    end
-    return pumps
-end

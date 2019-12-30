@@ -12,6 +12,14 @@
     arc = WSY.Arc("test", WSY.Junction(nothing), WSY.Junction(nothing))
  end
 
+@testset "Technical parameters constructors" begin
+    t_pattern = WSY.Pattern(nothing)
+    @test t_pattern isa WSY.TechnicalParams
+    t_curve = WSY.Curve(nothing)
+    @test t_curve isa WSY.TechnicalParams
+    #TODO: checks on pump parameter types
+end
+
 @testset "Injection constructors" begin
     t_res = WSY.Reservoir(nothing)
     @test t_res isa WSY.Injection
@@ -23,18 +31,20 @@
     @test t_demand isa WSY.WaterDemand
 end
 
-@testset "Technical parameters constructors" begin
-    t_pattern = WSY.Pattern(nothing)
-    @test t_pattern isa WSY.TechnicalParams
-    t_curve = WSY.Curve(nothing)
-    @test t_curve isa WSY.TechnicalParams
-    #TODO: checks on pump parameter types
+@testset "Link constructors" begin
+    t_openpipe = WSY.OpenPipe(nothing)
+    @test t_openpipe isa WSY.Pipe
+    @test t_openpipe isa WSY.Link
+    t_gatepipe = WSY.GatePipe(nothing)
+    @test t_gatepipe isa WSY.Pipe
+    t_cvpipe = WSY.CVPipe(nothing)
+    @test t_cvpipe isa WSY.Pipe
 end
 
-# intermediate testing of parsing an epanet file and constructing subtypes of WaterSystems
+# testing of parsing an epanet file and constructing subtypes of WaterSystems
 @testset "Consctructors from epanet data" begin
-    # what comparative tests would be useful here? mainly just making sure no errors are
-    # thrown JJS 12/20/19
+    # what comparative tests would be useful here? these are mainly just making sure no
+    # errors are thrown JJS 12/20/19
     data = WSY.make_dict(epanet_test_path)
     # test creation of junction structs
     junctions = WSY.junction_to_struct(data["Junction"])
@@ -43,6 +53,11 @@ end
     # test creation of arc structs
     arcs = WSY.link_to_struct(data["Link"], j_dict)
     @test arcs isa Array{WaterSystems.Arc,1}
+    a_dict = Dict{String, WSY.Arc}(arc.name => arc for arc in arcs)
+
+    # test creation of technical params structs
+    # TBD
+    
     # test creation of reservoir structs
     reservoirs = WSY.res_to_struct(data["Reservoir"], j_dict)
     @test reservoirs isa Array{WaterSystems.Reservoir,1}
@@ -58,7 +73,11 @@ end
     curves = WSY.curve_to_struct(data["Curve"])
     @test curves isa Array{WaterSystems.Curve,1}
     
-    # testing constructors for technical parameters and links TBD
+    # test creation of pipe structs
+    pipes = WSY.pipe_to_struct(data["Pipe"], a_dict)
+    @test pipes isa Array{WaterSystems.Pipe,1}
+    # test creation of pump structs
+    # TBD
 end
 
 # @testset "Branch Constructors" begin

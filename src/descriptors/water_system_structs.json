@@ -231,6 +231,24 @@
         "null_value": "nothing"
       },
       {
+        "name": "base_price",
+        "comment": "'base' price in dollar/J",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "pattern_name",
+        "comment": "name of forecast pattern array",
+        "null_value": "init",
+        "data_type": "String"
+      },
+      {
+        "name": "_forecasts",
+        "null_value": "InfrastructureSystems.Forecasts()",
+        "data_type": "InfrastructureSystems.Forecasts",
+        "default": "InfrastructureSystems.Forecasts()"
+      },
+      {
         "name": "internal",
         "comment": "internal reference, do not modify",
         "data_type": "InfrastructureSystemsInternal",
@@ -244,14 +262,35 @@
     "supertype": "Link",
     "fields": [
       {
-        "null_value": "init",
         "name": "name",
+        "null_value": "init",
         "data_type": "String"
       },
       {
-        "name": "operating",
+        "name": "arc",
+        "null_value": "Arc(nothing)",
+        "data_type": "Arc"
+      },
+      {
+        "name": "available",
         "null_value": "true",
         "data_type": "Bool"
+      },
+      {
+        "name": "pumpparams",
+        "comment": "Pump parameters object, including pump curves",
+        "data_type": "PumpParams",
+        "null_value": "PumpParams(nothing)"
+      },
+      {
+        "name": "flowlimits",
+        "null_value": "(min=0.0, max=10.0)",
+        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+      },
+      {
+        "name": "operating",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Bool}"
       },
       {
         "name": "flow",
@@ -261,30 +300,8 @@
       {
         "name": "headgain",
         "comment": "Not sure about decoupled headgain when pump is off.",
-        "null_value": "0.0",
-        "data_type": "Float64"
-      },
-      {
-        "name": "available",
-        "null_value": "true",
-        "data_type": "Bool"
-      },
-      {
-        "null_value": "Arc(Junction(nothing), Junction(nothing))",
-        "name": "arc",
-        "data_type": "Arc"
-      },
-      {
-        "name": "pumpparams",
-        "comment": "Pump parameters object, including pump curves",
-        "data_type": "PumpParams",
-        "null_value": "PumpParams(nothing)"
-
-      },
-      {
-        "name": "flowlimits",
-        "null_value": "(min=0.0, max=10.0)",
-        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
       },
       {
         "name": "internal",
@@ -300,9 +317,39 @@
     "supertype": "Pipe",
     "fields": [
       {
-        "null_value": "init",
         "name": "name",
+        "null_value": "init",
         "data_type": "String"
+      },
+      {
+        "null_value": "Arc(nothing)",
+        "name": "arc",
+        "data_type": "Arc"
+      },
+      {
+        "name": "available",
+        "null_value": "true",
+        "data_type": "Bool"
+      },
+      {
+        "name": "diameter",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "length",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "roughness",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "flowlimits",
+        "null_value": "(min=-10.0, max=10.0)",
+        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
       },
       {
         "name": "flow",
@@ -311,38 +358,8 @@
       },
       {
         "name": "headloss",
-        "null_value": "0.0",
-        "data_type": "Float64"
-      },
-      {
-        "name": "available",
-        "null_value": "true",
-        "data_type": "Bool"
-      },
-      {
-        "null_value": "Arc(Junction(nothing), Junction(nothing))",
-        "name": "arc",
-        "data_type": "Arc"
-      },
-      {
-        "null_value": "0.0",
-        "name": "diameter",
-        "data_type": "Float64"
-      },
-      {
-        "null_value": "0.0",
-        "name": "length",
-        "data_type": "Float64"
-      },
-      {
-        "null_value": "0.0",
-        "name": "roughness",
-        "data_type": "Float64"
-      },
-      {
-        "name": "flowlimits",
-        "null_value": "(min=-10.0, max=10.0)",
-        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
       },
       {
         "name": "internal",
@@ -358,20 +375,14 @@
     "supertype": "Pipe",
     "fields": [
       {
-        "null_value": "init",
         "name": "name",
+        "null_value": "init",
         "data_type": "String"
       },
       {
-        "name": "flow",
-        "null_value": "nothing",
-        "data_type": "Union{Nothing,Float64}"
-      },
-      {
-        "name": "headloss",
-        "comment": "Not sure about decoupled headloss when pipe is closed.",
-        "null_value": "0.0",
-        "data_type": "Float64"
+        "name": "arc",
+        "null_value": "Arc(nothing)",
+        "data_type": "Arc"
       },
       {
         "name": "available",
@@ -379,23 +390,18 @@
         "data_type": "Bool"
       },
       {
-        "null_value": "Arc(Junction(nothing), Junction(nothing))",
-        "name": "arc",
-        "data_type": "Arc"
-      },
-      {
-        "null_value": "0.0",
         "name": "diameter",
+        "null_value": "0.0",
         "data_type": "Float64"
       },
       {
-        "null_value": "0.0",
         "name": "length",
+        "null_value": "0.0",
         "data_type": "Float64"
       },
       {
-        "null_value": "0.0",
         "name": "roughness",
+        "null_value": "0.0",
         "data_type": "Float64"
       },
       {
@@ -405,8 +411,18 @@
       },
       {
         "name": "open_status",
-        "null_value": "true",
-        "data_type": "Bool"
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Bool}"
+      },
+      {
+        "name": "flow",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
+      },
+      {
+        "name": "headloss",
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
       },
       {
         "name": "internal",
@@ -422,9 +438,39 @@
     "supertype": "Pipe",
     "fields": [
       {
-        "null_value": "init",
         "name": "name",
+        "null_value": "init",
         "data_type": "String"
+      },
+      {
+        "name": "arc",
+        "null_value": "Arc(nothing)",
+        "data_type": "Arc"
+      },
+      {
+        "name": "available",
+        "null_value": "true",
+        "data_type": "Bool"
+      },
+      {
+        "name": "diameter",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "length",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "roughness",
+        "null_value": "0.0",
+        "data_type": "Float64"
+      },
+      {
+        "name": "flowlimits",
+        "null_value": "(min=0.0, max=10.0)",
+        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
       },
       {
         "name": "flow",
@@ -433,39 +479,8 @@
       },
       {
         "name": "headloss",
-        "comment": "Not sure about decoupled headloss when flow is zero.",
-        "null_value": "0.0",
-        "data_type": "Float64"
-      },
-      {
-        "name": "available",
-        "null_value": "true",
-        "data_type": "Bool"
-      },
-      {
-        "null_value": "Arc(Junction(nothing), Junction(nothing))",
-        "name": "arc",
-        "data_type": "Arc"
-      },
-      {
-        "null_value": "0.0",
-        "name": "diameter",
-        "data_type": "Float64"
-      },
-      {
-        "null_value": "0.0",
-        "name": "length",
-        "data_type": "Float64"
-      },
-      {
-        "null_value": "0.0",
-        "name": "roughness",
-        "data_type": "Float64"
-      },
-      {
-        "name": "flowlimits",
-        "null_value": "(min=0.0, max=10.0)",
-        "data_type": "NamedTuple{(:min, :max), Tuple{Float64, Float64}}"
+        "null_value": "nothing",
+        "data_type": "Union{Nothing,Float64}"
       },
       {
         "name": "internal",

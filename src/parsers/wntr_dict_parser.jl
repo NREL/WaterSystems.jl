@@ -1,5 +1,7 @@
 ## much of this is modified from legacy Amanda Mason code and appears to have a lot of
-## unnecessary and/or redundant code, JJS, 12/5/19
+## unnecessary and/or redundant code; rather than creating the "data" dictionary, why not
+## just create the Julia struct objects directly from the python wntr dictionary? JJS,
+## 12/26/19
 
 """
 Create a dictionary of the network using wntr to parse the inp file
@@ -34,7 +36,8 @@ function make_dict(inp_file::String)
     end_day = start_day + Second(duration-time_periods)
 
     time_ahead = collect(start_day:Second(time_periods):end_day)
-    ## should not use results! JJS 12/19/19
+    ## now only used (I think) for getting pump-flow estimates when head-curve not provided;
+    ## should we only run an EPANET simulation in that case? JJS 12/28/19
     node_results = wn["node_results"]
     link_results = wn["link_results"]
     
@@ -46,10 +49,9 @@ function make_dict(inp_file::String)
     demand_dict!(wn, demands)
     pattern_dict!(wn, patterns)
     curve_dict!(wn, curves)
-    link_dict!(wn, link_results, links, junctions)
-    
-    pipe_dict(wn, link_results, pipes,junctions)
-    pump_dict(wn, junctions,pumps, node_results, link_results)
+    link_dict!(wn, links, junctions)
+    pipe_dict!(wn, pipes)
+    pump_dict!(wn, link_results, pumps, curves) # will add to curves if pumps are power type
     valve_dict(wn, valves)
 
     data = Dict{String,Any}( "Junction" => junctions, "Tank" => tanks,
@@ -159,24 +161,94 @@ function curve_dict!(wn::Dict{Any,Any}, curves::Vector{Any})
 end
 
 # adding this as holdover until all this dict parsing code can be rewritten, JJS 12/11/19
-function link_dict!(wn::Dict{Any,Any}, link_results::Dict{Any, Any}, links::Dict{String,Any},
+function link_dict!(wn::Dict{Any,Any}, links::Dict{String,Any},
                    junctions::Dict{String,Any})
     for link in wn["links_vec"]
         name = link["name"]
         junction_start = junctions[link["start_node_name"]]
         junction_end = junctions[link["end_node_name"]]
-        links[name] = Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end))
+        links[name] = Dict{String,Any}("name" => name, "connectionpoints"
+                                       => (from = junction_start, to = junction_end))
     end
 end
 
-function pipe_dict(wn::Dict{Any,Any}, link_results::Dict{Any, Any}, pipes::Vector{Any}, junctions::Dict{String,Any})
+function pipe_dict!(wn::Dict{Any,Any}, pipes::Vector{Any})
     for (key,pipe) in wn["pipes"]
         name = pipe["name"]
-        headloss = get(link_results["headloss"],name).values[1] #m
-        flowrate = get(link_results["flowrate"],name).values[1] #m^3/sec
-        junction_start = junctions[pipe["start_node_name"]]
-        junction_end = junctions[pipe["end_node_name"]]
-        push!(pipes, Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "diameter" => pipe["diameter"], "length" => pipe["length"],"roughness" => pipe["roughness"], "headloss" => convert(Float64,headloss), "flow" => convert(Float64,flowrate), "initial_status" => pipe["initial_status"], "control_pipe" => pipe["control_pipe"], "cv" => pipe["cv"]))
+        push!(pipes, Dict{String,Any}("name" => name,
+                                      "diameter" => pipe["diameter"],
+                                      "length" => pipe["length"],
+                                      "roughness" => pipe["roughness"],
+                                      "initial_status" => pipe["initial_status"],
+                                      "control_pipe" => pipe["control_pipe"],
+                                      "cv" => pipe["cv"]))
+    end
+end
+
+function pump_dict!(wn::Dict{Any, Any}, link_results::Dict{Any,Any}, pumps::Vector{Any},
+                    curves::Vector{Any})
+    # get global value to use for pump efficiency when not provided
+    global_effnc = wn["options"]["energy"]["global_efficiency"]
+    # I think wntr will always populate global efficiency; if not, we can use these lines,
+    # JJS 12/27/19
+    # if global_effnc == nothing
+    #     global_effnc = 0.75 
+    # end
+
+    ## global energy price and pattern?
+    global_price = wn["options"]["energy"]["global_price"]
+    global_pattern = wn["options"]["energy"]["global_pattern"]
+    
+    for pump in wn["pumps"]
+        name = pump["name"]
+        # pump head and efficiency OR power values
+        type = pump["pump_type"] # HEAD or POWER
+        efficiency = pump["efficiency"]
+        if type == "HEAD"
+            head_curve_name = pump["pump_curve_name"]
+            if efficiency == nothing
+                efficiency = global_effnc
+            else # then always a curve provided? need to check if pump-specific
+                # single-values are ever used in .inp files
+                efficiency = efficiency.name # efficiency curve name
+            end
+            power = nothing
+        else # POWER -- this needs testing, e.g., with ky3.inp JJS 12/29/19
+            efficiency = global_effnc # needed for estimating BEP
+            power = pump["power"] # W
+            # use sim results to estimate the nominal flow rate of the pump for BEP
+            #flows = link_results["flowrate"].name
+            flows = link_results["flowrate"][name]
+            # convert from pyobject (pandas I think) to julia -- there may be a more
+            # elegant way to do this... JJS 12/28/19
+            flows = [val for val in flows]
+            head_curve_name = name*"_head_power"
+            ## here, the head is calculated from the flow and power; instead, take the head
+            ## value from the simulation results and just ignore the power?
+            head_point = head_curve_from_power(power, efficiency, flows) # utils/PumpCoefs.jl
+            push!(curves, Dict{String,Any}("name" => head_curve_name,
+                                           "type" => "HEAD",
+                                           "points" => head_point))
+        end
+        
+        # energy base price and pattern
+        # why would energy price (and pattern) be specific to each pump???  JJS 12/27/19
+        price = pump["energy_price"]
+        if price == nothing
+            price = global_price
+        end
+        price_pattern = pump["energy_pattern"]
+        if price_pattern == nothing
+            price_pattern = global_pattern
+        end
+
+        push!(pumps, Dict{String,Any}("name" => name,
+                                      "type" => type,
+                                      "head_curve_name" => head_curve_name,
+                                      "efficiency" => efficiency,
+                                      "power" => power,
+                                      "price" => price,
+                                      "price_pattern" => price_pattern))
     end
 end
 
@@ -193,67 +265,6 @@ function valve_dict(wn::Dict{Any,Any}, valves::Vector{Any})
         status_index = valve["initial_status"] + 1  # 1=Closed, 2=Open, 3 = Active, 4 = CheckValve
         status_string = ["Closed", "Open", "Active","Check Valve"][status_index] #Active = partially open
         push!(valves, Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => status_string , "diameter" => valve["diameter"], "pressure_drop" => valve["setting"], "valvetype"=>valve_type))
-    end
-end
-
-function pump_dict(wn::Dict{Any, Any}, junctions::Dict{String,Any}, pumps::Vector{Any}, node_results::Dict{Any, Any}, link_results::Dict{Any, Any})
-    for pump in wn["pumps"]
-        energy = 0
-        efficiency = nothing
-        name = pump["name"]
-        junction_start = junctions[pump["start_node_name"]]
-        junction_end = junctions[pump["end_node_name"]]
-
-        if pump["pump_type"] == "HEAD"
-            pump_curve_name = pump["pump_curve_name"]
-            pump_curve = wn["curves"][pump_curve_name]["points"]
-        else
-            pump_curve = [(pump["power"],0.0)] #power pump types gives fixed power value,
-            #0 is dummy variable to fit tuple type until we decide what we want to do
-        end
-
-        #energy price
-        price = wn["options"]["energy"]["global_price"] # Power  $/kW hrs
-        pattern = wn["options"]["energy"]["global_pattern"]# $/kW hrs
-        price_array2 = Array{Any}(undef,0)
-        price_array = Array{Any}(undef,0)
-        energyprice = TimeSeries.TimeArray(TimeSeries.today(), [1.0])
-        # if price == 0
-        #     pricearray = price
-        #     # warn("Price is set to 0. Using randomly generated price array with higher weights during peak hours (4pm-8pm).")
-        #     # timeperiods_per_hour = 1/(timeperiods)
-        #     # #TO:DO check to make sure time_steps / hour is an int or divisor of 4
-        #     #price_array = [2*rand(Int(timeperiods_per_hour*16))+1; 7*rand(Int(timeperiods_per_hour*4))+3; 2*rand(Int(timeperiods_per_hour*4))+3]
-        #     if duration_hours > 24
-        #         days = Int(duration_hours/24)
-        #         for i=1:days
-        #             price_array2 = vcat(price_array2, price_array)
-        #         end
-        #         price_array = price_array2
-        #     end
-        # elseif typeof(pattern) == Nothing
-        #     price_array = price * ones(length(time_ahead))
-        # else
-        #     price_array = price * pattern
-        #     if duration_hours > 24
-        #         days = Int(duration_hours/24)
-        #         for i=1:days
-        #             price_array2 = vcat(price_array2, price_array)
-        #         end
-        #         price_array = price_array2
-        #     end
-        # end
-        # l = length(time_ahead)
-        # p = length(price_array)
-        # l == p ? energyprice = TimeSeries.TimeArray(time_ahead, price_array) : println("$l and $p")
-        # energyprice = TimeSeries.TimeArray(time_ahead, price_array)
-        #efficiency
-        try
-            efficiency = pump["efficiency"].points
-        catch
-            wn["options"]["energy"]["global_efficiency"] != nothing ? efficiency = wn["options"]["energy"]["global_efficiency"] : efficiency = 0.65
-        end
-        push!(pumps, Dict{String,Any}("name" => name, "connectionpoints" => (from = junction_start, to = junction_end), "status" => pump["status"], "pumpcurve" => pump_curve, "efficiency" => efficiency, "energyprice" => energyprice))
     end
 end
 
