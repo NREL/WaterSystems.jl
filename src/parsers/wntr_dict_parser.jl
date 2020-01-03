@@ -208,7 +208,7 @@ function pump_dict!(wn::Dict{Any, Any}, link_results::Dict{Any,Any}, pumps::Vect
             head_curve_name = pump["pump_curve_name"]
             if efficiency == nothing
                 efficiency = global_effnc
-            else # then always a curve provided? need to check if pump-specific
+            else # then will a curve always be provided? need to check if pump-specific
                 # single-values are ever used in .inp files
                 efficiency = efficiency.name # efficiency curve name
             end
@@ -217,14 +217,15 @@ function pump_dict!(wn::Dict{Any, Any}, link_results::Dict{Any,Any}, pumps::Vect
             efficiency = global_effnc # needed for estimating BEP
             power = pump["power"] # W
             # use sim results to estimate the nominal flow rate of the pump for BEP
-            #flows = link_results["flowrate"].name
-            flows = link_results["flowrate"][name]
+            #flows = link_results["flowrate"].name # doesn't work
+            flows = link_results["flowrate"][name] # gives a warning in 1.3
             # convert from pyobject (pandas I think) to julia -- there may be a more
             # elegant way to do this... JJS 12/28/19
             flows = [val for val in flows]
             head_curve_name = name*"_head_power"
             ## here, the head is calculated from the flow and power; instead, take the head
-            ## value from the simulation results and just ignore the power?
+            ## value from the simulation results as well and just ignore the power? there
+            ## are clear inconsistencies here! JJS 01/02/20
             head_point = head_curve_from_power(power, efficiency, flows) # utils/PumpCoefs.jl
             push!(curves, Dict{String,Any}("name" => head_curve_name,
                                            "type" => "HEAD",

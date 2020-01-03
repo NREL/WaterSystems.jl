@@ -32,7 +32,6 @@ export get_flow_bep
 export get_flowlimits
 export get_from
 export get_head
-export get_head0
 export get_head_bep
 export get_headgain
 export get_headloss

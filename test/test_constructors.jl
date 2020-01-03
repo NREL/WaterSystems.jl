@@ -17,7 +17,12 @@
     @test t_pattern isa WSY.TechnicalParams
     t_curve = WSY.Curve(nothing)
     @test t_curve isa WSY.TechnicalParams
-    #TODO: checks on pump parameter types
+    t_epntp = WSY.EPANETPumpParams(nothing)
+    @test t_epntp isa WSY.TechnicalParams
+    t_npp = WSY.NormPumpParams(nothing)
+    @test t_npp isa WSY.TechnicalParams
+    t_pp = WSY.PumpParams(nothing)
+    @test t_pp isa WSY.TechnicalParams
 end
 
 @testset "Injection constructors" begin
@@ -39,6 +44,8 @@ end
     @test t_gatepipe isa WSY.Pipe
     t_cvpipe = WSY.CVPipe(nothing)
     @test t_cvpipe isa WSY.Pipe
+    t_pump = WSY.Pump(nothing)
+    @test t_pump isa WSY.Link
 end
 
 # testing of parsing an epanet file and constructing subtypes of WaterSystems
@@ -55,8 +62,12 @@ end
     @test arcs isa Array{WaterSystems.Arc,1}
     a_dict = Dict{String, WSY.Arc}(arc.name => arc for arc in arcs)
 
-    # test creation of technical params structs
-    # TBD
+    # test creation of pattern structs
+    patterns = WSY.pattern_to_struct(data["Pattern"])
+    @test patterns isa Array{WSY.Pattern,1}
+    # test creation of curve structs
+    curves = WSY.curve_to_struct(data["Curve"])
+    @test curves isa Array{WSY.Curve,1}
     
     # test creation of reservoir structs
     reservoirs = WSY.res_to_struct(data["Reservoir"], j_dict)
@@ -77,25 +88,9 @@ end
     pipes = WSY.pipe_to_struct(data["Pipe"], a_dict)
     @test pipes isa Array{WaterSystems.Pipe,1}
     # test creation of pump structs
-    # TBD
+    pumps = WSY.pump_to_struct(data["Pump"], a_dict, curves, patterns)
+    @test pumps isa Array{WSY.Pump,1}
 end
-
-# @testset "Branch Constructors" begin
-#     tLine = Line(nothing)
-#     @test tLine isa PowerSystems.Component
-#     tMonitoredLine = MonitoredLine(nothing)
-#     @test tMonitoredLine isa PowerSystems.Component
-#     tHVDCLine = HVDCLine(nothing)
-#     @test tHVDCLine isa PowerSystems.Component
-#     tVSCDCLine = VSCDCLine(nothing)
-#     @test tVSCDCLine isa PowerSystems.Component
-#     tTransformer2W = Transformer2W(nothing)
-#     @test tTransformer2W isa PowerSystems.Component
-#     tTapTransformer = TapTransformer(nothing)
-#     @test tTapTransformer isa PowerSystems.Component
-#     tPhaseShiftingTransformer = PhaseShiftingTransformer(nothing)
-#     @test tPhaseShiftingTransformer isa PowerSystems.Component
-# end
 
 # @testset "Forecast Constructors" begin
 #     tg = RenewableFix(nothing)

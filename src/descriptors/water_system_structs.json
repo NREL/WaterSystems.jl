@@ -188,12 +188,6 @@
         "null_value": "0.0"
       },
       {
-        "name": "head0",
-        "comment": "head ratio G0/GBEP",
-        "data_type": "Float64",
-        "null_value": "1.25"
-      },
-      {
         "name": "power_slope",
         "comment": "slope of the linear power curve",
         "data_type": "Float64",

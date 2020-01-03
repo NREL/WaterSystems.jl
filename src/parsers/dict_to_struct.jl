@@ -1,5 +1,8 @@
 # modifying from Amanda's legacy parsing code, JJS 12/5/19
 
+const small = 1e-6
+const large = 1e6
+
 """
 Convert dictionary of water network to WaterSystems structure
 """
@@ -17,7 +20,6 @@ function dict_to_struct(data::Dict{String,Any})
     curves = curve_to_struct(data["Curve"])
     pipes = pipe_to_struct(data["Pipe"], a_dict)
     pumps = pump_to_struct(data["Pump"], a_dict, curves, patterns)
-    # stopped here
     valves = valve_to_struct(data["Valve"], a_dict)
 
     # create functions to populate pump params, patterns
@@ -124,8 +126,10 @@ Create array of pipes using WaterSystems.Pipe types.
 """
 function pipe_to_struct(pi_vec::Vector{Any}, a_dict::Dict{String,Arc})
     pipes = Vector{Pipe}(undef, length(pi_vec))
-    unid_flowlimits = CVPipe(nothing).flowlimits # get defaults--is this good practice ??
-    bidi_flowlimits = GatePipe(nothing).flowlimits
+    #unid_flowlimits = CVPipe(nothing).flowlimits # neat trick to get defaults, not using
+    #bidi_flowlimits = GatePipe(nothing).flowlimits
+    unid_flowlimits = (min = small, max = large)
+    bidi_flowlimits = (min = -large, max = large)
     for (i, pipe) in enumerate(pi_vec)
         name = pipe["name"]
         if pipe["cv"] == true
@@ -149,19 +153,30 @@ Create array of pumps using WaterSystem.Pump type.
 function pump_to_struct(pu_vec::Vector{Any}, a_dict::Dict{String,Arc}, c_vec::Vector{Curve},
                         pa_vec::Vector{Pattern})
     pumps = Vector{Pump}(undef, length(pu_vec))
-    c_dict = Dict{String, WSY.Curve}(curve.name => curve for curve in c_vec)
+    c_dict = Dict{String, Curve}(curve.name => curve for curve in c_vec)
+    pa_dict = Dict{String, Pattern}(patt.name => patt for patt in pa_vec)
+    flowlimits = (min = small, max = large)
     for (i, pump) in enumerate(pu_vec)
+        name = pump["name"]
         # creat EPANETPumpParams object for the pump
-        epanetparams = EPANETPumpParams(pump["type"], pump["power"],
+        if pump["efficiency"] isa String
+            efficiency = c_dict[pump["efficiency"]]
+        else
+            efficiency = pump["efficiency"]
+        end
+        epanet_params = EPANETPumpParams(pump["type"], pump["power"],
                                         c_dict[pump["head_curve_name"]],
-                                        pump["efficiency"])
+                                        efficiency)
         # calculate normalized params and create the object
-        
-#        [params] = norm_pump_params(pump, c_dict) # in utils/PumpCoefs.jl
-
-        # create the pump object, including base price and pattern
-        
-        #pumps[ix] = ConstSpeedPump(p["name"], (from = junction_from, to = junction_to), p["status"], p["pumpcurve"], p["efficiency"], p["energyprice"])
+         # in utils/PumpCoefs.jl
+        Qbep, etabep, Gbep, slope, intcpt = norm_pump_params(pump, c_dict)
+        norm_coefs = NormPumpParams(Qbep, etabep, Gbep, slope, intcpt)
+        # create the pump parameters object, including base price and pattern
+        pump_params = PumpParams(epanet_params, norm_coefs, pump["price"],
+                                 pump["price_pattern"])
+        # create the pump object
+        pumps[i] = Pump(name, a_dict[name], true, pump_params, flowlimits, nothing, nothing,
+                        nothing)
     end
     return pumps
 end
