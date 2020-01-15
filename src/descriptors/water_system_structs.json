@@ -110,8 +110,8 @@
       {
         "name": "type",
         "comment": "type of curve (head or efficiency)",
-        "null_value": "init",
-        "data_type": "String"
+        "data_type": "Union{Nothing, String}",
+        "null_value": "nothing"
       },
       {
         "name": "points",
@@ -227,14 +227,14 @@
       {
         "name": "base_price",
         "comment": "'base' price in dollar/J",
-        "null_value": "0.0",
-        "data_type": "Float64"
+        "data_type": "Union{Nothing, Float64}",
+        "null_value": "nothing"
       },
       {
         "name": "pattern_name",
         "comment": "name of forecast pattern array",
-        "null_value": "init",
-        "data_type": "String"
+        "data_type": "Union{Nothing, String}",
+        "null_value": "nothing"
       },
       {
         "name": "_forecasts",

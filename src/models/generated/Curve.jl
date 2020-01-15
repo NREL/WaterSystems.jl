@@ -4,7 +4,7 @@ This file is auto-generated. Do not edit.
 """
     mutable struct Curve <: TechnicalParams
         name::String
-        type::String
+        type::Union{Nothing, String}
         points::Union{Nothing, Array{Tuple{Float64,Float64},1}}
         internal::InfrastructureSystemsInternal
     end
@@ -13,14 +13,14 @@ Pump head or efficiency curve
 
 # Arguments
 - `name::String`
-- `type::String`: type of curve (head or efficiency)
+- `type::Union{Nothing, String}`: type of curve (head or efficiency)
 - `points::Union{Nothing, Array{Tuple{Float64,Float64},1}}`: tuples of the curve points
 - `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
 mutable struct Curve <: TechnicalParams
     name::String
     "type of curve (head or efficiency)"
-    type::String
+    type::Union{Nothing, String}
     "tuples of the curve points"
     points::Union{Nothing, Array{Tuple{Float64,Float64},1}}
     "internal reference, do not modify"
@@ -39,7 +39,7 @@ end
 function Curve(::Nothing)
     Curve(;
         name="init",
-        type="init",
+        type=nothing,
         points=nothing,
     )
 end

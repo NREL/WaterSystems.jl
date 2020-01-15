@@ -208,20 +208,21 @@ function pump_dict!(wn::Dict{Any, Any}, link_results::Dict{Any,Any}, pumps::Vect
             head_curve_name = pump["pump_curve_name"]
             if efficiency == nothing
                 efficiency = global_effnc
-            else # then will a curve always be provided? need to check if pump-specific
-                # single-values are ever used in .inp files
+            elseif efficiency isa PyObject 
                 efficiency = efficiency.name # efficiency curve name
+            # else, efficiency should be a single float value and can remain as it is
+            # (EPANET manual suggests this is an option, but I have not seen it yet, and so
+            # it is not tested, JJS 01/07/19)
             end
             power = nothing
-        else # POWER -- this needs testing, e.g., with ky3.inp JJS 12/29/19
+        else # POWER 
             efficiency = global_effnc # needed for estimating BEP
             power = pump["power"] # W
             # use sim results to estimate the nominal flow rate of the pump for BEP
-            #flows = link_results["flowrate"].name # doesn't work
-            flows = link_results["flowrate"][name] # gives a warning in 1.3
-            # convert from pyobject (pandas I think) to julia -- there may be a more
-            # elegant way to do this... JJS 12/28/19
-            flows = [val for val in flows]
+            #flows = link_results["flowrate"][name] # gives a warning in 1.3
+            flows = getproperty(link_results["flowrate"], name)
+            # convert from pyobject (pandas I think) to julia 
+            flows = collect(flows)
             head_curve_name = name*"_head_power"
             ## here, the head is calculated from the flow and power; instead, take the head
             ## value from the simulation results as well and just ignore the power? there

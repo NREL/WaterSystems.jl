@@ -22,11 +22,7 @@ function dict_to_struct(data::Dict{String,Any})
     pumps = pump_to_struct(data["Pump"], a_dict, curves, patterns)
     valves = valve_to_struct(data["Valve"], a_dict)
 
-    # create functions to populate pump params, patterns
-    
-    d = data["wntr"]
-    simulations = Simulation(d["duration"], d["timeperiods"], d["num_timeperiods"], d["start"], d["end"])
-    return junctions, tanks, res, pipes, valves, pumps, demands, simulations
+    return junctions, arcs, res, tanks, demands, patterns, curves, pipes, pumps, valves
 end
 
 """
@@ -182,8 +178,8 @@ function pump_to_struct(pu_vec::Vector{Any}, a_dict::Dict{String,Arc}, c_vec::Ve
 end
 
 #ignoring valves for now, JJS 12/5/19
-function valve_to_struct(data::Vector{Any}, a_dict::Dict{String,Arc})
-    if size(data["Valve"])[1] != 0
+function valve_to_struct(v_vec::Vector{Any}, a_dict::Dict{String,Arc})
+    if size(v_vec)[1] != 0
         @warn("There appears to be pressure/flow control valves in this network, but these valves are not currently handled by WaterSystems.jl")
     end
     return nothing

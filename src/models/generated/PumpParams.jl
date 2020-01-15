@@ -5,8 +5,8 @@ This file is auto-generated. Do not edit.
     mutable struct PumpParams <: TechnicalParams
         epnt_data::Union{Nothing, EPANETPumpParams}
         norm_coefs::Union{Nothing, NormPumpParams}
-        base_price::Float64
-        pattern_name::String
+        base_price::Union{Nothing, Float64}
+        pattern_name::Union{Nothing, String}
         _forecasts::InfrastructureSystems.Forecasts
         internal::InfrastructureSystemsInternal
     end
@@ -16,8 +16,8 @@ Pump characteristics, containing both inp-file data and coefficients for a norma
 # Arguments
 - `epnt_data::Union{Nothing, EPANETPumpParams}`: Pump specifications from inp-file
 - `norm_coefs::Union{Nothing, NormPumpParams}`: Coefficients that characterize pumps with a normalized representation of head, efficiency, and power. Currently only single-speed
-- `base_price::Float64`: 'base' price in dollar/J
-- `pattern_name::String`: name of forecast pattern array
+- `base_price::Union{Nothing, Float64}`: 'base' price in dollar/J
+- `pattern_name::Union{Nothing, String}`: name of forecast pattern array
 - `_forecasts::InfrastructureSystems.Forecasts`
 - `internal::InfrastructureSystemsInternal`: internal reference, do not modify
 """
@@ -27,9 +27,9 @@ mutable struct PumpParams <: TechnicalParams
     "Coefficients that characterize pumps with a normalized representation of head, efficiency, and power. Currently only single-speed"
     norm_coefs::Union{Nothing, NormPumpParams}
     "'base' price in dollar/J"
-    base_price::Float64
+    base_price::Union{Nothing, Float64}
     "name of forecast pattern array"
-    pattern_name::String
+    pattern_name::Union{Nothing, String}
     _forecasts::InfrastructureSystems.Forecasts
     "internal reference, do not modify"
     internal::InfrastructureSystemsInternal
@@ -48,8 +48,8 @@ function PumpParams(::Nothing)
     PumpParams(;
         epnt_data=nothing,
         norm_coefs=nothing,
-        base_price=0.0,
-        pattern_name="init",
+        base_price=nothing,
+        pattern_name=nothing,
         _forecasts=InfrastructureSystems.Forecasts(),
     )
 end

@@ -131,5 +131,6 @@ include("parsers/wntr_dict_parser.jl")
 # utils... not sure what of the legacy code will be needed, JJS 12/5/19
 #include("Utils/build_incidence.jl")
 include("utils/PumpCoefs.jl") # re-purposed, JJS 12/29/19
+include("utils/print.jl")
 
 end # module
