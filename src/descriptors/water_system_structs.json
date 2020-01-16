@@ -188,17 +188,11 @@
         "null_value": "0.0"
       },
       {
-        "name": "power_slope",
-        "comment": "slope of the linear power curve",
+        "name": "power_bep",
+        "comment": "power at the best efficiency point",
         "data_type": "Float64",
         "null_value": "0.0"
-      },
-      {
-        "name": "power_intcpt",
-        "comment": "inetercept of the linear power curve",
-        "data_type": "Float64",
-        "null_value": "0.0"
-      },
+      },     
       {
         "name": "internal",
         "comment": "internal reference, do not modify",

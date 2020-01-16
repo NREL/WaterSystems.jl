@@ -4,7 +4,26 @@ const density = 1000.0 # kg/m^3
 const Gh0 = 1.25
 
 """
-Estimate single-point head curve for a bump of 'POWER' type in the .inp file. 
+Calculate slope and intercept for normalized power curve
+"""
+function power_coeffs(Gh0::Float64)
+    # with fixed Gh0 value, then we have fixed values for slope and intercept for normalized
+    # power curve
+    
+    # a least-squares fit -- would be more mathematically rigorouse to use an analytical
+    # formula for the fit (TBD)
+    N = 100
+    Qhat = Array(range(0.5, 1.5, length=N))
+    Phat = ((1 - Gh0)*Qhat.^2 .+ Gh0)./(2 .- Qhat)
+    A = hcat(Qhat, ones(N))
+    slope, intcpt = A\Phat
+    return slope, intcpt
+end
+
+const pow_slp, pow_int = power_coeffs(Gh0)
+
+"""
+Estimate single-point head curve for a pump of 'POWER' type in the .inp file. 
 """
 function head_curve_from_power(power::Float64, efficiency::Float64, flows::Vector{Float64})
     flows_nz = flows[flows .> 0] # nonzero flow values
@@ -27,7 +46,7 @@ function norm_pump_params(pump::Dict{String,Any}, c_dict::Dict{String,Curve})
     if pump["efficiency"] isa String
         eff_curve_tuples = c_dict[pump["efficiency"]].points
         eff_curve = array_from_tuples(eff_curve_tuples)
-        eff_curve[:,2] = eff_curve[:,2]/100
+        eff_curve[:,2] = eff_curve[:,2]
         
         # fit efficiency curve to determine Qbep and etabep
         A = hcat(eff_curve[:,1].^2, eff_curve[:,1])
@@ -70,16 +89,10 @@ function norm_pump_params(pump::Dict{String,Any}, c_dict::Dict{String,Curve})
         end
     end
 
-    # power
-    # for now, discretize Qhat and do a least-squares fit -- would be more mathematically
-    # rigorouse to use an analytical formula for the fit (TBD)
-    N = 100
-    Qhat = Array(range(0.5, 1.5, length=N))
-    Phat = ((1 - Gh0)*Qhat.^2 .+ Gh0)./(2 .- Qhat)
-    A = hcat(Qhat, ones(N))
-    slope, intcpt = A\Phat
+    # Power at the BEP
+    Pbep = density*gravity/etabep/100*Gbep*Qbep
     
-    return Qbep, etabep, Gbep, slope, intcpt
+    return Qbep, etabep, Gbep, Pbep
 end
 
 

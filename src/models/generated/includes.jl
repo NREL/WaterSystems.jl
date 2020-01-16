@@ -48,8 +48,7 @@ export get_open_status
 export get_operating
 export get_pattern_name
 export get_points
-export get_power_intcpt
-export get_power_slope
+export get_power_bep
 export get_pumpparams
 export get_roughness
 export get_to
