@@ -201,7 +201,7 @@ function pump_dict!(wn::Dict{Any, Any}, link_results::Dict{Any,Any}, pumps::Vect
     
     for pump in wn["pumps"]
         name = pump["name"]
-        # pump head and efficiency OR power values
+        # pump specified by head and efficiency values OR a constant power value
         type = pump["pump_type"] # HEAD or POWER
         efficiency = pump["efficiency"]
         if type == "HEAD"
@@ -222,7 +222,9 @@ function pump_dict!(wn::Dict{Any, Any}, link_results::Dict{Any,Any}, pumps::Vect
             #flows = link_results["flowrate"][name] # gives a warning in 1.3
             flows = getproperty(link_results["flowrate"], name)
             # convert from pyobject (pandas I think) to julia 
-            flows = collect(flows)
+            flows = Array{Float64}(collect(flows))
+            # estimate a single-point head curve for this POWER case and at it to the set of
+            # curves
             head_curve_name = name*"_head_power"
             ## here, the head is calculated from the flow and power; instead, take the head
             ## value from the simulation results as well and just ignore the power? there

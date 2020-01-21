@@ -90,7 +90,7 @@ function norm_pump_params(pump::Dict{String,Any}, c_dict::Dict{String,Curve})
     end
 
     # Power at the BEP
-    Pbep = density*gravity/etabep/100*Gbep*Qbep
+    Pbep = density*gravity/(etabep/100)*Gbep*Qbep
     
     return Qbep, etabep, Gbep, Pbep
 end
