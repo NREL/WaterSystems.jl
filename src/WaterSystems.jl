@@ -119,6 +119,7 @@ include("models/links.jl")
 # Include all auto-generated structs.
 include("models/generated/includes.jl")
 
+include("common.jl")
 # Definitions of (Water) System
 include("base.jl")
 

@@ -17,10 +17,9 @@ Create a System from an epanet ".inp" file.
 """
 function parse_inp_file(inp_file::String)
     data = make_dict(inp_file) # data is a dictionary
-    junctions, arcs, res, tanks, demands, patterns, curves, pipes, pumps, valves =
+    junctions, arcs, res, demands, tanks, patterns, curves, pipes, pumps, valves =
         dict_to_struct(data)
 
     # need to work on the constructor(s) for the Water System, JJS 200103
     return System()
 end
-

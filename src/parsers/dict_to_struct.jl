@@ -7,22 +7,20 @@ const large = 1e6
 Convert dictionary of water network to WaterSystems structure
 """
 function dict_to_struct(data::Dict{String,Any})
-    # I stripped away the checks for the existence of each of these -- may need them for not
-    # required features, e.g., tanks, JJS 12/11/19
     junctions = junction_to_struct(data["Junction"])
     j_dict = Dict{String, Junction}(junction.name => junction for junction in junctions)
     arcs = link_to_struct(data["Link"], j_dict)
     a_dict = Dict{String, Arc}(arc.name => arc for arc in arcs)
     res = res_to_struct(data["Reservoir"], j_dict)
-    tanks = tank_to_struct(data["Tank"], j_dict)
     demands = demand_to_struct(data["Demand"], j_dict)
+    tanks = tank_to_struct(data["Tank"], j_dict)
     patterns = pattern_to_struct(data["Pattern"])
     curves = curve_to_struct(data["Curve"])
     pipes = pipe_to_struct(data["Pipe"], a_dict)
     pumps = pump_to_struct(data["Pump"], a_dict, curves, patterns)
     valves = valve_to_struct(data["Valve"], a_dict)
 
-    return junctions, arcs, res, tanks, demands, patterns, curves, pipes, pumps, valves
+    return junctions, arcs, res, demands, tanks, patterns, curves, pipes, pumps, valves
 end
 
 """

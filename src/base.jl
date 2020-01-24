@@ -17,7 +17,7 @@ struct System <: WaterSystemType
 end
 
 """Construct an empty System. Useful for building a System while parsing raw data."""
-function System(kwargs...)
+function System(; kwargs...)
     return System(_create_system_data_from_kwargs(; kwargs...))
 end
 
@@ -30,11 +30,16 @@ end
 """System constructor when components are constructed externally."""
 function System(
     junctions::Vector{Junction},
+    arcs::Vector{Arc},
     reservoirs::Vector{Reservoir},
-    pipes::Vector{<:Pipe},    
-    pumps::Union{Nothing,Vector{Pump}},
-    demands::Union{Nothing,Vector{<:WaterDemand}},
-    tanks::Union{Nothing,Vector{Tank}},
+    demands::Vector{<:WaterDemand}, # practically, there will always be a demand to have flow
+    tanks::Union{Nothing, Vector{<:Tank}},
+    # curves? -- included with pump object
+    # patterns? -- to be included as a forecasts with pump and demand objects? TBD!
+    pipes::Vector{<:Pipe}, # theortically, a network _could_ exist without pipes, but not
+                           # practically
+    pumps::Union{Nothing, Vector{Pump}},
+    valves::Union{Nothing, Vector{Valve}}
     ;
     kwargs...,
 )
@@ -42,15 +47,15 @@ function System(
     data = _create_system_data_from_kwargs(; kwargs...)
     sys = System(data; kwargs...)
 
-    arrays = [junctions, reservoirs, pipes]
-    if !isnothing(pumps)
+    arrays = [junctions, arcs, reservoirs, demands, pipes]
+    if !isnothing(tanks) && !isempty(tanks)
+        push!(arrays, tanks)
+    end
+    if !isnothing(pumps) && !isempty(pumps)
         push!(arrays, pumps)
     end
-    if !isnothing(demands)
-        push!(arrays, demands)
-    end
-    if !isnothing(tanks)
-        push!(arrays, tanks)
+    if !isnothing(valves) && !isempty(valves)
+        push!(arrays, valves)
     end
 
     error_detected = false
