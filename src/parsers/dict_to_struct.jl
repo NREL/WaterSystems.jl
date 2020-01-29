@@ -1,8 +1,5 @@
 # modifying from Amanda's legacy parsing code, JJS 12/5/19
 
-const small = 1e-6
-const large = 1e6
-
 """
 Convert dictionary of water network to WaterSystems structure
 """
@@ -120,6 +117,7 @@ Create array of pipes using WaterSystems.Pipe types.
 """
 function pipe_to_struct(pi_vec::Vector{Any}, a_dict::Dict{String,Arc})
     pipes = Vector{Pipe}(undef, length(pi_vec))
+    # define arbitrary flow limits -- just remove flow limits from pipes? JJS 1/28/19
     #unid_flowlimits = CVPipe(nothing).flowlimits # neat trick to get defaults, not using
     #bidi_flowlimits = GatePipe(nothing).flowlimits
     unid_flowlimits = (min = small, max = large)

@@ -6,12 +6,13 @@ A water system (municipal network).
 """
 struct System <: WaterSystemType
     data::IS.SystemData
-    runchecks::Bool
+    #runchecks::Bool
     internal::InfrastructureSystemsInternal
 
     function System(data, internal; kwargs...)
-        runchecks = get(kwargs, :runchecks, true)
-        sys = new(data, runchecks, internal)
+        #runchecks = get(kwargs, :runchecks, true)
+        #sys = new(data, runchecks, internal)
+        sys = new(data, internal)
         return sys
     end
 end
@@ -33,13 +34,13 @@ function System(
     arcs::Vector{Arc},
     reservoirs::Vector{Reservoir},
     demands::Vector{<:WaterDemand}, # practically, there will always be a demand to have flow
-    tanks::Union{Nothing, Vector{<:Tank}},
-    # curves? -- included with pump object
-    # patterns? -- to be included as a forecasts with pump and demand objects? TBD!
     pipes::Vector{<:Pipe}, # theortically, a network _could_ exist without pipes, but not
                            # practically
+    tanks::Union{Nothing, Vector{<:Tank}},
     pumps::Union{Nothing, Vector{Pump}},
     valves::Union{Nothing, Vector{Valve}}
+    # curves? -- included with pump object
+    # patterns? -- to be included as a forecasts with pump and demand objects? TBD!
     ;
     kwargs...,
 )
@@ -77,9 +78,9 @@ function System(
         throw(IS.InvalidRange("Invalid value(s) detected"))
     end
 
-    if runchecks
-        check!(sys)
-    end
+    # if runchecks
+    #     check!(sys)
+    # end
 
     return sys
 end
@@ -88,49 +89,118 @@ end
 """System constructor without nothing-able arguments."""
 function System(
     junctions::Vector{Junction},
+    arcs::Vector{Arc},
     reservoirs::Vector{Reservoir},
-    pipes::Vector{<:Pipe},    
+    demands::Vector{<:WaterDemand},
+    pipes::Vector{<:Pipe}
     ;
     kwargs...,
 )
     return System(
         junctions,
+        arcs,
         reservoirs,
+        demands,
         pipes,
-        nothing,
-        nothing,
-        nothing,
+        nothing, # tanks
+        nothing, # pumps
+        nothing # valves
         ;
         kwargs...,
     )
 end
 
-"""System constructor with keyword arguments."""
-function System(
-    ;
-    junctions,
-    reservoirs,
-    pipes,
-    pumps,
-    demands,
-    tanks,
-    kwargs...,
-)
-    return System(
-        junctions,
-        reservoirs,
-        pipes,
-        pumps,
-        demands,
-        tanks,
-        ;
-        kwargs...,
-    )
+# # I'm not sure this is necessary; right now, it would conflict with existing empty System
+# # creator System() defined above, JJS 1/29/20
+# """System constructor with keyword arguments."""
+# function System(
+#     ;
+#     junctions,
+#     reservoirs,
+#     pipes,
+#     pumps,
+#     demands,
+#     tanks,
+#     kwargs...,
+# )
+#     return System(
+#         junctions,
+#         reservoirs,
+#         pipes,
+#         pumps,
+#         demands,
+#         tanks
+#         ;
+#         kwargs...,
+#     )
+# end
+
+
+
+function _create_system_data_from_kwargs(; kwargs...)
+    validation_descriptor_file = nothing
+    runchecks = get(kwargs, :runchecks, true)
+    if runchecks
+        validation_descriptor_file = get(kwargs, :configpath,
+                                         WATER_SYSTEM_STRUCT_DESCRIPTOR_FILE)
+    end
+
+    return IS.SystemData(; validation_descriptor_file=validation_descriptor_file)
+end
+
+
+"""
+    add_component!(sys::System, component::T; kwargs...) where T <: Component
+
+Add a component to the system.
+
+Throws ArgumentError if the component's name is already stored for its concrete type.
+
+Throws InvalidRange if any of the component's field values are outside of defined valid
+range.
+
+# Examples
+```julia
+sys = System()
+
+# Add a single component.
+add_component!(sys, junction)
+
+# Add many at once.
+junctions = [junction1, junction2, junction3]
+tanks = [tank1, tank2, tank3]
+foreach(x -> add_component!(sys, x), Iterators.flatten((junctions, tanks)))
+```
+"""
+function add_component!(sys::System, component::T; kwargs...) where T <: Component
+    # check_component_addition(sys, component) # not implemented yet, JJS 1/29/20
+
+    if Junction in fieldtypes(T) && T != Arc
+        check_junction(sys, get_junction(component), component)
+    end
+
+    # if sys.runchecks && !validate_struct(sys, component)
+    #     throw(InvalidValue("Invalid value for $(component)"))
+    # end
+
+    IS.add_component!(sys.data, component; kwargs...)
+end
+
+"""
+Throws ArgumentError if the bus is not stored in the system.
+"""
+function check_junction(sys::System, junction::Junction, component::Component)
+    name = get_name(junction)
+    if isnothing(get_component(Junction, sys, name))
+        throw(ArgumentError("$component has junction $name that is not stored in the system"))
+    end
 end
 
 
 ### below was copied from PowerSystems.jl and has not yet been checked or modified, JJS,
 ### 12/5/19
+
+
 
 
 """
@@ -157,45 +227,6 @@ function System(filename::String)
     sys = IS.from_json(System, filename)
     check!(sys)
     return sys
-end
-
-"""
-    add_component!(sys::System, component::T; kwargs...) where T <: Component
-
-Add a component to the system.
-
-Throws ArgumentError if the component's name is already stored for its concrete type.
-
-Throws InvalidRange if any of the component's field values are outside of defined valid
-range.
-
-# Examples
-```julia
-sys = System(100.0)
-
-# Add a single component.
-add_component!(sys, bus)
-
-# Add many at once.
-buses = [bus1, bus2, bus3]
-generators = [gen1, gen2, gen3]
-foreach(x -> add_component!(sys, x), Iterators.flatten((buses, generators)))
-```
-"""
-function add_component!(sys::System, component::T; kwargs...) where T <: Component
-    if T <: Branch
-        arc = get_arc(component)
-        check_bus(sys, get_from(arc), arc)
-        check_bus(sys, get_to(arc), arc)
-    elseif Bus in fieldtypes(T)
-        check_bus(sys, get_bus(component), component)
-    end
-
-    if sys.runchecks && !validate_struct(sys, component)
-        throw(InvalidValue("Invalid value for $(component)"))
-    end
-
-    IS.add_component!(sys.data, component; kwargs...)
 end
 
 """
@@ -754,11 +785,12 @@ function validate_struct(sys::System, value::WaterSystemType)::Bool
     return true
 end
 
-function check!(sys::System)
-    buses = get_components(Bus, sys)
-    slack_bus_check(buses)
-    buscheck(buses)
-end
+# # an analagous check is probably not needed for WaterSystems
+# function check!(sys::System)
+#     buses = get_components(Bus, sys)
+#     slack_bus_check(buses)
+#     buscheck(buses)
+# end
 
 function JSON2.read(io::IO, ::Type{System})
     raw = JSON2.read(io, NamedTuple)
@@ -875,17 +907,6 @@ function IS.compare_values(x::System, y::System)::Bool
     end
 
     return match
-end
-
-function _create_system_data_from_kwargs(; kwargs...)
-    validation_descriptor_file = nothing
-    runchecks = get(kwargs, :runchecks, true)
-    if runchecks
-        validation_descriptor_file = get(kwargs, :configpath,
-                                         WATER_SYSTEM_STRUCT_DESCRIPTOR_FILE)
-    end
-
-    return IS.SystemData(; validation_descriptor_file=validation_descriptor_file)
 end
 
 function parse_types(mod)

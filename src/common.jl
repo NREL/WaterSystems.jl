@@ -1,3 +1,8 @@
+# currently used for pipe flow limits -- may remove?
+const small = 1e-6
+const large = 1e6
+
+
 const gravity = 9.81 # m/s^2
 const density = 1000.0 # kg/m^3
 
