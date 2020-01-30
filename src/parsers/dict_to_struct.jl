@@ -151,7 +151,6 @@ function pump_to_struct(pu_vec::Vector{Any}, a_dict::Dict{String,Arc}, c_vec::Ve
     pumps = Vector{Pump}(undef, length(pu_vec))
     c_dict = Dict{String, Curve}(curve.name => curve for curve in c_vec)
     pa_dict = Dict{String, Pattern}(patt.name => patt for patt in pa_vec)
-    flowlimits = (min = small, max = large)
     for (i, pump) in enumerate(pu_vec)
         name = pump["name"]
         # creat EPANETPumpParams object for the pump
@@ -166,6 +165,7 @@ function pump_to_struct(pu_vec::Vector{Any}, a_dict::Dict{String,Arc}, c_vec::Ve
         # calculate normalized params and create the object
          # in utils/PumpCoefs.jl
         Qbep, etabep, Gbep, Pbep = norm_pump_params(pump, c_dict)
+        flowlimits = (min = 0.5*Qbep, max = 1.5*Qbep)
         norm_coefs = NormPumpParams(Qbep, etabep, Gbep, Pbep)
         # create the pump parameters object, including base price and pattern
         pump_params = PumpParams(epanet_params, norm_coefs, pump["price"],

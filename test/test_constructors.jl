@@ -4,7 +4,7 @@
     t_junct = WSY.Junction(nothing)
     @test t_junct isa WSY.WaterSystemType
     @test t_junct isa WSY.Topology
-    junction = WSY.Junction("test", 0.0, 0.0, 0.0, (lat=0.0, lon=0.0)) 
+    junction = WSY.Junction("test", 0.0, 0.0, (lat=0.0, lon=0.0), nothing)
 
     t_arc = WSY.Arc(nothing) 
     @test t_arc isa WSY.WaterSystemType
@@ -90,7 +90,19 @@ end
     # test creation of pump structs
     pumps = WSY.pump_to_struct(data["Pump"], a_dict, curves, patterns)
     @test pumps isa Array{WSY.Pump,1}
+    # test power calculation
+    coefs = pumps[1].pumpparams.norm_coefs
+    Pbep = WSY.density*WSY.gravity*coefs.head_bep*coefs.flow_bep/(coefs.effncy_bep/100)
+    @test Pbep≈coefs.power_bep
+
+    # make all the objects with dict_to_struct function
+    junctions2, arcs, reservoirs, demands, tanks, patterns, curves, pipes2, pumps, valves =
+        WSY.dict_to_struct(data)
+    # not sure how to check equality of structure objects; '==' is giving false, JJS 1/30/20
+    #@test junctions==junctions2
+    #@test pipes==pipes2
 end
+
 
 # @testset "Forecast Constructors" begin
 #     tg = RenewableFix(nothing)
