@@ -43,7 +43,7 @@ function make_dict(inp_file::String)
     
     junction_dict(wn, node_results, junctions)
     tank_dict(wn, node_results, tanks, junctions, num_timeperiods, time_ahead)
-    res_dict(wn, node_results, reservoirs, junctions, num_timeperiods, time_ahead)
+    res_dict!(wn, reservoirs, junctions)
     # removing 'time_ahead' info from demand_dict; can remove it from tank_dict and
     # res_dict also, JJS 12/19/19
     demand_dict!(wn, demands)
@@ -75,8 +75,10 @@ function junction_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, junctions
         name = junc["name"]
         #head and demand are current at each node
         head = get(node_results["head"],name).values[1] #Meters Total Head/ Hydraulic Head = Pressure Head + Elevation
-        head = convert(Float64,head)
-        junctions[name] = Dict{String,Any}("name" => name, "elevation" => junc["elevation"], "head" => head, "minimum_pressure" => junc["minimum_pressure"], "coordinates" => (lat = junc["coordinates"][2], lon = junc["coordinates"][1]))
+        # will store "pressure head" in the struct, independent from elevation
+        press_head = convert(Float64,head) - junc["elevation"]
+        # what is minimum pressure? is it total head or pressure head? what is it for?
+        junctions[name] = Dict{String,Any}("name" => name, "elevation" => junc["elevation"], "press_head" => press_head, "minimum_pressure" => junc["minimum_pressure"], "coordinates" => (lat = junc["coordinates"][2], lon = junc["coordinates"][1]))
     end
 end
 
@@ -126,23 +128,24 @@ function tank_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, tanks::Vector
         volume = area * tank["init_level"]; #m^3
         volumelimits = [x * area for x in [tank["min_level"],tank["max_level"]]];
         haskey(junctions, name) ? junc_name = "Junction- " * name : junc_name = name
-        junctions[name] = Dict{String,Any}("name" => junc_name, "elevation" => tank["elevation"], "head" => convert(Float64,head), "minimum_pressure" => min_pressure, "coordinates" => (lat = tank["coordinates"][2], lon = tank["coordinates"][1]))
+        # legacacy placeholder for pressure head -- should NOT use results and instead
+        # calculate pressure head based on the initial liquid height in the tank, JJS
+        # 1/30/20
+        press_head = convert(Float64,head) - tank["elevation"]
+        junctions[name] = Dict{String,Any}("name" => junc_name, "elevation" => tank["elevation"], "press_head" => press_head, "minimum_pressure" => min_pressure, "coordinates" => (lat = tank["coordinates"][2], lon = tank["coordinates"][1]))
         push!(tanks, Dict{String, Any}("name" => name, "volumelimits" => (min = volumelimits[1],max = volumelimits[2]), "diameter" => tank["diameter"], "volume" => volume, "area" => area, "level" => tank["init_level"], "levellimits" => (min = tank["min_level"], max = tank["max_level"])))
 
     end
 end
 
-function res_dict(wn::Dict{Any,Any}, node_results::Dict{Any,Any}, reservoirs::Vector{Any}, junctions::Dict{String,Any}, num_timeperiods::Int64, time_ahead::Vector{DateTime})
+function res_dict!(wn::Dict{Any,Any}, reservoirs::Vector{Any}, junctions::Dict{String,Any})
     for res in wn["reservoirs"]
         name = res["name"]
-        head = get(node_results["head"],name).values[1] #m Total head/ Hydraulic head note: base_head = elevation
-        # demand = get(node_results["demand"],name).values[1:num_timeperiods] #m^3/sec
-        # demand_timeseries = TimeSeries.TimeArray(time_ahead, demand)
-        # demand_forecast = demand_timeseries #will possibly add perturbation later
-        haskey(junctions, name) ? junc_name = "Junction- " * name : junc_name = name
-        junctions[name] = Dict{String,Any}("name" => junc_name, "elevation" => res["base_head"], "head" => convert(Float64,head), "minimum_pressure" => 0, "coordinates" => (lat = res["coordinates"][2], lon = res["coordinates"][1])) #array of pseudo nodes @ res
-        push!(reservoirs, Dict{String,Any}("name" => name, "elevation" => res["base_head"])) #base_head = elevation
-
+        pattern_name = res["head_pattern_name"]
+        junctions[name] = Dict{String,Any}("name" => name, "elevation" => res["base_head"], "press_head" => 0.0, "minimum_pressure" => 0, "coordinates" => (lat = res["coordinates"][2], lon = res["coordinates"][1])) 
+        # letting base_head = elevation
+        push!(reservoirs, Dict{String,Any}("name" => name, "elevation" => res["base_head"],
+                                           "pattern_name" => pattern_name))
     end
 end
 

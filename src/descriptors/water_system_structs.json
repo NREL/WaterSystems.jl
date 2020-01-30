@@ -24,17 +24,23 @@
         "validation_action": "error"
       },
       {
-        "name": "minimum_pressure",
-        "comment": "minimum pressure head at the junction",
-        "null_value": "0.0",
-        "data_type": "Float64"
-      },
-      {
         "name": "coordinates",
         "comment": "latitude and longitude coordinates of junction",
         "null_value": "nothing",
         "data_type": "Union{Nothing, NamedTuple{(:lat, :lon),Tuple{Float64,Float64}}}",
         "validation_action": "error"
+      },
+      {
+        "name": "pattern_name",
+        "comment": "name of head pattern array, for reservoirs only",
+        "data_type": "Union{Nothing, String}",
+        "null_value": "nothing"
+      },
+      {
+        "name": "_forecasts",
+        "null_value": "InfrastructureSystems.Forecasts()",
+        "data_type": "InfrastructureSystems.Forecasts",
+        "default": "InfrastructureSystems.Forecasts()"
       },
       {
         "name": "internal",

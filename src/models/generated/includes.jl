@@ -40,7 +40,6 @@ export get_junction
 export get_length
 export get_level
 export get_level_limits
-export get_minimum_pressure
 export get_multipliers
 export get_name
 export get_norm_coefs

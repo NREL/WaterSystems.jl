@@ -1,4 +1,4 @@
-# modifying from Amanda's legacy parsing code, JJS 12/5/19
+# modified from Amanda's legacy parsing code; see more notes in wntr_dict_parser.jl
 
 """
 Convert dictionary of water network to WaterSystems structure
@@ -24,9 +24,11 @@ end
 Create array of junctions using WaterSystems.Junction type
 """
 function junction_to_struct(j_dict::Dict{String, Any})
-    junctions = [Junction(name, junction["elevation"], junction["head"],
-                          junction["minimum_pressure"], junction["coordinates"])
-                 for (name, junction) in j_dict]
+    junctions = Vector{Junction}(undef, length(j_dict))
+    for (i, (name, junction)) in enumerate(j_dict)
+        junctions[i] = Junction(name, junction["elevation"], junction["press_head"],
+                                junction["coordinates"], nothing)
+    end
     return junctions
 end
 
@@ -50,7 +52,10 @@ function res_to_struct(r_vec::Vector{Any}, j_dict::Dict{String,Junction})
     reservoirs = Vector{Reservoir}(undef,length(r_vec))
     for (i, reservoir) in enumerate(r_vec)
         name = reservoir["name"]
-        reservoirs[i] = Reservoir(name, true, j_dict[name])
+        junction = j_dict[name]
+        # assign the reservoir head pattern to the junction
+        junction.pattern_name = reservoir["pattern_name"]
+        reservoirs[i] = Reservoir(name, true, junction)
     end
     return reservoirs
 end
@@ -59,7 +64,6 @@ end
 Create array of tanks using WaterSystems.Tank types. Only cylindrical tanks are
 currently supported.
 """
-
 function tank_to_struct(t_vec::Vector{Any}, j_dict::Dict{String,Junction})
     tanks = Vector{Tank}(undef, length(t_vec))
     for (i, tank) in enumerate(t_vec)
