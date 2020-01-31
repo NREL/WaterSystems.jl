@@ -19,7 +19,7 @@ end
 
 """Construct an empty System. Useful for building a System while parsing raw data."""
 function System(; kwargs...)
-    return System(_create_system_data_from_kwargs(; kwargs...))
+    return System(_create_system_data_from_kwargs(; kwargs...); kwargs...)
 end
 
 """Construct a `System` from `InfrastructureSystems.SystemData`"""
