@@ -1,57 +1,137 @@
+## TODO:
+## * add "controls" ????????
+
+isdefined(Base, :__precompile__) && __precompile__()
+
+"""
+Module for constructing self-contained water system objects.
+"""
 module WaterSystems
 
-    using TimeSeries
-    using DataFrames
-    # This packages will be removed with Julia v0.7
-    using Compat
-    using PyCall
+#################################################################################
+# Exports
 
-    include("Models/topological_elements.jl")
-    include("Models/storage.jl")
-    include("Models/network.jl")
-    include("Models/pumps.jl")
-    include("Models/water_demand.jl")
+# water system
+export System
 
-    include("base.jl")
+export WaterSystemType
+export Component
+export Device
 
-    #Parser 
-    include("Parsers/epa_net_parser.jl")
+# topological elements
+export Junction
+export Arc
 
-    #__precompile__() # this module is NOT safe to precompile
+# technical parameters
+export EPANETPumpParams
+export NormPumpParams
+export PumpParams
+export Pattern
+export Curve
 
-    try
-        @pyimport wntr
-    catch
+# transport elements 
+export Link
+export Pipe  # why is this prepended by WaterSystems in the type tree?? JJS 11/5/19
+export Pump
+export Valve
+export OpenPipe
+export GatePipe
+export CVPipe
+export Reservoir
+export Tank 
 
-        const PACKAGES = ["wntr"]
+# demands
+export WaterDemand
+export StaticDemand
 
-        # Import pip
-        try
-            @pyimport pip
-        catch
-            # If it is not found, install it
-            get_pip = joinpath(dirname(@__FILE__), "get-pip.py")
-            download("https://bootstrap.pypa.io/get-pip.py", get_pip)
-            run(`$(PyCall.python) $get_pip --user`)
-        end
+# parser
+export parse_inp_file
+export dict_to_struct
+export make_dict
+export wntr_dict
 
-        @pyimport pip
+#################################################################################
+# Imports
 
-        args = []
-        if haskey(ENV, "http_proxy")
-            push!(args, "--proxy")
-            push!(args, ENV["http_proxy"])
-        end
-        push!(args, "install")
-        push!(args, "--user")
-        append!(args, PACKAGES)
+using PyCall # keeping this as "using" for now, but probably could/should change to import,
+             # JJS 12/6/19
+# coverted these to imports -- not sure what calls refer to them, JJS 12/6/19
+#import CurveFit # I don't think this is needed now, JJS 12/30/19
+import SparseArrays
+import LinearAlgebra
 
-        pip.main(args)
+import Dates
+import Dates: DateTime, Second # change instances to "Dates.[object]" instead?
+import TimeSeries
+import DataFrames
+import JSON
+import JSON2
+import CSV
+import YAML
+import UUIDs
+import Base.to_index
 
+import InfrastructureSystems
+import InfrastructureSystems: Components, Deterministic, Probabilistic, Forecast,
+    ScenarioBased, InfrastructureSystemsType, InfrastructureSystemsInternal,
+    FlattenIteratorWrapper, LazyDictFromIterator, DataFormatError, InvalidRange,
+    InvalidValue
 
-    end
-    const wntr = PyNULL()
-    function __init__()
-        copy!(wntr, pyimport("wntr")) 
-    end
+const IS = InfrastructureSystems
+
+# python imports, needed to use wntr for parsing epanet files;
+# this import method makes these precompile safe? JJS 12/9/19
+const metric = PyNULL()
+const model = PyNULL()
+const sim = PyNULL()
+function __init__() 
+    copy!(metric, pyimport("wntr.metrics.economic")) # what is this for? JJS 12/5/19
+    copy!(model, pyimport("wntr.network.model")) #import wntr network model -- this is used
+    copy!(sim, pyimport("wntr.sim.epanet")) # not sure if this is needed either
 end
+## old way, resulted in "PyObject NULL"
+# metric = pyimport("wntr.metrics.economic") # what is this for? JJS 12/5/19
+# model = pyimport("wntr.network.model") #import wntr network model 
+# sim = pyimport("wntr.sim.epanet")
+
+#################################################################################
+# Includes
+
+"""
+Supertype for all WaterSystems types.
+All subtypes must include a InfrastructureSystemsInternal member.
+Subtypes should call InfrastructureSystemsInternal() by default, but also must
+provide a constructor that allows existing values to be deserialized.
+"""
+abstract type WaterSystemType <: IS.InfrastructureSystemsType end
+
+abstract type Component <: WaterSystemType end
+# supertype for "devices" (pipe, pump, valve, etc.)
+abstract type Device <: Component end
+# supertype for technical parameters, data, etc.
+abstract type TechnicalParams <: WaterSystemType end
+
+# Models
+include("models/topological_elements.jl")
+include("models/water_injection.jl")
+include("models/links.jl")
+
+# Include all auto-generated structs.
+include("models/generated/includes.jl")
+
+include("common.jl")
+# Definitions of (Water) System
+include("base.jl")
+
+# parsing files
+include("parsers/epanet_file_parser.jl")
+include("parsers/dict_to_struct.jl")
+include("parsers/wntr_dict.jl")
+include("parsers/wntr_dict_parser.jl")
+
+# utils... not sure what of the legacy code will be needed, JJS 12/5/19
+#include("Utils/build_incidence.jl")
+include("utils/PumpCoefs.jl") # re-purposed, JJS 12/29/19
+include("utils/print.jl")
+
+end # module
