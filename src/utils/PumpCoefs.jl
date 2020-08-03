@@ -44,7 +44,6 @@ function norm_pump_params(pump::Dict{String,Any}, c_dict::Dict{String,Curve})
     if pump["efficiency"] isa String
         eff_curve_tuples = c_dict[pump["efficiency"]].points
         eff_curve = array_from_tuples(eff_curve_tuples)
-        eff_curve[:,2] = eff_curve[:,2]
         
         # fit efficiency curve to determine Qbep and etabep
         A = hcat(eff_curve[:,1].^2, eff_curve[:,1])
