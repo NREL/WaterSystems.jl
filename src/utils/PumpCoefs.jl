@@ -1,5 +1,6 @@
 # fixed value for Gh0 -- allow users to specify this value?
-const Gh0 = 1.25
+const Gh0 = 4/3  # this value results in pump gain crossing zero at the same flow rate as
+                 # for efficiency, JJS 9/11/20
 
 """
 Calculate slope and intercept for normalized power curve
